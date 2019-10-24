@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
 body {margin:0;}
 
@@ -26,7 +28,7 @@ body {margin:0;}
 
 .icon-bar b {
   float: left;
-  width: 40%;
+  width: 30%;
   text-align: center;
   padding: 4px 0;
   font-weight:bold;
@@ -44,22 +46,116 @@ body {margin:0;}
   background-color: #4CAF50;
 }
 
+#Settings {
+  float: right;
+  width: 5%;
+  border:none;
+  text-align: center;
+  padding: 10px 0;
+  font-weight:bold;
+  font-family:Arial;
+  text-decoration:none;
+  color: white;
+  font-size: 20px;
+  background-color: #555;
+}
+
+#Settings:hover {
+  background-color: #000;
+}
+
 #map {
 height: 1000px;
 width: 100%;
-
 }
+
+<!-- New -->
+
+#description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input { <!-- Search box CSS -->
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 435px;
+		height: 40px;
+		text-align: center;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
 </style>
 
 <body>
 
 <div class="icon-bar">
    <b> Crime Mapper </b>
-   <a href="#"><i class="fa fa-cog"></i> Settings</a> 
-   <a href="#"><i class="fa fa-download"></i> Import</a>
-   <a class="active" href="#"><i class="fa fa-map-marker"></i> Map</a> 
+   <a href="#" id="Settings"><i class="fa fa-cog"></i></a> 
+   <a href="signin.html"><i class="fa fa-sign-in"></i> Sign in</a>
+   <a class="active" href="#"><i class="fa fa-map-marker"></i> Map</a>
+   <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode">   
 </div>
 
+<!-- <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> -->
 <div id="map"></div>
 
 <script>
@@ -70,7 +166,51 @@ width: 100%;
 		map.addListener('click', function(e) {
           placeMarker(e.latLng, map);
         });
-	}
+		
+		// Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        <!-- map.controls[google.maps.ControlPosition.LEFT].push(input); -->
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
 	
 	function placeMarker(latLng, map) {
         var marker = new google.maps.Marker({
@@ -79,10 +219,10 @@ width: 100%;
         });
         <!-- map.panTo(latLng); -->
 	}
+	  
 </script>
 
-<script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&callback=initMap">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer>
 </script>
 
 </body>
