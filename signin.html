@@ -5,7 +5,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
-body {margin:0;}
+body {
+margin:0;
+height: 100%
+width: 100%;
+}
 
 .icon-bar {
   width: 100%;
@@ -13,40 +17,51 @@ body {margin:0;}
   overflow: auto;
 }
 
-.icon-bar a {
-  float: right;
-  width: 20%;
+#MapBtn {
+  float: left;
+  width: 25%;
+  border:none;
   text-align: center;
   padding: 10px 0;
-  transition: all 0.3s ease;
   font-weight:bold;
   font-family:Arial;
   text-decoration:none;
   color: white;
   font-size: 20px;
+  background-color: #555;
 }
 
-.icon-bar b {
-  float: left;
-  width: 40%;
+#MapBtn:hover {
+  background-color: #000;
+}
+
+#MapBtn.active {
+  background-color: #4CAF50;
+}
+
+#SigninBtn {
+  float: right;
+  width: 20%;
+  border:none;
   text-align: center;
-  padding: 4px 0;
+  padding: 10px 0;
   font-weight:bold;
   font-family:Arial;
   text-decoration:none;
   color: white;
-  font-size: 30px;
+  font-size: 20px;
+  background-color: #555;
 }
 
-.icon-bar a:hover {
+#SigninBtn:hover {
   background-color: #000;
 }
 
-.active {
+#SigninBtn.active {
   background-color: #4CAF50;
 }
 
-#Settings {
+#SettingsBtn {
   float: right;
   width: 5%;
   border:none;
@@ -60,24 +75,35 @@ body {margin:0;}
   background-color: #555;
 }
 
-#Settings:hover {
+#SettingsBtn:hover {
   background-color: #000;
 }
 
-#map {
-height: 1000px;
-width: 100%;
-
+#SettingsBtn.active {
+  background-color: #4CAF50;
 }
+
+.icon-bar b {
+  float: left;
+  width: 48.5%;
+  text-align: center;
+  padding: 4px 0;
+  font-weight:bold;
+  font-family:Arial;
+  text-decoration:none;
+  color: white;
+  font-size: 30px;
+}
+
 </style>
 
 <body>
 
 <div class="icon-bar">
+   <a href="index.html" id="MapBtn"><i class="fa fa-map-marker"></i> Map</a>
    <b> Crime Mapper </b>
-   <a href="#" id="Settings"><i class="fa fa-cog"></i></a> 
-   <a class="active" href="#"><i class="fa fa-sign-in"></i> Sign in</a>
-   <a href="index.html"><i class="fa fa-map-marker"></i> Map</a> 
+   <a href="settings.html" id="SettingsBtn"><i class="fa fa-cog"></i></a> 
+   <a class="active" href="#" id="SigninBtn"><i class="fa fa-sign-in"></i> Sign in</a>
 </div>
 
 <h1 style="font-family: Arial;"> Login </h1>
