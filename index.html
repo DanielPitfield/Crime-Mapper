@@ -160,17 +160,14 @@ width: 100%;
         width: 345px;
       }
 	  
-	  .contextmenu {
+	  .custom_contextmenu {
 		background-color: white;
-		border: 1px solid black;
-		position: absolute;
-		top: 0;
-		left: 0;
-		display: none;
+		position: fixed;
 		width: 10%;
+		display: none;
 	  }
 	  
-	  .contextmenu_add {
+	  .custom_contextmenu_add {
 		cursor: pointer;
 		padding: 8px 15px;
 		background-color: #4CAF50;
@@ -183,11 +180,11 @@ width: 100%;
 		text-align: center;
 	  }
 	  
-	  .contextmenu_add:hover {
+	  .custom_contextmenu_add:hover {
 		background-color: #000;
 	  }
 	  
-	  .contextmenu_view {
+	  .custom_contextmenu_view {
 		cursor: pointer;
 		padding: 8px 15px;
 		background-color: #555;
@@ -200,13 +197,13 @@ width: 100%;
 		text-align: center;
 	  }
 	  
-	  .contextmenu_view:hover {
+	  .custom_contextmenu_view:hover {
 		background-color: #000;
 	  }
 	  
 </style>
 
-<body>
+<body oncontextmenu="return false;">
 
 <div class="icon-bar">
    <a class="active" href="#" id="MapBtn"><i class="fa fa-map-marker"></i> Map</a>
@@ -215,22 +212,19 @@ width: 100%;
    <a href="signin.html" id="SigninBtn"><i class="fa fa-sign-in"></i> Sign in</a>
 </div>
 
-<div id="map">
-</div>
+<div id="map"></div>
 
-<div class="contextmenu">
-	<div class="contextmenu_add">Add crime</div>
-	<div class="contextmenu_view">View region information</div>
+<div class="custom_contextmenu" id="menu">
+	<div class="custom_contextmenu_add">Add crime</div>
+	<div class="custom_contextmenu_view">View region information</div>
 </div>
 
 <script>
 	function initMap() {
 		var location = {lat: 51.454266, lng: -0.978130};
+		var MenuDisplayed = false;
+		var ContextMenu = null;
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: location});
-		
-		map.addListener('click', function(e) {
-          placeMarker(e.latLng, map);
-        });
 		
 		// Create the search box and link it to the UI element.
         var input = document.getElementById('pac-input');
@@ -241,6 +235,42 @@ width: 100%;
         map.addListener('bounds_changed', function() {
           searchBox.setBounds(map.getBounds());
         });
+		
+		
+		map.addListener('rightclick', function(e) {
+			for (prop in e) {
+				if (e[prop] instanceof MouseEvent) {
+					mouseEvt = e[prop];
+					var left = mouseEvt.clientX;
+					var top = mouseEvt.clientY;
+
+					ContextMenu = document.getElementById("menu");
+					
+					ContextMenu.style.left = left + "px";
+					ContextMenu.style.top = top + "px";
+					ContextMenu.style.display = "block";
+
+					menuDisplayed = true;
+				}
+			}
+
+		});
+		
+		map.addListener("click", function(e) {
+			if (menuDisplayed == true) {
+				ContextMenu.style.display = "none";
+			}		
+		});	
+		
+        //map.addListener('rightclick', function(event) {
+			//var cm = document.querySelector('.custom_contextmenu');
+			//console.log(event.pixel.x, event.pixel.y);
+			//cm.style.top = event.pixel.y;
+			//cm.style.left = event.pixel.x; // NOT MOVING
+			//cm.style.display = 'block'; // Showing	
+		//});
+		
+		// Try and do it like this! But it works!
 
         // Listen for the event fired when the user selects a prediction and retrieve
         // more details for that place.
@@ -275,8 +305,8 @@ width: 100%;
           });
           map.fitBounds(bounds);
         });
-      }
-	
+	}
+		
 	function placeMarker(latLng, map) {
         var marker = new google.maps.Marker({
           position: latLng,
