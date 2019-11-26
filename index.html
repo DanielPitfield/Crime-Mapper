@@ -84,7 +84,8 @@ width: 100%;
 }
 
 #map {
-height: 890px;
+position:absolute;
+height: 95%;
 width: 100%;
 }
 
@@ -215,15 +216,26 @@ width: 100%;
 <div id="map"></div>
 
 <div class="custom_contextmenu" id="menu">
-	<div class="custom_contextmenu_add">Add crime</div>
-	<div class="custom_contextmenu_view">View region information</div>
+	<div class="custom_contextmenu_add" id="btn_add">Add crime</div>
+	<div class="custom_contextmenu_view" id="btn_view">View region information</div>
 </div>
 
 <script>
+		
+	function placeMarker(Location, map) {
+		var marker = new google.maps.Marker({
+		position: Location,
+		map: map
+		});
+	}
+
 	function initMap() {
-		var location = {lat: 51.454266, lng: -0.978130};
-		var MenuDisplayed = false;
 		var ContextMenu = null;
+		var menuDisplayed = false;
+		var Latitude = 0;
+		var Longitude = 0;
+		
+		var location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: location});
 		
 		// Create the search box and link it to the UI element.
@@ -236,31 +248,66 @@ width: 100%;
           searchBox.setBounds(map.getBounds());
         });
 		
+	// --------------------------------------------------------------------------- //		
+			
+		function hideContextMenu() {
+			ContextMenu = document.getElementById("menu");
+			ContextMenu.style.left = -500 + "px"; // Hide off page
+			ContextMenu.style.top = -500 + "px";
+			ContextMenu.style.display = "none"; // For good measure
+			menuDisplayed = false;
+		}
 		
-		map.addListener('rightclick', function(e) {
-			for (prop in e) {
-				if (e[prop] instanceof MouseEvent) {
-					mouseEvt = e[prop];
-					var left = mouseEvt.clientX;
-					var top = mouseEvt.clientY;
-
-					ContextMenu = document.getElementById("menu");
-					
-					ContextMenu.style.left = left + "px";
-					ContextMenu.style.top = top + "px";
-					ContextMenu.style.display = "block";
-
-					menuDisplayed = true;
+		map.addListener('rightclick', function(e) { // Right click context menu
+			if (menuDisplayed == true) { // If menu is already open and user right clicks again
+				hideContextMenu();
+			}
+			else { // Open the context menu
+				Location = e.latLng
+				
+				for (prop in e) {
+					if (e[prop] instanceof MouseEvent) {
+						mouseEvt = e[prop];
+						var left = mouseEvt.clientX;
+						var top = mouseEvt.clientY;
+						
+						ContextMenu = document.getElementById("menu");
+						ContextMenu.style.left = (left+5) + "px"; // Small adjustment to its position (HARDCODED)
+						ContextMenu.style.top = (top-30) + "px";
+						ContextMenu.style.display = "block";
+						menuDisplayed = true;
+					}
 				}
 			}
-
+		});			
+		
+		map.addListener("click", function(e) { // Left click away from it
+			if (menuDisplayed == true) {
+				hideContextMenu();
+			}		
 		});
 		
-		map.addListener("click", function(e) {
+		map.addListener("drag", function(e) { // Drag away from it
 			if (menuDisplayed == true) {
-				ContextMenu.style.display = "none";
+				hideContextMenu();
 			}		
-		});	
+		});
+
+		const add_btn = document.querySelector('.custom_contextmenu_add'); // 'Add crime' button
+		add_btn.addEventListener('click', event => {
+			// Should probably first open a settings window for the crime (date, description)
+			placeMarker(Location,map); // Just show marker for now
+			hideContextMenu();
+		});
+		
+		const view_btn = document.querySelector('.custom_contextmenu_view'); // 'View region information' button
+		view_btn.addEventListener('click', event => {
+			alert("View button clicked");
+			hideContextMenu();
+			// Functionality
+		});
+
+		// Another attempt! Try and implement it like this! 
 		
         //map.addListener('rightclick', function(event) {
 			//var cm = document.querySelector('.custom_contextmenu');
@@ -270,11 +317,11 @@ width: 100%;
 			//cm.style.display = 'block'; // Showing	
 		//});
 		
-		// Try and do it like this! But it works!
+		
+	// --------------------------------------------------------------------------- //
 
-        // Listen for the event fired when the user selects a prediction and retrieve
-        // more details for that place.
-        searchBox.addListener('places_changed', function() {
+        // Central searchbox functionality
+        searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
           var places = searchBox.getPlaces();
 
           if (places.length == 0) {
@@ -306,14 +353,8 @@ width: 100%;
           map.fitBounds(bounds);
         });
 	}
-		
-	function placeMarker(latLng, map) {
-        var marker = new google.maps.Marker({
-          position: latLng,
-          map: map
-        });
-        <!-- map.panTo(latLng); -->
-	}
+	
+	// --------------------------------------------------------------------------- //
 	  
 </script>
 
