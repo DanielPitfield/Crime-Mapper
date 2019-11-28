@@ -1,8 +1,12 @@
+<?php 
+require 'dbConfig.php'; // Include the database configuration file
+?>
+
 <!DOCTYPE html>
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
 
 <style>
 body {
@@ -204,23 +208,29 @@ width: 100%;
 	  
 </style>
 
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
 <div class="icon-bar">
-   <a class="active" href="#" id="MapBtn"><i class="fa fa-map-marker"></i> Map</a>
-   <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode">
+   <a class="active" href="#" id="MapBtn"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
+   <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
    <a href="settings.html" id="SettingsBtn"><i class="fa fa-cog"></i></a> 
    <a href="signin.html" id="SigninBtn"><i class="fa fa-sign-in"></i> Sign in</a>
 </div>
 
 <div id="map"></div>
 
-<div class="custom_contextmenu" id="menu">
+<div class="custom_contextmenu" id="menu"> <!-- Context Menu -->
 	<div class="custom_contextmenu_add" id="btn_add">Add crime</div>
 	<div class="custom_contextmenu_view" id="btn_view">View region information</div>
 </div>
 
-<script>	
+<script>
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Map functions, variables and elements
+	|-----------------------------------------------------------------------------------------------------------
+	*/
+	
 	function placeMarker(Location, map) {
 		var marker = new google.maps.Marker({
 		position: Location,
@@ -236,126 +246,121 @@ width: 100%;
 		
 		var location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: location});
+		
+		// Create the search box and link it to the UI element.
+		var input = document.getElementById('pac-input');
+		var searchBox = new google.maps.places.SearchBox(input);
+		<!-- map.controls[google.maps.ControlPosition.LEFT].push(input); -->
+
+		// Bias the SearchBox results towards current map's viewport.
+		map.addListener('bounds_changed', function() {
+			searchBox.setBounds(map.getBounds());
+		});		
 	
-	// --------------------------------------------------------------------------- //	
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Retrieving and placing database markers
+	|-----------------------------------------------------------------------------------------------------------
+	*/
 		
-		var markers = [
-			<?php 
-			require_once 'dbConfig.php'; // Include the database configuration file
-			$result = $db->query("SELECT Latitude, Longitude FROM markers"); // Returns output of statement
-
-			if($result->num_rows > 0){ 
-				while($row = $result->fetch_assoc()){ 
-					echo '['.$row['Latitude'].', '.$row['Longitude'].'],'; 
-				} 
+	var markers = [
+		<?php 
+		$result = $db->query("SELECT Latitude, Longitude FROM markers"); // Returns output of statement
+		if($result->num_rows > 0){ 
+			while($row = $result->fetch_assoc()){ 
+				echo '['.$row['Latitude'].', '.$row['Longitude'].'],'; 
 			} 
-			?>
-		];
+		} 
+		?>
+	];
 
-		for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
-			var Point = new google.maps.LatLng(markers[i][0], markers[i][1]);
-			// [Marker Number, Latitude],[Marker Number, Longitude]
-			placeMarker(Point,map);		
-		}
+	for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
+		var Point = new google.maps.LatLng(markers[i][0], markers[i][1]);
+		// [Marker Number, Latitude],[Marker Number, Longitude]
+		placeMarker(Point,map);		
+	}
 
-	// --------------------------------------------------------------------------- //
-
-	// Create the search box and link it to the UI element.
-        var input = document.getElementById('pac-input');
-        var searchBox = new google.maps.places.SearchBox(input);
-        <!-- map.controls[google.maps.ControlPosition.LEFT].push(input); -->
-
-        // Bias the SearchBox results towards current map's viewport.
-        map.addListener('bounds_changed', function() {
-          searchBox.setBounds(map.getBounds());
-        });
-		
-	// --------------------------------------------------------------------------- //		
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Custom right click context menu
+	|-----------------------------------------------------------------------------------------------------------
+	*/		
 			
-		function hideContextMenu() {
-			ContextMenu = document.getElementById("menu");
-			ContextMenu.style.left = -500 + "px"; // Hide off page
-			ContextMenu.style.top = -500 + "px";
-			ContextMenu.style.display = "none"; // For good measure
-			menuDisplayed = false;
-		}
+	function hideContextMenu() {
+		ContextMenu = document.getElementById("menu");
+		ContextMenu.style.left = -500 + "px"; // Hide off page
+		ContextMenu.style.top = -500 + "px";
+		ContextMenu.style.display = "none"; // For good measure
+		menuDisplayed = false;
+	}
 		
-		map.addListener('rightclick', function(e) { // Right click context menu
-			if (menuDisplayed == true) { // If menu is already open and user right clicks again
-				hideContextMenu();
-			}
-			else { // Open the context menu
-				Location = e.latLng
-				
-				for (prop in e) {
-					if (e[prop] instanceof MouseEvent) {
-						mouseEvt = e[prop];
-						var left = mouseEvt.clientX;
-						var top = mouseEvt.clientY;
+	map.addListener('rightclick', function(e) {
+		if (menuDisplayed == true) { // If menu is already open and user right clicks again
+			hideContextMenu();
+		}
+		else { // Open the context menu
+			Location = e.latLng // Hold position in global variable (for placing marker later)				
+			for (prop in e) {
+				if (e[prop] instanceof MouseEvent) {
+					mouseEvt = e[prop];
+					var left = mouseEvt.clientX;
+					var top = mouseEvt.clientY;
 						
-						ContextMenu = document.getElementById("menu");
-						ContextMenu.style.left = (left+5) + "px"; // Small adjustment to its position (HARDCODED)
-						ContextMenu.style.top = (top-30) + "px";
-						ContextMenu.style.display = "block";
-						menuDisplayed = true;
-					}
+					ContextMenu = document.getElementById("menu");
+					ContextMenu.style.left = (left+5) + "px"; // Small adjustment to its position (HARDCODED)
+					ContextMenu.style.top = (top-30) + "px";
+					ContextMenu.style.display = "block";
+					menuDisplayed = true;
 				}
 			}
-		});			
+		}
+	});			
 		
-		map.addListener("click", function(e) { // Left click away from it
-			if (menuDisplayed == true) {
-				hideContextMenu();
-			}		
-		});
-		
-		map.addListener("drag", function(e) { // Drag away from it
-			if (menuDisplayed == true) {
-				hideContextMenu();
-			}		
-		});
-
-		const add_btn = document.querySelector('.custom_contextmenu_add'); // 'Add crime' button
-		add_btn.addEventListener('click', event => {
-			// Should probably first open a settings window for the crime (date, description)
-			placeMarker(Location,map); // Just show marker for now
+	map.addListener("click", function(e) { // Left click away from it
+		if (menuDisplayed == true) {
 			hideContextMenu();
-		});
+		}		
+	});
 		
-		const view_btn = document.querySelector('.custom_contextmenu_view'); // 'View region information' button
-		view_btn.addEventListener('click', event => {
-			alert("View button clicked");
+	map.addListener("drag", function(e) { // Drag away from it
+		if (menuDisplayed == true) {
 			hideContextMenu();
-			// Functionality
-		});
+		}		
+	});
 
-		// Another attempt! Try and implement it like this! 
+	const add_btn = document.querySelector('.custom_contextmenu_add'); // 'Add crime' button
+	add_btn.addEventListener('click', event => {
+		// Should probably first open a settings window for the crime (date, description)
+		placeMarker(Location,map); // Just show marker for now
+		hideContextMenu();
+	});
 		
-        //map.addListener('rightclick', function(event) {
-			//var cm = document.querySelector('.custom_contextmenu');
-			//console.log(event.pixel.x, event.pixel.y);
-			//cm.style.top = event.pixel.y;
-			//cm.style.left = event.pixel.x; // NOT MOVING
-			//cm.style.display = 'block'; // Showing	
-		//});
+	const view_btn = document.querySelector('.custom_contextmenu_view'); // 'View region information' button
+	view_btn.addEventListener('click', event => {
+		alert("View button clicked");
+		hideContextMenu();
+		// Functionality
+	});		
 		
-		
-	// --------------------------------------------------------------------------- //
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Search box implementation
+	|-----------------------------------------------------------------------------------------------------------
+	*/
 
-        // Central searchbox functionality
-        searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
-          var places = searchBox.getPlaces();
+    searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
+        var places = searchBox.getPlaces();
 
-          if (places.length == 0) {
-            return;
-          }
+        if (places.length == 0) {
+			return;
+        }
 
           // For each place, get the icon, name and location.
-          var bounds = new google.maps.LatLngBounds();
-          places.forEach(function(place) {
-            if (!place.geometry) {
-              console.log("Returned place contains no geometry");
-              return;
+        var bounds = new google.maps.LatLngBounds();
+        places.forEach(function(place) {
+			if (!place.geometry) {
+				console.log("Returned place contains no geometry");
+				return;
             }
             var icon = {
               url: place.icon,
@@ -375,12 +380,10 @@ width: 100%;
           map.fitBounds(bounds);
         });
 	}
-	
-	// --------------------------------------------------------------------------- //
 	  
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> <!-- API Key, Libraries and map function -->
 </script>
 
 </body>
