@@ -341,7 +341,7 @@ width: 100%;
 		placeMarker(Location,map); // Just go striaght to showing marker for now
 		
 		$.ajax({
-        url: 'SaveMarker.php',
+        url: 'SaveMarkers.php',
         type: 'POST',
 		// Ability to send other data (fom future settings window?)
 		// New data must also be caught in SaveMarker.php
