@@ -4,6 +4,11 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!DOCTYPE html>
 <html>
+
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
+</head>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
@@ -299,7 +304,9 @@ width: 100%;
 			hideContextMenu();
 		}
 		else { // Open the context menu
-			Location = e.latLng // Hold position in global variable (for placing marker later)				
+			Location = e.latLng // Hold position in global variable (for placing marker later)
+			Latitude = Location.lat();
+			Longitude = Location.lng();
 			for (prop in e) {
 				if (e[prop] instanceof MouseEvent) {
 					mouseEvt = e[prop];
@@ -331,7 +338,20 @@ width: 100%;
 	const add_btn = document.querySelector('.custom_contextmenu_add'); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		// Should probably first open a settings window for the crime (date, description)
-		placeMarker(Location,map); // Just show marker for now
+		placeMarker(Location,map); // Just go striaght to showing marker for now
+		
+		$.ajax({
+        url: 'SaveMarker.php',
+        type: 'POST',
+		// Ability to send other data (fom future settings window?)
+		// New data must also be caught in SaveMarker.php
+        data: {Latitude: Latitude, Longitude: Longitude},
+        success: function (data)
+		{
+			// Can create an alert to confirm data has been sent
+        }
+	});
+
 		hideContextMenu();
 	});
 		
