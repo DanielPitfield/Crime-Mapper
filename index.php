@@ -14,7 +14,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
 
 <style>
-body {
+html, body {
 margin:0;
 height: 100%
 width: 100%;
@@ -26,9 +26,7 @@ width: 100%;
   overflow: auto;
 }
 
-#MapBtn {
-  float: left;
-  width: 25%;
+.IconBarBtn {
   border:none;
   text-align: center;
   padding: 10px 0;
@@ -40,62 +38,33 @@ width: 100%;
   background-color: #555;
 }
 
-#MapBtn:hover {
+.IconBarBtn:hover {
   background-color: #000;
 }
 
-#MapBtn.active {
+.IconBarBtn.active {
   background-color: #4CAF50;
 }
 
-#SigninBtn {
+.Map {
+  float: left;
+  width: 25%;	
+}
+
+.Signin {
   float: right;
   width: 20%;
-  border:none;
-  text-align: center;
-  padding: 10px 0;
-  font-weight:bold;
-  font-family:Arial;
-  text-decoration:none;
-  color: white;
-  font-size: 20px;
-  background-color: #555;
 }
 
-#SigninBtn:hover {
-  background-color: #000;
-}
-
-#SigninBtn.active {
-  background-color: #4CAF50;
-}
-
-#SettingsBtn {
+.Settings {
   float: right;
   width: 5%;
-  border:none;
-  text-align: center;
-  padding: 10px 0;
-  font-weight:bold;
-  font-family:Arial;
-  text-decoration:none;
-  color: white;
-  font-size: 20px;
-  background-color: #555;
-}
-
-#SettingsBtn:hover {
-  background-color: #000;
-}
-
-#SettingsBtn.active {
-  background-color: #4CAF50;
 }
 
 #map {
-position:absolute;
-height: 95%;
-width: 100%;
+  position:absolute;
+  height: 95%;
+  width: 100%;
 }
 
 #description {
@@ -216,10 +185,10 @@ width: 100%;
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
 <div class="icon-bar">
-   <a class="active" href="#" id="MapBtn"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
+   <a class="IconBarBtn Map active" href="#"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
    <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
-   <a href="settings.html" id="SettingsBtn"><i class="fa fa-cog"></i></a> 
-   <a href="signin.html" id="SigninBtn"><i class="fa fa-sign-in"></i> Sign in</a>
+   <a href="settings.html" class="IconBarBtn Settings"><i class="fa fa-cog"></i></a> 
+   <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i> Sign in</a>
 </div>
 
 <div id="map"></div>
