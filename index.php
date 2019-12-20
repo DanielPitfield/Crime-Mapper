@@ -68,7 +68,7 @@ width: 100%;
 }
 
 #description {
-        font-family: Roboto;
+        font-family: Arial;
         font-size: 15px;
         font-weight: 300;
       }
@@ -93,7 +93,7 @@ width: 100%;
         outline: none;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         background-color: #fff;
-        font-family: Roboto;
+        font-family: Arial;
       }
 
       #pac-container {
@@ -107,14 +107,14 @@ width: 100%;
       }
 
       .pac-controls label {
-        font-family: Roboto;
+        font-family: Arial;
         font-size: 13px;
         font-weight: 300;
       }
 
       #pac-input {
         background-color: #fff;
-        font-family: Roboto;
+        font-family: Arial;
         font-size: 15px;
         font-weight: 300;
         padding: 0 11px 0 13px;
@@ -135,55 +135,46 @@ width: 100%;
         font-weight: 500;
         padding: 6px 12px;
       }
+	  
       #target {
         width: 345px;
       }
 	  
-	  .custom_contextmenu {
-		background-color: white;
-		position: fixed;
-		width: 10%;
-		display: none;
-	  }
+.custom_contextmenu {
+  background-color: white;
+  position: fixed;
+  width: 10%;
+  display: none;
+}
 	  
-	  .custom_contextmenu_add {
-		cursor: pointer;
-		padding: 8px 15px;
-		background-color: #4CAF50;
-		
-		font-weight:bold;
-		font-family:Arial;
-		text-decoration:none;
-		color: white;
-		font-size: 14px;
-		text-align: center;
-	  }
-	  
-	  .custom_contextmenu_add:hover {
-		background-color: #000;
-	  }
-	  
-	  .custom_contextmenu_view {
-		cursor: pointer;
-		padding: 8px 15px;
-		background-color: #555;
-		
-		font-weight:bold;
-		font-family:Arial;
-		text-decoration:none;
-		color: white;
-		font-size: 14px;
-		text-align: center;
-	  }
-	  
-	  .custom_contextmenu_view:hover {
-		background-color: #000;
-	  }
+.custom_contextmenu_btn {
+  cursor: pointer;
+  padding: 8px 15px;		
+  font-weight:bold;
+  font-family:Arial;
+  text-decoration:none;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.custom_contextmenu_btn:hover {
+  background-color: #000;
+}
+
+.add {
+  background-color: #4CAF50;
+}
+
+.view {
+  background-color: #555;
+}
 	  
 </style>
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
+<!-- Navigation/Icon Bar -->
 <div class="icon-bar">
    <a class="IconBarBtn Map active" href="#"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
    <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
@@ -191,11 +182,13 @@ width: 100%;
    <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i> Sign in</a>
 </div>
 
+<!-- Map -->
 <div id="map"></div>
 
-<div class="custom_contextmenu" id="menu"> <!-- Context Menu -->
-	<div class="custom_contextmenu_add" id="btn_add">Add crime</div>
-	<div class="custom_contextmenu_view" id="btn_view">View region information</div>
+<!-- Context Menu -->
+<div class="custom_contextmenu" id="menu">
+	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
+	<div class="custom_contextmenu_btn view" id="btn_view">View region information</div>
 </div>
 
 <script>
@@ -304,7 +297,7 @@ width: 100%;
 		}		
 	});
 
-	const add_btn = document.querySelector('.custom_contextmenu_add'); // 'Add crime' button
+	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		// Should probably first open a settings window for the crime (date, description)
 		placeMarker(Location,map); // Just go striaght to showing marker for now
@@ -324,7 +317,7 @@ width: 100%;
 		hideContextMenu();
 	});
 		
-	const view_btn = document.querySelector('.custom_contextmenu_view'); // 'View region information' button
+	const view_btn = document.getElementById("btn_view"); // 'View region information' button
 	view_btn.addEventListener('click', event => {
 		alert("View button clicked");
 		hideContextMenu();
