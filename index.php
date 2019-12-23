@@ -27,7 +27,7 @@ width: 100%;
 }
 
 .IconBarBtn {
-  border:none;
+  border: none;
   text-align: center;
   padding: 10px 0;
   font-weight:bold;
@@ -53,17 +53,17 @@ width: 100%;
 
 .Signin {
   float: right;
-  width: 20%;
+  width: 5%;
 }
 
 .Settings {
   float: right;
-  width: 5%;
+  width: 20%;
 }
 
 #map {
   position:absolute;
-  height: 95%;
+  height: calc(100% - 45px);
   width: 100%;
 }
 
@@ -178,8 +178,8 @@ width: 100%;
 <div class="icon-bar">
    <a class="IconBarBtn Map active" href="#"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
    <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
-   <a href="settings.html" class="IconBarBtn Settings"><i class="fa fa-cog"></i></a> 
-   <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i> Sign in</a>
+   <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i></a>
+   <a href="settings.html" class="IconBarBtn Settings"><i class="fa fa-cog"></i> Options</a> 
 </div>
 
 <!-- Map -->
@@ -276,8 +276,10 @@ width: 100%;
 					var top = mouseEvt.clientY;
 						
 					ContextMenu = document.getElementById("menu");
-					ContextMenu.style.left = (left+5) + "px"; // Small adjustment to its position (HARDCODED)
-					ContextMenu.style.top = (top-30) + "px";
+					// Position context menu one pixel to the right and below location of click
+					// (so that hover styling is not seen immediately)
+					ContextMenu.style.left = (left+1) + "px";
+					ContextMenu.style.top = (top-1) + "px";
 					ContextMenu.style.display = "block";
 					menuDisplayed = true;
 				}
@@ -362,6 +364,12 @@ width: 100%;
           map.fitBounds(bounds);
         });
 	}
+	
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Main Drop Down Menu (Mapping, Analysis and Prevention) 
+	|-----------------------------------------------------------------------------------------------------------
+	*/
 	  
 </script>
 
