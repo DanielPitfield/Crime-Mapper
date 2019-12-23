@@ -18,6 +18,7 @@ html, body {
 margin:0;
 height: 100%
 width: 100%;
+font-family: Arial;
 }
 
 .icon-bar {
@@ -169,6 +170,113 @@ width: 100%;
 .view {
   background-color: #555;
 }
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+
+.modal-content {
+  position: relative;
+  background-color: #fefefe;
+  margin: auto;
+  padding: 0;
+  border: 1px solid #888;
+  width: 40%;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s
+}
+
+@-webkit-keyframes animatetop {
+  from {top:-300px; opacity:0} 
+  to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+  from {top:-300px; opacity:0}
+  to {top:0; opacity:1}
+}
+
+.close {
+  color: white;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-header {
+  padding: 2px 18px;
+  background-color: #5cb85c;
+  color: white;
+}
+
+.modal-body {padding: 14px 16px;}
+
+input[type=date], input[type=time] {
+ width:17.5%;
+ height:25px;
+ font-family:Arial;
+ font-size:18px;
+ background-color: grey;
+ outline: none;
+ border: 0;
+ border-radius: 3px;
+ padding: 0 4px;
+ color: white;
+}
+
+input[type=time] {
+	width:10%;
+}
+
+.input-container {
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.icon {
+  padding: 10px;
+  background: dodgerblue;
+  color: white;
+  min-width: 50px;
+  text-align: center;
+}
+
+textarea {
+   resize: none;
+   background-color: grey;
+}	
+
+input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button,       
+input[type="date"]::-webkit-clear-button { -webkit-appearance: none;display: none; }
+
+input[type="time"]::-webkit-inner-spin-button,
+input[type="time"]::-webkit-outer-spin-button { opacity:1; } 
+input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: none; }
 	  
 </style>
 
@@ -189,6 +297,33 @@ width: 100%;
 <div class="custom_contextmenu" id="menu">
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
 	<div class="custom_contextmenu_btn view" id="btn_view">View region information</div>
+</div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->  
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Add Crime</h2>
+    </div>
+    <div class="modal-body">
+      <form action="/action_page.php">
+		<input type="date" name="Crime_date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input type="time" name="Crime_time" value="00:00" required>
+		<!-- Set default value to today's date, limit future dates -->
+		<br></br>
+		<textarea rows="10" cols="35"> </textarea>
+		
+		<!-- Log when crime is added (crime reported) -->
+		<!-- Range of time (toggle?) -->
+		<!-- ID -->	
+		
+	  </form>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -298,10 +433,13 @@ width: 100%;
 			hideContextMenu();
 		}		
 	});
+	
+	var modal = document.getElementById("myModal");
+	var span = document.getElementsByClassName("close")[0];
 
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
-		// Should probably first open a settings window for the crime (date, description)
+		modal.style.display = "block";
 		placeMarker(Location,map); // Just go striaght to showing marker for now
 		
 		$.ajax({
@@ -318,6 +456,10 @@ width: 100%;
 
 		hideContextMenu();
 	});
+	
+	span.onclick = function() { // Close button for add crime input window
+		modal.style.display = "none";
+	}
 		
 	const view_btn = document.getElementById("btn_view"); // 'View region information' button
 	view_btn.addEventListener('click', event => {
