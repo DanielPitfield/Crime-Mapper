@@ -68,6 +68,13 @@ font-family: Arial;
   width: 100%;
 }
 
+
+#map2 {
+  float:right;
+  width:55%;
+  height:270px;  
+}
+
 #description {
         font-family: Arial;
         font-size: 15px;
@@ -232,7 +239,7 @@ font-family: Arial;
 
 .modal-body {padding: 14px 16px;}
 
-input[type=date], input[type=time] {
+input[type=date], input[type=time], select {
  width:17.5%;
  height:25px;
  font-family:Arial;
@@ -241,27 +248,17 @@ input[type=date], input[type=time] {
  outline: none;
  border: 0;
  border-radius: 3px;
- padding: 0 4px;
+ padding: 5px;
  color: white;
+}
+
+select {
+	width:37%;
+	padding: 0px;
 }
 
 input[type=time] {
 	width:10%;
-}
-
-.input-container {
-  display: -ms-flexbox; /* IE10 */
-  display: flex;
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-.icon {
-  padding: 10px;
-  background: dodgerblue;
-  color: white;
-  min-width: 50px;
-  text-align: center;
 }
 
 textarea {
@@ -310,11 +307,21 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
     </div>
     <div class="modal-body">
       <form action="/action_page.php">
+	    <div id="map2"></div>
+		Date:
 		<input type="date" name="Crime_date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		Time:
 		<input type="time" name="Crime_time" value="00:00" required>
-		<!-- Set default value to today's date, limit future dates -->
 		<br></br>
-		<textarea rows="10" cols="35"> </textarea>
+		Type:
+		<select>
+		<option value="Arson">Arson</option>
+		<option value="Arson">Murder</option>
+		<option value="Arson">Anti-social Behaviour</option>
+		</select>
+		<br></br>
+		<textarea id="description" name="description" rows="10" cols="37">
+		</textarea>
 		
 		<!-- Log when crime is added (crime reported) -->
 		<!-- Range of time (toggle?) -->
@@ -323,7 +330,6 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 	  </form>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -339,6 +345,14 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		map: map
 		});
 	}
+	
+	function placeDraggableMarker(Location, map) {
+		var marker = new google.maps.Marker({
+		position: Location,
+		draggable: true,
+		map: map
+		});
+	}
 
 	function initMap() {
 		var ContextMenu = null;
@@ -346,8 +360,8 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		var Latitude = 0;
 		var Longitude = 0;
 		
-		var location = {lat: 51.454266, lng: -0.978130};
-		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: location});
+		var initial_location = {lat: 51.454266, lng: -0.978130};
+		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
 		
 		// Create the search box and link it to the UI element.
 		var input = document.getElementById('pac-input');
@@ -439,9 +453,42 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
-		modal.style.display = "block";
-		placeMarker(Location,map); // Just go striaght to showing marker for now
+		modal.style.display = "block"; // Show input window
 		
+		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
+		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
+		var SmallMapOptions = {
+			center: Location,
+			zoom: RefinedZoom,
+			disableDefaultUI: true, // Remove all controls but street view
+			streetViewControl: true,
+		};
+
+		//placeMarker(Location,map); // Just go striaght to showing marker for now
+		var map2 = new google.maps.Map(document.getElementById("map2"), SmallMapOptions); // Show smaller map
+		
+		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
+		position: Location,
+		draggable: true,
+		map: map2
+		});
+		
+		/*
+		map2.addListener(Draggable_marker, 'dragend', function() { // When marker is moved
+			console.log("Marker dragged");
+			// Change location to new position
+		});
+		*/
+		
+		// Don;t need to detect drag, just take marker location when button is pressed
+		console.log(Draggable_marker.getPosition().Lat());
+		
+		/*
+		3D View (adding markers in street view)
+		Confirm button when pressed, takes location position
+		Sends new information to database
+		*/
+
 		$.ajax({
         url: 'SaveMarkers.php',
         type: 'POST',
