@@ -75,6 +75,21 @@ font-family: Arial;
   height:270px;  
 }
 
+.submit_button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font: bold 15px Arial;
+}
+
+.submit_button:hover {
+  opacity: 0.8;
+}
+
 #description {
         font-family: Arial;
         font-size: 15px;
@@ -316,16 +331,19 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		Type:
 		<select>
 		<option value="Arson">Arson</option>
-		<option value="Arson">Murder</option>
-		<option value="Arson">Anti-social Behaviour</option>
+		<option value="Murder">Murder</option>
+		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
 		<br></br>
 		<textarea id="description" name="description" rows="10" cols="37">
 		</textarea>
+		<button type="submit" id="btn_confirm" class="submit_button">Confirm</button>
 		
 		<!-- Log when crime is added (crime reported) -->
 		<!-- Range of time (toggle?) -->
-		<!-- ID -->	
+		<!-- ID -->
+
+		<!-- Input information on left side is sent to action_page.php -->
 		
 	  </form>
     </div>
@@ -453,6 +471,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
+		hideContextMenu();
 		modal.style.display = "block"; // Show input window
 		
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
@@ -464,46 +483,39 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 			streetViewControl: true,
 		};
 
-		//placeMarker(Location,map); // Just go striaght to showing marker for now
 		var map2 = new google.maps.Map(document.getElementById("map2"), SmallMapOptions); // Show smaller map
-		
+
 		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
 		position: Location,
 		draggable: true,
 		map: map2
 		});
 		
-		/*
-		map2.addListener(Draggable_marker, 'dragend', function() { // When marker is moved
-			console.log("Marker dragged");
-			// Change location to new position
-		});
-		*/
+		// 3D View (adding markers in street view)
+	});
+	
+	const confirm_btn = document.getElementById("btn_confirm"); // Confirm button for form
+	confirm_btn.addEventListener('click', event => {
+		// Form information (inputs on left) will be sent and handled by action_page.php
+		Latitude = Draggable_marker.getPosition().lat();
+		Longitude = Draggable_marker.getPosition().lng();
+		// Get the location of the marker
+		//console.log(Latitude, Longitude);
 		
-		// Don;t need to detect drag, just take marker location when button is pressed
-		console.log(Draggable_marker.getPosition().Lat());
-		
 		/*
-		3D View (adding markers in street view)
-		Confirm button when pressed, takes location position
-		Sends new information to database
-		*/
-
-		$.ajax({
+		$.ajax({ // Send locational information to be stored into database
         url: 'SaveMarkers.php',
         type: 'POST',
-		// Ability to send other data (fom future settings window?)
-		// New data must also be caught in SaveMarker.php
         data: {Latitude: Latitude, Longitude: Longitude},
         success: function (data)
 		{
 			// Can create an alert to confirm data has been sent
         }
+		*/
 	});
+		//placeMarker(Location,map); // Place a static marker on the main map
+	//});
 
-		hideContextMenu();
-	});
-	
 	span.onclick = function() { // Close button for add crime input window
 		modal.style.display = "none";
 	}
