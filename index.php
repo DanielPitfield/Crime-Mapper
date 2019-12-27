@@ -321,21 +321,21 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
       <h2>Add Crime</h2>
     </div>
     <div class="modal-body">
-      <form action="/action_page.php">
+      <form action="SaveMarkers.php" method="post">
 	    <div id="map2"></div>
 		Date:
-		<input type="date" name="Crime_date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		Time:
-		<input type="time" name="Crime_time" value="00:00" required>
+		<input type="time" name="Time" value="00:00" required>
 		<br></br>
 		Type:
-		<select>
+		<select name="Crime_Type">
 		<option value="Arson">Arson</option>
 		<option value="Murder">Murder</option>
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
 		<br></br>
-		<textarea id="description" name="description" rows="10" cols="37">
+		<textarea id="description" name="Description" rows="10" cols="37">
 		</textarea>
 		<button type="submit" id="btn_confirm" class="submit_button">Confirm</button>
 		
@@ -357,16 +357,16 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	function placeMarker(Location, map) {
+	function placeMarker(CenterLocation, map) {
 		var marker = new google.maps.Marker({
-		position: Location,
+		position: CenterLocation,
 		map: map
 		});
 	}
 	
-	function placeDraggableMarker(Location, map) {
+	function placeDraggableMarker(CenterLocation, map) {
 		var marker = new google.maps.Marker({
-		position: Location,
+		position: CenterLocation,
 		draggable: true,
 		map: map
 		});
@@ -433,9 +433,10 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 			hideContextMenu();
 		}
 		else { // Open the context menu
-			Location = e.latLng // Hold position in global variable (for placing marker later)
-			Latitude = Location.lat();
-			Longitude = Location.lng();
+			FirstLocation = e.latLng; // Initial position specified
+			Latitude = FirstLocation.lat();
+			Longitude = FirstLocation.lng();
+
 			for (prop in e) {
 				if (e[prop] instanceof MouseEvent) {
 					mouseEvt = e[prop];
@@ -477,7 +478,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
 		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
 		var SmallMapOptions = {
-			center: Location,
+			center: FirstLocation,
 			zoom: RefinedZoom,
 			disableDefaultUI: true, // Remove all controls but street view
 			streetViewControl: true,
@@ -486,23 +487,22 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		var map2 = new google.maps.Map(document.getElementById("map2"), SmallMapOptions); // Show smaller map
 
 		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
-		position: Location,
+		position: FirstLocation,
 		draggable: true,
 		map: map2
 		});
 		
+		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
+			Latitude = evt.latLng.lat(); // Information to be sent
+			Longitude = evt.latLng.lng();
+			SecondLocation = evt.latLng; // To be used to place static marker on main map
+		});
+			
 		// 3D View (adding markers in street view)
 	});
 	
 	const confirm_btn = document.getElementById("btn_confirm"); // Confirm button for form
-	confirm_btn.addEventListener('click', event => {
-		// Form information (inputs on left) will be sent and handled by action_page.php
-		Latitude = Draggable_marker.getPosition().lat();
-		Longitude = Draggable_marker.getPosition().lng();
-		// Get the location of the marker
-		//console.log(Latitude, Longitude);
-		
-		/*
+	confirm_btn.addEventListener('click', event => {		
 		$.ajax({ // Send locational information to be stored into database
         url: 'SaveMarkers.php',
         type: 'POST',
@@ -511,10 +511,9 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		{
 			// Can create an alert to confirm data has been sent
         }
-		*/
 	});
-		//placeMarker(Location,map); // Place a static marker on the main map
-	//});
+		placeMarker(SecondLocation,map); // Place a static marker on the main map
+	});
 
 	span.onclick = function() { // Close button for add crime input window
 		modal.style.display = "none";
