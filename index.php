@@ -514,27 +514,12 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 			data: data,
 			success: function(data)
 			{
-				//
+				// Success message
 			}
 		});
-	});
-	
-	/*
-	const confirm_btn = document.getElementById("btn_confirm"); // Confirm button for form
-	confirm_btn.addEventListener('click', event => {		
-		$.ajax({ // Send locational information to be stored into database
-        url: 'SaveMarkers.php',
-        type: 'POST',
-        data: {Latitude: Latitude, Longitude: Longitude},
-        success: function (data)
-		{
-			// Can create an alert to confirm data has been sent
-        }
-	});
 		placeMarker(SecondLocation,map); // Place a static marker on the main map
 		modal.style.display = "none";
 	});
-	*/
 
 	span.onclick = function() { // Close button for add crime input window
 		modal.style.display = "none";
