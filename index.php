@@ -321,7 +321,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
       <h2>Add Crime</h2>
     </div>
     <div class="modal-body">
-      <form action="SaveMarkers.php" method="post">
+      <form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
 	    <div id="map2"></div>
 		Date:
 		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
@@ -341,10 +341,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		
 		<!-- Log when crime is added (crime reported) -->
 		<!-- Range of time (toggle?) -->
-		<!-- ID -->
-
-		<!-- Input information on left side is sent to action_page.php -->
-		
+		<!-- ID -->		
 	  </form>
     </div>
   </div>
@@ -501,6 +498,28 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		// 3D View (adding markers in street view)
 	});
 	
+	$("#submit_form").submit(function(e) {
+		e.preventDefault();
+			
+		var formData = $("#submit_form").serialize();
+		
+		var Vars = {Latitude: Latitude, Longitude: Longitude};
+		var varsData = $.param(Vars);
+
+		var data = formData + '&' + varsData;
+
+		$.ajax({
+			url: 'SaveMarkers.php',
+			type: 'POST',
+			data: data,
+			success: function(data)
+			{
+				//
+			}
+		});
+	});
+	
+	/*
 	const confirm_btn = document.getElementById("btn_confirm"); // Confirm button for form
 	confirm_btn.addEventListener('click', event => {		
 		$.ajax({ // Send locational information to be stored into database
@@ -513,7 +532,9 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
         }
 	});
 		placeMarker(SecondLocation,map); // Place a static marker on the main map
+		modal.style.display = "none";
 	});
+	*/
 
 	span.onclick = function() { // Close button for add crime input window
 		modal.style.display = "none";
