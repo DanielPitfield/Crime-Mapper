@@ -179,6 +179,7 @@ font-family: Arial;
   color: white;
   font-size: 14px;
   text-align: center;
+  background-color: #555;
 }
 
 .custom_contextmenu_btn:hover {
@@ -187,10 +188,6 @@ font-family: Arial;
 
 .add {
   background-color: #4CAF50;
-}
-
-.view {
-  background-color: #555;
 }
 
 .modal {
@@ -299,7 +296,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
    <a class="IconBarBtn Map active" href="#"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
    <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
    <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i></a>
-   <a href="settings.html" class="IconBarBtn Settings"><i class="fa fa-cog"></i> Options</a> 
+   <a class="IconBarBtn Settings"><i class="fa fa-cog"></i> Options</a> 
 </div>
 
 <!-- Map -->
@@ -308,13 +305,11 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 <!-- Context Menu -->
 <div class="custom_contextmenu" id="menu">
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
-	<div class="custom_contextmenu_btn view" id="btn_view">View region information</div>
+	<div class="custom_contextmenu_btn" id="btn_filter">Filter</div>
+	<div class="custom_contextmenu_btn" id="btn_view">View region information</div>
 </div>
 
-<!-- The Modal -->
-<div id="myModal" class="modal">
-
-  <!-- Modal content -->  
+<div id="modal_add" class="modal"> 
   <div class="modal-content">
     <div class="modal-header">
       <span class="close">&times;</span>
@@ -343,6 +338,23 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		<!-- Range of time (toggle?) -->
 		<!-- ID -->		
 	  </form>
+    </div>
+  </div>
+</div>
+
+<div id="modal_filter" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Filter</h2>
+    </div>
+    <div class="modal-body">
+		Date:
+		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<br></br>
+		Time:
+		Type:
+		<button type="submit" id="btn_confirm" class="submit_button">Confirm</button>
     </div>
   </div>
 </div>
@@ -464,13 +476,16 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		}		
 	});
 	
-	var modal = document.getElementById("myModal");
-	var span = document.getElementsByClassName("close")[0];
+	var modal_add = document.getElementById("modal_add");
+	var modal_filter = document.getElementById("modal_filter");
+		
+	var span_add = document.getElementsByClassName("close")[0];
+	var span_filter = document.getElementsByClassName("close")[1];
 
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		hideContextMenu();
-		modal.style.display = "block"; // Show input window
+		modal_add.style.display = "block"; // Show input window
 		
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
 		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
@@ -518,16 +533,29 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 			}
 		});
 		placeMarker(SecondLocation,map); // Place a static marker on the main map
-		modal.style.display = "none";
+		modal_add.style.display = "none";
 	});
 
-	span.onclick = function() { // Close button for add crime input window
-		modal.style.display = "none";
+	span_add.onclick = function() { // Close button for add crime input window
+		modal_add.style.display = "none";
+	}
+	
+	const filter_btn = document.getElementById("btn_filter"); // 'Filter' button
+	filter_btn.addEventListener('click', event => {
+		hideContextMenu();
+		modal_filter.style.display = "block";
+		// show view of database based on filter options
+		// remove all filter options
+		
+		//modal_filter.style.display = "none";
+	});
+	
+	span_filter.onclick = function() {
+		modal_filter.style.display = "none";
 	}
 		
 	const view_btn = document.getElementById("btn_view"); // 'View region information' button
 	view_btn.addEventListener('click', event => {
-		alert("View button clicked");
 		hideContextMenu();
 		// Functionality
 	});		
