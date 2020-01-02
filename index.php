@@ -349,12 +349,15 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
       <h2>Filter</h2>
     </div>
     <div class="modal-body">
-		Date:
+		Date (min):
+		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		Date (max):
 		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		<br></br>
 		Time:
+		<br></br>
 		Type:
-		<button type="submit" id="btn_confirm" class="submit_button">Confirm</button>
+		<button type="submit" name="filter" id="btn_confirm" class="submit_button">Confirm</button>
     </div>
   </div>
 </div>
@@ -366,11 +369,13 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
+	var MarkerArray = [];	
 	function placeMarker(CenterLocation, map) {
 		var marker = new google.maps.Marker({
 		position: CenterLocation,
 		map: map
 		});
+		MarkerArray.push(marker);
 	}
 	
 	function placeDraggableMarker(CenterLocation, map) {
@@ -405,22 +410,38 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 	| Retrieving and placing database markers
 	|-----------------------------------------------------------------------------------------------------------
 	*/
-		
-	var markers = [
-		<?php 
-		$result = $db->query("SELECT Latitude, Longitude FROM markers"); // Returns output of statement
-		if($result->num_rows > 0){ 
-			while($row = $result->fetch_assoc()){ 
-				echo '['.$row['Latitude'].', '.$row['Longitude'].'],'; 
+	
+	function LoadMarkers() {	
+		var markers = [
+			<?php 
+			$result = $db->query("SELECT Latitude, Longitude FROM markers"); // Returns output of statement
+			if($result->num_rows > 0){ 
+				while($row = $result->fetch_assoc()){ 
+					echo '['.$row['Latitude'].', '.$row['Longitude'].'],'; 
+				} 
 			} 
-		} 
-		?>
-	];
+			?>
+		];
 
-	for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
-		var Point = new google.maps.LatLng(markers[i][0], markers[i][1]);
-		// [Marker Number, Latitude],[Marker Number, Longitude]
-		placeMarker(Point,map);		
+		for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
+			var Point = new google.maps.LatLng(markers[i][0], markers[i][1]);
+			// [Marker Number, Latitude],[Marker Number, Longitude]
+			placeMarker(Point,map);		
+		}
+		
+	}
+	LoadMarkers();
+	
+	function hideAllMarkers(){
+		for(i=0; i < MarkerArray.length; i++){
+			MarkerArray[i].setMap(null);
+		}
+	}
+	
+	function showAllMarkers(){
+		for(i=0; i < MarkerArray.length; i++){
+			MarkerArray[i].setMap(map);
+		}
 	}
 
 	/*
@@ -476,12 +497,16 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 		}		
 	});
 	
-	var modal_add = document.getElementById("modal_add");
-	var modal_filter = document.getElementById("modal_filter");
-		
-	var span_add = document.getElementsByClassName("close")[0];
-	var span_filter = document.getElementsByClassName("close")[1];
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| 'Add crime' input window
+	|-----------------------------------------------------------------------------------------------------------
+	*/
 
+	var modal_add = document.getElementById("modal_add");
+	var span_add = document.getElementsByClassName("close")[0];
+	var SmallMarkerMoved = false;
+			
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		hideContextMenu();
@@ -508,6 +533,7 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 			Latitude = evt.latLng.lat(); // Information to be sent
 			Longitude = evt.latLng.lng();
 			SecondLocation = evt.latLng; // To be used to place static marker on main map
+			SmallMarkerMoved = true;
 		});
 			
 		// 3D View (adding markers in street view)
@@ -532,28 +558,47 @@ input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: non
 				// Success message
 			}
 		});
-		placeMarker(SecondLocation,map); // Place a static marker on the main map
-		modal_add.style.display = "none";
+		
+		if (SmallMarkerMoved == true) {
+			placeMarker(SecondLocation,map); // Place a static marker on the main map
+		}
+		else {
+			placeMarker(FirstLocation,map); // Place a static marker on the main map
+		}
+		SmallMarkerMoved = false;
+
+		modal_add.style.display = "none"; // Close input window
 	});
 
 	span_add.onclick = function() { // Close button for add crime input window
 		modal_add.style.display = "none";
 	}
 	
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| 'Filter' input window
+	|-----------------------------------------------------------------------------------------------------------
+	*/
+	
+	var modal_filter = document.getElementById("modal_filter");
+	var span_filter = document.getElementsByClassName("close")[1];
+	
 	const filter_btn = document.getElementById("btn_filter"); // 'Filter' button
 	filter_btn.addEventListener('click', event => {
 		hideContextMenu();
 		modal_filter.style.display = "block";
-		// show view of database based on filter options
-		// remove all filter options
-		
-		//modal_filter.style.display = "none";
 	});
 	
 	span_filter.onclick = function() {
 		modal_filter.style.display = "none";
 	}
-		
+	
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| 'View region information' information window
+	|-----------------------------------------------------------------------------------------------------------
+	*/
+	
 	const view_btn = document.getElementById("btn_view"); // 'View region information' button
 	view_btn.addEventListener('click', event => {
 		hideContextMenu();
