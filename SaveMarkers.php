@@ -38,5 +38,8 @@ if(isset($_POST['Longitude']))
 // Insert information into database
 $sql = "INSERT INTO markers (Crime_Type, Description, Date_Time, Latitude, Longitude)
 		VALUES ('$crime_type', '$description', '$date_time', '$latitude', '$longitude')";
-$db->query($sql);		
-?>	
+$db->query($sql);
+
+$id= mysqli_insert_id($db);
+echo $id;	
+?>
