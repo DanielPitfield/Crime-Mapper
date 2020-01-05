@@ -115,8 +115,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		google.maps.event.addListener(marker, 'click', function() {
 			// Should open small context menu with red option to 'Delete' first, then do the following...
 			// Delete from ...
-			marker.setVisible(false); // View	
-			MarkerArray.pop(marker); // Array
+			marker.setVisible(false); // View
+
+			var index = MarkerArray.indexOf(marker);
+			if (index !== -1) MarkerArray.splice(index, 1); // Array
+			
 			var MarkerID = marker.ID;
 			//alert(MarkerID);
 
@@ -162,8 +165,19 @@ require 'dbConfig.php'; // Include the database configuration file
 			<?php 
 			$result = $db->query("SELECT * FROM markers"); // Returns output of statement
 			if($result->num_rows > 0){ 
-				while($row = $result->fetch_assoc()){ 
-					echo '['.$row['ID'].', "'.$row['Crime_Type'].'", "'.$row['Description'].'", '.$row['Latitude'].', '.$row['Longitude'].'],';
+				while($row = $result->fetch_assoc()){
+					$raw_date = $row['Date_Time'];
+					$date = new DateTime($raw_date);
+					$timestamp = date_timestamp_get($date); 
+					/* 
+					JS Array can't hold datetimeobject, use timestamp instead
+					Also easier for filtering (comparisons)
+					Can be converted back when displaying date and time to user
+					*/
+
+					echo '['.$row['ID'].',"'.$row['Crime_Type'].'",';
+					echo $timestamp;
+					echo ',"'.$row['Description'].'",'.$row['Latitude'].','.$row['Longitude'].'],';
 				} 
 			} 
 			?>
@@ -172,30 +186,31 @@ require 'dbConfig.php'; // Include the database configuration file
 		for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
 			var ID = markers[i][0];
 			var Crime_Type = markers[i][1];
-			var Description = markers[i][2];
-			var Point = new google.maps.LatLng(markers[i][3], markers[i][4]); // [Marker Number, Latitude],[Marker Number, Longitude]
+			var Date_Time = markers[i][2];
+			console.log(Date_Time);
+			var Description = markers[i][3];
+			var Point = new google.maps.LatLng(markers[i][4], markers[i][5]);
 			placeMarker(ID,Crime_Type,Description,Point,map);		
 		}
 		
 	}
 	LoadMarkers();
 	
-	function FilterMarkers() {
-		for(i=0; i < MarkerArray.length; i++){ // Hide all markers
-			MarkerArray[i].setVisible(false);
-		}
-		
+	function FilterMarkers() {	
 		var dropdown = document.getElementById("Filter_Crime_Type");
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		
-		// Also by ID or last 10/100/1000 crimes?
+		// Also by ID or last x/10/100 crimes?
 		// Also by date (after date or range of dates)
 		
 		for(i=0; i < MarkerArray.length; i++){
 			if (MarkerArray[i].Crime_Type == Crime_Type) { // If marker category matches filter
-				MarkerArray[i].setVisible(true); // Show the marker
-				// Add to another marker array? Operations may want to be performed on this new array (crime analysis)
+				MarkerArray[i].setVisible(true); // Show the marker if not shown already
 			}
+			else {
+				MarkerArray[i].setVisible(false);
+			}
+			// Add to another marker array? Operations may want to be performed on this new array (crime analysis)
 		}
 	}
 
@@ -296,10 +311,10 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	$("#submit_form").submit(function(e) {
 		e.preventDefault();
-		
-		/* Take values locally */				
+					
 		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
 		
+		/* Take values locally */	
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("description").value;
 
