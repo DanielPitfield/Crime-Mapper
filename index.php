@@ -49,7 +49,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<input type="time" name="Time" value="00:00" required>
 		<br></br>
 		Type:
-		<select id="Crime_Type" name="Crime_Type">
+		<select id="Add_Crime_Type" name="Crime_Type">
 		<option value="Arson">Arson</option>
 		<option value="Murder">Murder</option>
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
@@ -57,7 +57,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<br></br>
 		<textarea id="description" name="Description" rows="10" cols="37">
 		</textarea>
-		<button type="submit" id="btn_confirm" class="submit_button">Confirm</button>
+		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
 		
 		<!-- Log when crime is added (crime reported) -->
 		<!-- Range of time (toggle?) -->
@@ -82,7 +82,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		Time:
 		<br></br>
 		Type:
-		<button type="submit" name="filter" id="btn_confirm" class="submit_button">Confirm</button>
+		<select id="Filter_Crime_Type" name="Crime_Type">
+		<option value="Arson">Arson</option>
+		<option value="Murder">Murder</option>
+		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
+		</select>
+		<button id="btn_filter_confirm" class="submit_button">Confirm</button>
     </div>
   </div>
 </div>
@@ -94,7 +99,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	var MarkerArray = [];	
+	var MarkerArray = [];
+	var FilteredMarkerArray = [];
+	
 	function placeMarker(ID,Crime_Type,Description,CenterLocation,map) {
 		var marker = new google.maps.Marker({
 		ID: ID,
@@ -104,17 +111,17 @@ require 'dbConfig.php'; // Include the database configuration file
 		map: map
 		});
 		MarkerArray.push(marker);
-		
+
 		google.maps.event.addListener(marker, 'click', function() {
 			// Should open small context menu with red option to 'Delete' first, then do the following...
 			// Delete from ...
-			marker.setVisible(false); // View
+			marker.setVisible(false); // View	
 			MarkerArray.pop(marker); // Array
-			var MarkerID = marker.ID; // Database
+			var MarkerID = marker.ID;
 			//alert(MarkerID);
 
 			$.ajax({
-				url: 'DeleteMarker.php',
+				url: 'DeleteMarker.php',  // Database
 				type: 'POST',
 				data: {MarkerID: MarkerID},
 				success: function(data)
@@ -173,15 +180,22 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	LoadMarkers();
 	
-	function hideAllMarkers(){
-		for(i=0; i < MarkerArray.length; i++){
+	function FilterMarkers() {
+		for(i=0; i < MarkerArray.length; i++){ // Hide all markers
 			MarkerArray[i].setVisible(false);
 		}
-	}
-	
-	function showAllMarkers(){
+		
+		var dropdown = document.getElementById("Filter_Crime_Type");
+		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		
+		// Also by ID or last 10/100/1000 crimes?
+		// Also by date (after date or range of dates)
+		
 		for(i=0; i < MarkerArray.length; i++){
-			MarkerArray[i].setVisible(true);
+			if (MarkerArray[i].Crime_Type == Crime_Type) { // If marker category matches filter
+				MarkerArray[i].setVisible(true); // Show the marker
+				// Add to another marker array? Operations may want to be performed on this new array (crime analysis)
+			}
 		}
 	}
 
@@ -284,7 +298,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		e.preventDefault();
 		
 		/* Take values locally */				
-		var dropdown = document.getElementById("Crime_Type"); // Initial step of getting crime type
+		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
 		
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("description").value;
@@ -334,6 +348,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	filter_btn.addEventListener('click', event => {
 		hideContextMenu();
 		modal_filter.style.display = "block";
+		
+		$("#btn_filter_confirm").click(function() {
+			FilterMarkers();
+			modal_filter.style.display = "none";	
+		});
 	});
 	
 	span_filter.onclick = function() {
@@ -396,6 +415,8 @@ require 'dbConfig.php'; // Include the database configuration file
 	| Main Drop Down Menu (Mapping, Analysis and Prevention) 
 	|-----------------------------------------------------------------------------------------------------------
 	*/
+	
+	// Analysis methods should only be applied to markers that have their visible property as true (i.e markers that have not been filtered out)
 	  
 </script>
 
