@@ -44,7 +44,7 @@ require 'dbConfig.php'; // Include the database configuration file
       <form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
 	    <div id="map2"></div>
 		Date:
-		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		Time:
 		<input type="time" name="Time" value="00:00" required>
 		<br></br>
@@ -55,8 +55,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
 		<br></br>
-		<textarea id="description" name="Description" rows="10" cols="37">
-		</textarea>
+		<textarea id="description" name="Description" rows="10" cols="37"></textarea>
 		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
 		
 		<!-- Log when crime is added (crime reported) -->
@@ -74,12 +73,15 @@ require 'dbConfig.php'; // Include the database configuration file
       <h2>Filter</h2>
     </div>
     <div class="modal-body">
-		Date (min):
-		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-		Date (max):
-		<input type="date" name="Date" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		Date (from):
+		<input type="date" id="Filter_minDate" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		(to):
+		<input type="date" id="Filter_maxDate" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		<br></br>
-		Time:
+		Time (from):
+		<input type="time" id="Filter_minTime" value="00:00" required>
+		(to):
+		<input type="time" id="Filter_maxTime" value="00:00" required>
 		<br></br>
 		Type:
 		<select id="Filter_Crime_Type" name="Crime_Type">
@@ -92,6 +94,8 @@ require 'dbConfig.php'; // Include the database configuration file
   </div>
 </div>
 
+<script src="moment.js"></script> <!-- Moment.js library -->
+
 <script>
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -102,10 +106,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	var MarkerArray = [];
 	var FilteredMarkerArray = [];
 	
-	function placeMarker(ID,Crime_Type,Description,CenterLocation,map) {
+	function placeMarker(ID,Crime_Type,Date_Time,Description,CenterLocation,map) {
 		var marker = new google.maps.Marker({
 		ID: ID,
 		Crime_Type: Crime_Type,
+		Date_Time: Date_Time,
 		Description: Description,
 		position: CenterLocation,
 		map: map
@@ -190,27 +195,52 @@ require 'dbConfig.php'; // Include the database configuration file
 			console.log(Date_Time);
 			var Description = markers[i][3];
 			var Point = new google.maps.LatLng(markers[i][4], markers[i][5]);
-			placeMarker(ID,Crime_Type,Description,Point,map);		
+			placeMarker(ID,Crime_Type,Date_Time,Description,Point,map);		
 		}
 		
 	}
 	LoadMarkers();
 	
-	function FilterMarkers() {	
+	function FilterMarkers() {
+		/* If no value is set in some filter fields use following values
+		   Crime_Type = All the crime types
+		   
+		   minDate = 1st January 1970
+		   maxDate = Today + 1 day
+		   
+		   minTime = 00:00
+		   maxTime = 23:59
+		*/
+		
+		// Crime type
 		var dropdown = document.getElementById("Filter_Crime_Type");
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		
+		// Date
+		var minDate = $('#Filter_minDate').val();
+		var maxDate = $('#Filter_maxDate').val();
+		minDate = new Date(minDate);
+		maxDate = new Date(maxDate);
+		
+		// Time
+		var minTime = $('#Filter_minTime').val();
+		var maxTime = $('#Filter_maxTime').val();
 		
 		// Also by ID or last x/10/100 crimes?
 		// Also by date (after date or range of dates)
 		
-		for(i=0; i < MarkerArray.length; i++){
-			if (MarkerArray[i].Crime_Type == Crime_Type) { // If marker category matches filter
+		for(i = 0; i < MarkerArray.length; i++){
+			var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD");
+			MarkerDate = new Date(MarkerDate);
+			
+			var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm");
+			
+			if (MarkerArray[i].Crime_Type == Crime_Type && MarkerDate >= minDate && MarkerDate <= maxDate && MarkerTime >= minTime && MarkerTime <= maxTime) { // If marker category matches all filters
 				MarkerArray[i].setVisible(true); // Show the marker if not shown already
 			}
 			else {
 				MarkerArray[i].setVisible(false);
-			}
-			// Add to another marker array? Operations may want to be performed on this new array (crime analysis)
+			}	
 		}
 	}
 
@@ -365,6 +395,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		modal_filter.style.display = "block";
 		
 		$("#btn_filter_confirm").click(function() {
+			// maxDate and maxTime must be larger than their min counterparts
+			// Check values wheh confirmed or limit element when one of values is chosen?
 			FilterMarkers();
 			modal_filter.style.display = "none";	
 		});
