@@ -467,11 +467,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
-	| 'View region information' information window
+	| 'Analyse' - Crime Analysis Techniques
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	const analyse_btn = document.getElementById("btn_analyse"); // 'View region information' button
+	const analyse_btn = document.getElementById("btn_analyse"); // 'Analyse' button
 	analyse_btn.addEventListener('click', event => {
 		hideContextMenu();
 		
