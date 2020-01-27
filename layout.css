@@ -236,7 +236,6 @@ font-family: Arial;
 .modal-body {padding: 14px 16px;}
 
 input[type=date], input[type=time], select {
- width:17.5%;
  height:25px;
  font-family:Arial;
  font-size:18px;
@@ -248,13 +247,17 @@ input[type=date], input[type=time], select {
  color: white;
 }
 
-select {
-	width:37%;
-	padding: 0px;
+input[type=date] {
+ width:20%;
 }
 
 input[type=time] {
-	width:10%;
+ width:12.5%;
+}
+
+select {
+ width:30%;
+ padding: 0px;
 }
 
 textarea {
@@ -264,9 +267,4 @@ textarea {
 
 input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
 input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-outer-spin-button,       
-input[type="date"]::-webkit-clear-button { -webkit-appearance: none;display: none; }
-
-input[type="time"]::-webkit-inner-spin-button,
-input[type="time"]::-webkit-outer-spin-button { opacity:1; } 
-input[type="time"]::-webkit-clear-button { -webkit-appearance: none;display: none; }
+input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display: none; }
