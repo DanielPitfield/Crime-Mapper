@@ -31,7 +31,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <div class="custom_contextmenu" id="menu">
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
 	<div class="custom_contextmenu_btn" id="btn_filter">Filter</div>
-	<div class="custom_contextmenu_btn" id="btn_view">View region information</div>
+	<div class="custom_contextmenu_btn" id="btn_analyse">Analyse</div>
 </div>
 
 <div id="modal_add" class="modal"> 
@@ -471,10 +471,20 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	const view_btn = document.getElementById("btn_view"); // 'View region information' button
-	view_btn.addEventListener('click', event => {
+	const analyse_btn = document.getElementById("btn_analyse"); // 'View region information' button
+	analyse_btn.addEventListener('click', event => {
 		hideContextMenu();
-		// Functionality
+		
+		for(i = 0; i < MarkerArray.length; i++){
+			if (MarkerArray[i].getVisible() == true) { // If the marker is shown on the map (unfiltered)
+				FilteredMarkerArray.push(MarkerArray[i]); // Add it to a new array
+			}
+		}
+		
+		// Use this new array of markers and apply a MarkerClusterer to them
+		// Configure its options here
+		var markerCluster = new MarkerClusterer(map, FilteredMarkerArray,
+            {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 	});		
 		
 	/*
@@ -524,6 +534,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	// Analysis methods should only be applied to markers that have their visible property as true (i.e markers that have not been filtered out)
 	  
+</script>
+
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"> <!-- Marker Clusterer -->
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> <!-- API Key, Libraries and map function -->
