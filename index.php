@@ -12,7 +12,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
-<link rel="stylesheet" href="layout.css">  <!-- For navigation bar icons -->
+<link rel="stylesheet" href="layout.css">  <!-- Everything else -->
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
@@ -74,17 +74,18 @@ require 'dbConfig.php'; // Include the database configuration file
     </div>
     <div class="modal-body">
 		Date (from):
-		<input type="date" id="Filter_minDate" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		(to):
-		<input type="date" id="Filter_maxDate" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		<br></br>
 		Time (from):
-		<input type="time" id="Filter_minTime" value="00:00" required>
+		<input type="time" id="Filter_minTime" value="">
 		(to):
-		<input type="time" id="Filter_maxTime" value="00:00" required>
+		<input type="time" id="Filter_maxTime" value="">
 		<br></br>
 		Type:
 		<select id="Filter_Crime_Type" name="Crime_Type">
+		<option value="All">All</option>
 		<option value="Arson">Arson</option>
 		<option value="Murder">Murder</option>
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
@@ -202,45 +203,103 @@ require 'dbConfig.php'; // Include the database configuration file
 	LoadMarkers();
 	
 	function FilterMarkers() {
-		/* If no value is set in some filter fields use following values
-		   Crime_Type = All the crime types
-		   
-		   minDate = 1st January 1970
-		   maxDate = Today + 1 day
-		   
-		   minTime = 00:00
-		   maxTime = 23:59
-		*/
 		
-		// Crime type
+		var AllSelected = false;
+		var isMinDate = true;
+		var isMaxDate = true;
+		var isMinTime = true;
+		var isMaxTime = true;	
+		
+		/* ---- Crime Type ---- */
 		var dropdown = document.getElementById("Filter_Crime_Type");
-		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		
-		// Date
-		var minDate = $('#Filter_minDate').val();
-		var maxDate = $('#Filter_maxDate').val();
-		minDate = new Date(minDate);
-		maxDate = new Date(maxDate);
+		if (dropdown.options[dropdown.selectedIndex].value == "All") {
+			console.log("All selected");
+			AllSelected = true;
+		}
+		else {
+			var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		}
 		
-		// Time
-		var minTime = $('#Filter_minTime').val();
-		var maxTime = $('#Filter_maxTime').val();
+		/* ---- Date ---- */
+		if (document.getElementById("Filter_minDate").value == "") {
+			console.log("No minimum date was entered");
+			isMinDate = false;
+		}
+		else {
+			minDate = document.getElementById("Filter_minDate").value;
+			minDate = new Date(minDate);
+		}
+		
+		if (document.getElementById("Filter_maxDate").value == "") {
+			console.log("No maximum date was entered");
+			isMaxDate = false;
+		}
+		else {
+			maxDate = document.getElementById("Filter_maxDate").value;
+			maxDate = new Date(maxDate);
+		}
+		
+		/* ---- Time ---- */
+		if (document.getElementById("Filter_minTime").value == "") {
+			console.log("No minimum time was entered");
+			isMinTime = false;
+		}
+		else {
+			var minTime = document.getElementById("Filter_minTime").value;
+		}
+		
+		if (document.getElementById("Filter_maxTime").value == "") {
+			console.log("No maximum time was entered");
+			isMaxTime = false;
+		}
+		else {
+			var maxTime = document.getElementById("Filter_maxTime").value;
+		}
 		
 		// Also by ID or last x/10/100 crimes?
 		// Also by date (after date or range of dates)
 		
 		for(i = 0; i < MarkerArray.length; i++){
-			var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD");
+			MarkerArray[i].setVisible(true); // Remove any previous filters by showing all markers
+		}	
+		
+		for(i = 0; i < MarkerArray.length; i++){
+			var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD"); // Convert date
 			MarkerDate = new Date(MarkerDate);
 			
-			var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm");
+			var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
 			
-			if (MarkerArray[i].Crime_Type == Crime_Type && MarkerDate >= minDate && MarkerDate <= maxDate && MarkerTime >= minTime && MarkerTime <= maxTime) { // If marker category matches all filters
-				MarkerArray[i].setVisible(true); // Show the marker if not shown already
-			}
-			else {
-				MarkerArray[i].setVisible(false);
+			if (AllSelected == false) { // If a specific crime was selected
+				if (MarkerArray[i].Crime_Type != Crime_Type) { // And the marker's crime type is not the same as the one selected
+					MarkerArray[i].setVisible(false); // Hide it
+				}
 			}	
+			
+			if (isMinDate == true) { // If a minimum date was entered
+				if (MarkerDate < minDate) { // And the marker's date is before than that date
+					MarkerArray[i].setVisible(false); // Hide it
+				}
+			}
+			
+			if (isMaxDate == true) {
+				if (MarkerDate > maxDate) {
+					MarkerArray[i].setVisible(false);
+				}
+			}
+			
+			if (isMinTime == true) {
+				if (MarkerTime < minTime) {
+					MarkerArray[i].setVisible(false);
+				}
+			}
+			
+			if (isMaxTime == true) {
+				if (MarkerTime > maxTime) {
+					MarkerArray[i].setVisible(false);
+				}
+			}
+			
 		}
 	}
 
