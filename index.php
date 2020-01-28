@@ -33,8 +33,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<a class="dropdown-item" href="#">Add Crime</a>
-        	<a class="dropdown-item" href="#">Filter</a>
+        	<button class="dropdown-item" type="button">Add Crime</button>
+        	<button class="dropdown-item" id="btn_filter" type="button">Filter</button>
         </div>
     </li>
     
@@ -42,8 +42,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<a class="dropdown-item" href="#">MarkerClusterer</a>
-        	<a class="dropdown-item" href="#">Clustering</a>
+        	<button class="dropdown-item" id="btn_analyse" type="button">MarkerClusterer</button>
+        	<button class="dropdown-item" type="button">Clustering</button>
         </div>
     </li>
     
@@ -51,8 +51,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Predict<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<a class="dropdown-item" href="#">Warning</a>
-        	<a class="dropdown-item" href="#">RTM</a>
+        	<button class="dropdown-item" type="button">Warning</button>
+        	<button class="dropdown-item" type="button">RTM</button>
         </div>
     </li>
 	
@@ -66,8 +66,6 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Context Menu -->
 <div class="custom_contextmenu" id="menu">
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
-	<div class="custom_contextmenu_btn" id="btn_filter">Filter</div>
-	<div class="custom_contextmenu_btn" id="btn_analyse">Analyse</div>
 </div>
 
 <div id="modal_add" class="modal"> 
