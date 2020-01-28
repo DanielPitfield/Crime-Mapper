@@ -3,10 +3,14 @@ require 'dbConfig.php'; // Include the database configuration file
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+<title>Crime Mapper</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,13 +20,45 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
-<!-- Navigation/Icon Bar -->
-<div class="icon-bar">
-   <a class="IconBarBtn Map active" href="#"><i class="fa fa-map-marker"></i> Map</a> <!-- Tab/Page -->
-   <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
-   <a href="signin.html" class="IconBarBtn Signin"><i class="fa fa-sign-in"></i></a>
-   <a class="IconBarBtn Settings"><i class="fa fa-cog"></i> Options</a> 
-</div>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <!-- Logo -->
+  <a class="navbar-brand" href="#">Crime Mapper</a>
+  
+  <!-- <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
+
+  <ul class="navbar-nav">
+    
+    <!-- Map Dropdown -->
+    <li class="col-8 px-1">
+        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
+        <div class="dropdown-menu w-100">
+        	<a class="dropdown-item" href="#">Add Crime</a>
+        	<a class="dropdown-item" href="#">Filter</a>
+        </div>
+    </li>
+    
+    <!-- Analyse Dropdown -->
+    <li class="col-8 px-1">
+        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
+        <div class="dropdown-menu w-100">
+        	<a class="dropdown-item" href="#">MarkerClusterer</a>
+        	<a class="dropdown-item" href="#">Clustering</a>
+        </div>
+    </li>
+    
+    <!-- Predict Dropdown -->
+    <li class="col-8 px-1">
+        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Predict<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
+        <div class="dropdown-menu w-100">
+        	<a class="dropdown-item" href="#">Warning</a>
+        	<a class="dropdown-item" href="#">RTM</a>
+        </div>
+    </li>
+	
+  </ul>
+  
+</nav>
 
 <!-- Map -->
 <div id="map"></div>
@@ -541,6 +577,10 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> <!-- API Key, Libraries and map function -->
 </script>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 </body>
 </html> 
