@@ -34,7 +34,9 @@ require 'dbConfig.php'; // Include the database configuration file
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
         	<button class="dropdown-item" type="button">Add Crime</button>
-        	<button class="dropdown-item" id="btn_filter" type="button">Filter</button>
+        	<button type="button" class="dropdown-item" data-toggle="modal" data-target=".bd-example-modal-xl">Filter</button>
+			<!-- Use button (Map>>>Filter) directly to open modal -->
+			<!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
         </div>
     </li>
     
@@ -100,13 +102,17 @@ require 'dbConfig.php'; // Include the database configuration file
   </div>
 </div>
 
-<div id="modal_filter" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <span class="close">&times;</span>
-      <h2>Filter</h2>
-    </div>
-    <div class="modal-body">
+<!-- Filter modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h5 class="modal-title">Filter</h5>
+		<button type="button" class="close" data-dismiss="modal">
+			<span>&times;</span>
+		</button>
+	   </div>
+	   <div class="modal-body">
 		Date (from):
 		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		(to):
@@ -124,7 +130,9 @@ require 'dbConfig.php'; // Include the database configuration file
 		<option value="Murder">Murder</option>
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
+		<br></br>
 		<button id="btn_filter_confirm" class="submit_button">Confirm</button>
+	   </div>
     </div>
   </div>
 </div>
@@ -475,29 +483,16 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
-	| 'Filter' input window
+	| Filtering crimes
 	|-----------------------------------------------------------------------------------------------------------
 	*/
-	
-	var modal_filter = document.getElementById("modal_filter");
-	var span_filter = document.getElementsByClassName("close")[1];
-	
-	const filter_btn = document.getElementById("btn_filter"); // 'Filter' button
-	filter_btn.addEventListener('click', event => {
-		hideContextMenu();
-		modal_filter.style.display = "block";
 		
-		$("#btn_filter_confirm").click(function() {
-			// maxDate and maxTime must be larger than their min counterparts
-			// Check values wheh confirmed or limit element when one of values is chosen?
-			FilterMarkers();
-			modal_filter.style.display = "none";	
-		});
+	$("#btn_filter_confirm").click(function() {
+		FilterMarkers();
+		$("#modal_filter").modal('hide');
+		/* maxDate and maxTime must be larger than their min counterparts
+		Check values wheh confirmed or limit element when one of values is chosen? */
 	});
-	
-	span_filter.onclick = function() {
-		modal_filter.style.display = "none";
-	}
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
