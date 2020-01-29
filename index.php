@@ -7,9 +7,9 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <head>
 <title>Crime Mapper</title>
+<link rel="shortcut icon" href="#"> <!-- Website tab icon, change link to ico file -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 
@@ -33,10 +33,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" type="button">Add Crime</button>
+        	<button class="dropdown-item disabled" type="button">Add Crime</button>
         	<button type="button" class="dropdown-item" data-toggle="modal" data-target=".bd-example-modal-xl">Filter</button>
-			<!-- Use button (Map>>>Filter) directly to open modal -->
-			<!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
         </div>
     </li>
     
@@ -45,7 +43,7 @@ require 'dbConfig.php'; // Include the database configuration file
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
         	<button class="dropdown-item" id="btn_analyse" type="button">MarkerClusterer</button>
-        	<button class="dropdown-item" type="button">Clustering</button>
+        	<button class="dropdown-item disabled" type="button">Clustering</button>
         </div>
     </li>
     
@@ -53,8 +51,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Predict<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" type="button">Warning</button>
-        	<button class="dropdown-item" type="button">RTM</button>
+        	<button class="dropdown-item disabled" type="button">Warning</button>
+        	<button class="dropdown-item disabled" type="button">RTM</button>
         </div>
     </li>
 	
@@ -70,19 +68,22 @@ require 'dbConfig.php'; // Include the database configuration file
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
 </div>
 
-<div id="modal_add" class="modal"> 
-  <div class="modal-content">
-    <div class="modal-header">
-      <span class="close">&times;</span>
-      <h2>Add Crime</h2>
-    </div>
-    <div class="modal-body">
-      <form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
-	    <div id="map2"></div>
+<!-- Add crime modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h5 class="modal-title">Add Crime</h5>
+		<button type="button" class="close" data-dismiss="modal">
+			<span>&times;</span>
+		</button>
+	   </div>
+	   <div class="modal-body">
+		<form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
 		Date:
-		<input type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		Time:
-		<input type="time" name="Time" value="00:00" required>
+		<input id="Add_Time" type="time" name="Time" value="00:00" required>
 		<br></br>
 		Type:
 		<select id="Add_Crime_Type" name="Crime_Type">
@@ -90,14 +91,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		<option value="Murder">Murder</option>
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
-		<br></br>
-		<textarea id="description" name="Description" rows="10" cols="37"></textarea>
+		</br></br>
+		<textarea id="description" name="Description" rows="3" cols="50"></textarea>
+		<div id="map2"></div>
 		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
-		
-		<!-- Log when crime is added (crime reported) -->
-		<!-- Range of time (toggle?) -->
-		<!-- ID -->		
-	  </form>
+		</form>
+	   </div>
     </div>
   </div>
 </div>
@@ -192,15 +191,17 @@ require 'dbConfig.php'; // Include the database configuration file
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
 		
+		/*
 		// Create the search box and link it to the UI element.
 		var input = document.getElementById('pac-input');
 		var searchBox = new google.maps.places.SearchBox(input);
-		<!-- map.controls[google.maps.ControlPosition.LEFT].push(input); -->
+		//map.controls[google.maps.ControlPosition.LEFT].push(input);
 
 		// Bias the SearchBox results towards current map's viewport.
 		map.addListener('bounds_changed', function() {
 			searchBox.setBounds(map.getBounds());
-		});		
+		});
+		*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -358,16 +359,15 @@ require 'dbConfig.php'; // Include the database configuration file
 		ContextMenu.style.display = "none"; // For good measure
 		menuDisplayed = false;
 	}
-		
+	
 	map.addListener('rightclick', function(e) {
 		if (menuDisplayed == true) { // If menu is already open and user right clicks again
 			hideContextMenu();
 		}
 		else { // Open the context menu
-			FirstLocation = e.latLng; // Initial position specified
+			FirstLocation = e.latLng;
 			Latitude = FirstLocation.lat();
 			Longitude = FirstLocation.lng();
-
 			for (prop in e) {
 				if (e[prop] instanceof MouseEvent) {
 					mouseEvt = e[prop];
@@ -384,7 +384,7 @@ require 'dbConfig.php'; // Include the database configuration file
 				}
 			}
 		}
-	});			
+	});
 		
 	map.addListener("click", function(e) { // Left click away from it
 		if (menuDisplayed == true) {
@@ -403,18 +403,17 @@ require 'dbConfig.php'; // Include the database configuration file
 	| 'Add crime' input window
 	|-----------------------------------------------------------------------------------------------------------
 	*/
-
-	var modal_add = document.getElementById("modal_add");
-	var span_add = document.getElementsByClassName("close")[0];
+	
 	var SmallMarkerMoved = false;
 			
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		hideContextMenu();
-		modal_add.style.display = "block"; // Show input window
+		$("#modal_add").modal('show');
 		
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
 		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
+		
 		var SmallMapOptions = {
 			center: FirstLocation,
 			zoom: RefinedZoom,
@@ -431,9 +430,9 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 		
 		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
-			Latitude = evt.latLng.lat(); // Information to be sent
-			Longitude = evt.latLng.lng();
 			SecondLocation = evt.latLng; // To be used to place static marker on main map
+			Latitude = SecondLocation.lat(); // Information to be sent
+			Longitude = SecondLocation.lng();
 			SmallMarkerMoved = true;
 		});
 			
@@ -445,7 +444,13 @@ require 'dbConfig.php'; // Include the database configuration file
 					
 		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
 		
-		/* Take values locally */	
+		/* Take values locally */
+		var date_loc = document.getElementById("Add_Date").value;
+		var space = " ";
+		date_loc = date_loc.concat(space); // Add space after date part		
+		var time_loc = document.getElementById("Add_Time").value;
+		var datetime_loc = date_loc.concat(time_loc); // Combine date and time
+		
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("description").value;
 
@@ -465,21 +470,18 @@ require 'dbConfig.php'; // Include the database configuration file
 			{
 				//alert(result); // Result is the id being returned
 				if (SmallMarkerMoved == true) {
-					placeMarker(result,Crime_Type,Description,SecondLocation,map); // Place a static marker on the main map
+					placeMarker(result,Crime_Type,datetime_loc,Description,SecondLocation,map); // Place a static marker on the main map
 				}
 				else {
-					placeMarker(result,Crime_Type,Description,FirstLocation,map); // Place a static marker on the main map
+					placeMarker(result,Crime_Type,datetime_loc,Description,FirstLocation,map); // Place a static marker on the main map
 				}
 				SmallMarkerMoved = false;
-				modal_add.style.display = "none"; // Close input window
+				$("#modal_add").modal('hide');
 			}
 			
 		});
-	});
 
-	span_add.onclick = function() { // Close button for add crime input window
-		modal_add.style.display = "none";
-	}
+	});
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -522,6 +524,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 
+	/*
     searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
         var places = searchBox.getPlaces();
 
@@ -553,6 +556,8 @@ require 'dbConfig.php'; // Include the database configuration file
           });
           map.fitBounds(bounds);
         });
+	*/
+	
 	}
 	
 	/*
@@ -571,7 +576,8 @@ require 'dbConfig.php'; // Include the database configuration file
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> <!-- API Key, Libraries and map function -->
 </script>
 
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<!-- Bootstrap Scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
