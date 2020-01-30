@@ -68,39 +68,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
 </div>
 
-<!-- Add crime modal -->
-<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-		<h5 class="modal-title">Add Crime</h5>
-		<button type="button" class="close" data-dismiss="modal">
-			<span>&times;</span>
-		</button>
-	   </div>
-	   <div class="modal-body">
-		<form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
-		Date:
-		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-		Time:
-		<input id="Add_Time" type="time" name="Time" value="00:00" required>
-		<br></br>
-		Type:
-		<select id="Add_Crime_Type" name="Crime_Type">
-		<option value="Arson">Arson</option>
-		<option value="Murder">Murder</option>
-		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
-		</select>
-		</br></br>
-		<textarea id="description" name="Description" rows="3" cols="50"></textarea>
-		<div id="map2"></div>
-		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
-		</form>
-	   </div>
-    </div>
-  </div>
-</div>
-
 <!-- Filter modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
   <div class="modal-dialog modal-xl">
@@ -131,6 +98,39 @@ require 'dbConfig.php'; // Include the database configuration file
 		</select>
 		<br></br>
 		<button id="btn_filter_confirm" class="submit_button">Confirm</button>
+	   </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add crime modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h5 class="modal-title">Add Crime</h5>
+		<button type="button" class="close" data-dismiss="modal">
+			<span>&times;</span>
+		</button>
+	   </div>
+	   <div class="modal-body">
+		<form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
+		Date:
+		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		Time:
+		<input id="Add_Time" type="time" name="Time" value="00:00" required>
+		<br></br>
+		Type:
+		<select id="Add_Crime_Type" name="Crime_Type">
+		<option value="Arson">Arson</option>
+		<option value="Murder">Murder</option>
+		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
+		</select>
+		</br></br>
+		<textarea id="description" name="Description" rows="3" cols="50"></textarea>
+		<div id="map2"></div>
+		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
+		</form>
 	   </div>
     </div>
   </div>
