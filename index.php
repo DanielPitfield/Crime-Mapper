@@ -167,14 +167,25 @@ require 'dbConfig.php'; // Include the database configuration file
 		var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
 		
 		marker.info = new google.maps.InfoWindow({
-			content: '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +
-			'<br> <b>Date: </b>' + MarkerDate + '<br><b>Time: </b>' + MarkerTime + '<br><b>Description: </b>' + marker.Description
+			content: '<div id="iw-container">' + '<div class="iw-content">' + 
+					 '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
+					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
+					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary">Edit</button>' +
+					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker()>Delete</button>' + '</div>' + '</div>'
 		});
 
 		google.maps.event.addListener(marker, 'click', function() {
 			marker.info.open(map,marker);
 		});
 	}
+	
+	function DeleteMarker() {
+		alert("Test");
+		// Get the infowindow that is parent of the button clicked
+		// Get the marker associated with this info window
+		// Delete Marker (implemented below)
+	}
+
 	
 	/* Delete Marker
 	marker.setVisible(false); // View
