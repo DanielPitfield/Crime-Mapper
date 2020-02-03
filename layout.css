@@ -5,6 +5,14 @@ width: 100%;
 font-family: Arial;
 }
 
+#iw-container .iw-content {
+	font-size: 14px;
+	font-weight: 400;
+	padding: 2px 2px 2px 2px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
 .icon-bar {
   width: 100%;
   background-color: #555;
