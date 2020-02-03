@@ -155,14 +155,29 @@ require 'dbConfig.php'; // Include the database configuration file
 		Date_Time: Date_Time,
 		Description: Description,
 		position: CenterLocation,
+		title: '',
 		map: map
 		});
 		MarkerArray.push(marker);
+		
+		marker.title = marker.Crime_Type; // Shown on hover
+		
+		// Conversions
+		var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD"); // Convert date	
+		var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
+		
+		marker.info = new google.maps.InfoWindow({
+			content: '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +
+			'<br> <b>Date: </b>' + MarkerDate + '<br><b>Time: </b>' + MarkerTime + '<br><b>Description: </b>' + marker.Description
+		});
 
 		google.maps.event.addListener(marker, 'click', function() {
-			// Should open small context menu with red option to 'Delete' first, then do the following...
-			// Delete from ...
-			marker.setVisible(false); // View
+			marker.info.open(map,marker);
+		});
+	}
+	
+	/* Delete Marker
+	marker.setVisible(false); // View
 
 			var index = MarkerArray.indexOf(marker);
 			if (index !== -1) MarkerArray.splice(index, 1); // Array
@@ -179,8 +194,7 @@ require 'dbConfig.php'; // Include the database configuration file
 					//
 				}
 			});
-		});
-	}
+	*/
 
 	function initMap() {
 		var ContextMenu = null;
@@ -236,7 +250,6 @@ require 'dbConfig.php'; // Include the database configuration file
 			var ID = markers[i][0];
 			var Crime_Type = markers[i][1];
 			var Date_Time = markers[i][2];
-			console.log(Date_Time);
 			var Description = markers[i][3];
 			var Point = new google.maps.LatLng(markers[i][4], markers[i][5]);
 			placeMarker(ID,Crime_Type,Date_Time,Description,Point,map);		
@@ -312,6 +325,13 @@ require 'dbConfig.php'; // Include the database configuration file
 			MarkerDate = new Date(MarkerDate);
 			
 			var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
+			
+			/* These date and time values should be assigned to the markers to prevent the conversion
+			   for all markers taking place each time a filter is requested */
+			   
+			/* This way the conversion is only performed once for each marker 
+			   regardless of how many times a filter is requested */
+			
 			
 			if (AllSelected == false) { // If a specific crime was selected
 				if (MarkerArray[i].Crime_Type != Crime_Type) { // And the marker's crime type is not the same as the one selected
