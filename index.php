@@ -170,8 +170,8 @@ require 'dbConfig.php'; // Include the database configuration file
 			content: '<div id="iw-container">' + '<div class="iw-content">' + 
 					 '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
 					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
-					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary">Edit</button>' +
-					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker()>Delete</button>' + '</div>' + '</div>'
+					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" onclick=EditMarker('+marker.ID+')>Edit</button>' +
+					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>' // Send marker not marker.ID?
 		});
 
 		google.maps.event.addListener(marker, 'click', function() {
@@ -179,25 +179,30 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 	}
 	
-	function DeleteMarker() {
-		alert("Test");
-		// Get the infowindow that is parent of the button clicked
-		// Get the marker associated with this info window
-		// Delete Marker (implemented below)
+	function EditMarker(ID) {
+		// Update in database
+		// Remove old marker from view
+		// Remove old marker from array
+		// Place new marker (adds back to view and array)
 	}
-
 	
-	/* Delete Marker
-	marker.setVisible(false); // View
-
-			var index = MarkerArray.indexOf(marker);
-			if (index !== -1) MarkerArray.splice(index, 1); // Array
+	function DeleteMarker(ID) { // Refactor to use marker not marker.ID (saves looping through entire marker array to get marker from ID)
+		
+		for(i = 0; i < MarkerArray.length; i++){
+			if (MarkerArray[i].ID == ID)
+				var MarkerToDelete = MarkerArray[i]; // Get actual marker
+				var index = i; // Position in MarkerArray
+		}
+		
+		MarkerToDelete.info.close(); // Close infowindow
+		MarkerToDelete.setVisible(false); // Hide marker
+		
+		if (index !== -1) MarkerArray.splice(index, 1); // Remove marker from array
 			
-			var MarkerID = marker.ID;
-			//alert(MarkerID);
-
+		var MarkerID = ID; // Assign to send variable
+		
 			$.ajax({
-				url: 'DeleteMarker.php',  // Database
+				url: 'DeleteMarker.php',  // Remove from database
 				type: 'POST',
 				data: {MarkerID: MarkerID},
 				success: function(data)
@@ -205,7 +210,8 @@ require 'dbConfig.php'; // Include the database configuration file
 					//
 				}
 			});
-	*/
+		
+	}
 
 	function initMap() {
 		var ContextMenu = null;
