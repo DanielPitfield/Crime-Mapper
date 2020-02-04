@@ -34,7 +34,7 @@ require 'dbConfig.php'; // Include the database configuration file
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
         	<button class="dropdown-item disabled" type="button">Add Crime</button>
-        	<button type="button" class="dropdown-item" data-toggle="modal" data-target=".bd-example-modal-xl">Filter</button>
+        	<button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal_filter">Filter</button>
         </div>
     </li>
     
@@ -103,12 +103,12 @@ require 'dbConfig.php'; // Include the database configuration file
   </div>
 </div>
 
-<!-- Add crime modal -->
-<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
+<!-- Add/edit crime modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add_edit">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-		<h5 class="modal-title">Add Crime</h5>
+		<h5 class="modal-title">Title</h5>
 		<button type="button" class="close" data-dismiss="modal">
 			<span>&times;</span>
 		</button>
@@ -129,7 +129,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		</br></br>
 		<textarea id="description" name="Description" rows="3" cols="50"></textarea>
 		<div id="map2"></div>
-		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
+		<button type="submit" id="btn_add_confirm" class="submit_button">Button</button>
 		</form>
 	   </div>
     </div>
@@ -180,10 +180,29 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	function EditMarker(ID) {
+		
+		for(i = 0; i < MarkerArray.length; i++){
+			if (MarkerArray[i].ID == ID)
+				var MarkerToEdit = MarkerArray[i]; // Get actual marker
+				var index = i; // Position in MarkerArray
+		}
+		
+		var modal = $('#modal_add_edit');
+		modal.find('.modal-title').text('Edit Crime');
+		modal.find('.submit_button').text('Update');
+		
+		//modal.find('#Add_Date').val(MarkerDate);
+		//modal.find('#Add_Time').val(MarkerTime);
+		
+		modal.modal('show');
+		
+		// Change values of input to properties
 		// Update in database
-		// Remove old marker from view
-		// Remove old marker from array
+		//MarkerToEdit.setVisible(false);
+		//if (index !== -1) MarkerArray.splice(index, 1);
 		// Place new marker (adds back to view and array)
+		
+		// $("#modal_add_edit").modal('hide');
 	}
 	
 	function DeleteMarker(ID) { // Refactor to use marker not marker.ID (saves looping through entire marker array to get marker from ID)
@@ -446,7 +465,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
 	add_btn.addEventListener('click', event => {
 		hideContextMenu();
-		$("#modal_add").modal('show');
+		
+		var modal = $('#modal_add_edit');
+		modal.find('.modal-title').text('Add crime');
+		modal.find('.submit_button').text('Confirm');		
+		modal.modal('show');
 		
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
 		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
@@ -488,6 +511,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		var time_loc = document.getElementById("Add_Time").value;
 		var datetime_loc = date_loc.concat(time_loc); // Combine date and time
 		
+		console.log("Date_Time: ", datetime_loc);
+		
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("description").value;
 
@@ -513,7 +538,7 @@ require 'dbConfig.php'; // Include the database configuration file
 					placeMarker(result,Crime_Type,datetime_loc,Description,FirstLocation,map); // Place a static marker on the main map
 				}
 				SmallMarkerMoved = false;
-				$("#modal_add").modal('hide');
+				$("#modal_add_edit").modal('hide');
 			}
 			
 		});
