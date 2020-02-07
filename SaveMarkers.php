@@ -22,8 +22,6 @@ if(isset($_POST['Time']))
     $time = $_POST['Time'];
 }
 
-$date_time = $date . ' ' . $time; // Combine date and time together
-
 // From ajax call
 if(isset($_POST['Latitude']))
 {
@@ -36,8 +34,8 @@ if(isset($_POST['Longitude']))
 }
 
 // Insert information into database
-$sql = "INSERT INTO markers (Crime_Type, Date_Time, Description, Latitude, Longitude)
-		VALUES ('$crime_type', '$date_time', '$description', '$latitude', '$longitude')";
+$sql = "INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude)
+		VALUES ('$crime_type', '$date', '$time', '$description', '$latitude', '$longitude')";
 $db->query($sql);
 
 $id= mysqli_insert_id($db);
