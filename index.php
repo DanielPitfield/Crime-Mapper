@@ -127,7 +127,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
 		</select>
 		</br></br>
-		<textarea id="description" name="Description" rows="3" cols="50"></textarea>
+		<textarea id="Add_Description" name="Description" rows="3" cols="50"></textarea>
 		<div id="map2"></div>
 		<button type="submit" id="btn_add_confirm" class="submit_button">Button</button>
 		</form>
@@ -195,12 +195,29 @@ require 'dbConfig.php'; // Include the database configuration file
 		modal.find('.modal-title').text('Edit Crime');
 		modal.find('.submit_button').text('Update');
 		
-		//modal.find('#Add_Date').val(MarkerDate);
-		//modal.find('#Add_Time').val(MarkerTime);
+		modal.find('#Add_Crime_Type').val(MarkerToEdit.Crime_Type);
+		modal.find('#Add_Date').val(MarkerToEdit.Crime_Date);
+		modal.find('#Add_Time').val(MarkerToEdit.Crime_Time);
+		modal.find('#Add_Description').val(MarkerToEdit.Description);
 		
 		modal.modal('show');
 		
-		// Change values of input to properties
+		var EditMapOptions = {
+			center: MarkerToEdit.position,
+			zoom: 10,
+			disableDefaultUI: true, // Remove all controls but street view
+			streetViewControl: true,
+		};
+
+		var map2 = new google.maps.Map(document.getElementById("map2"), EditMapOptions); // Show smaller map
+
+		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
+		position: MarkerToEdit.position,
+		draggable: true,
+		map: map2
+		});
+		
+		// Record if marker moved
 		// Update in database
 		//MarkerToEdit.setVisible(false);
 		//if (index !== -1) MarkerArray.splice(index, 1);
@@ -508,7 +525,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		console.log("Time: ", Crime_Time);
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		console.log("Type: ", Crime_Type);
-		var Description = document.getElementById("description").value;
+		var Description = document.getElementById("Add_Description").value;
 		console.log("Description: ", Description);
 
 		/* Also send to database */	
