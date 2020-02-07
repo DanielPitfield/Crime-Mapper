@@ -5,10 +5,10 @@ require 'dbConfig.php'; // Include the database configuration file
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Crime Mapper</title>
 <link rel="shortcut icon" href="#"> <!-- Website tab icon, change link to ico file -->
-<meta charset="utf-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
@@ -148,11 +148,12 @@ require 'dbConfig.php'; // Include the database configuration file
 	var MarkerArray = [];
 	var FilteredMarkerArray = [];
 	
-	function placeMarker(ID,Crime_Type,Date_Time,Description,CenterLocation,map) {
+	function placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,CenterLocation,map) {
 		var marker = new google.maps.Marker({
 		ID: ID,
 		Crime_Type: Crime_Type,
-		Date_Time: Date_Time,
+		Crime_Date: Crime_Date,
+		Crime_Time: Crime_Time,
 		Description: Description,
 		position: CenterLocation,
 		title: '',
@@ -162,9 +163,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		marker.title = marker.Crime_Type; // Shown on hover
 		
-		// Conversions
-		var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD"); // Convert date	
-		var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
+		var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+
+        var MarkerTime = marker.Crime_Time;
+        if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
+            MarkerTime = Crime_Time.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+        }
 		
 		marker.info = new google.maps.InfoWindow({
 			content: '<div id="iw-container">' + '<div class="iw-content">' + 
@@ -265,18 +269,8 @@ require 'dbConfig.php'; // Include the database configuration file
 			$result = $db->query("SELECT * FROM markers"); // Returns output of statement
 			if($result->num_rows > 0){ 
 				while($row = $result->fetch_assoc()){
-					$raw_date = $row['Date_Time'];
-					$date = new DateTime($raw_date);
-					$timestamp = date_timestamp_get($date); 
-					/* 
-					JS Array can't hold datetimeobject, use timestamp instead
-					Also easier for filtering (comparisons)
-					Can be converted back when displaying date and time to user
-					*/
-
-					echo '['.$row['ID'].',"'.$row['Crime_Type'].'",';
-					echo $timestamp;
-					echo ',"'.$row['Description'].'",'.$row['Latitude'].','.$row['Longitude'].'],';
+					echo '['.$row['ID'].',"'.$row['Crime_Type'].'","'.$row['Crime_Date'].'","'.$row['Crime_Time'].'",
+					"'.$row['Description'].'",'.$row['Latitude'].','.$row['Longitude'].'],';
 				} 
 			} 
 			?>
@@ -285,10 +279,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
 			var ID = markers[i][0];
 			var Crime_Type = markers[i][1];
-			var Date_Time = markers[i][2];
-			var Description = markers[i][3];
-			var Point = new google.maps.LatLng(markers[i][4], markers[i][5]);
-			placeMarker(ID,Crime_Type,Date_Time,Description,Point,map);		
+			var Crime_Date = markers[i][2];
+			var Crime_Time = markers[i][3];
+			var Description = markers[i][4];
+			var Point = new google.maps.LatLng(markers[i][5], markers[i][6]);
+			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
 		}
 		
 	}
@@ -347,6 +342,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 		else {
 			var maxTime = document.getElementById("Filter_maxTime").value;
+			maxTime = maxTime + ":00"; // MarkerTime has seconds, not an issue for minTime but will hide on boundary of maxTime
 		}
 		
 		// Also by ID or last x/10/100 crimes?
@@ -357,10 +353,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		}	
 		
 		for(i = 0; i < MarkerArray.length; i++){
-			var MarkerDate = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("YYYY-MM-DD"); // Convert date
+			var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
 			MarkerDate = new Date(MarkerDate);
 			
-			var MarkerTime = moment(MarkerArray[i].Date_Time * 1000).add(1, 'hours').format("HH:mm"); // Convert time
+			var MarkerTime = MarkerArray[i].Crime_Time;
+			console.log("MarkerTime: ", MarkerTime);
 			
 			/* These date and time values should be assigned to the markers to prevent the conversion
 			   for all markers taking place each time a filter is requested */
@@ -505,16 +502,14 @@ require 'dbConfig.php'; // Include the database configuration file
 		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
 		
 		/* Take values locally */
-		var date_loc = document.getElementById("Add_Date").value;
-		var space = " ";
-		date_loc = date_loc.concat(space); // Add space after date part		
-		var time_loc = document.getElementById("Add_Time").value;
-		var datetime_loc = date_loc.concat(time_loc); // Combine date and time
-		
-		console.log("Date_Time: ", datetime_loc);
-		
+		var Crime_Date = document.getElementById("Add_Date").value;
+		console.log("Date: ", Crime_Date);
+		var Crime_Time = document.getElementById("Add_Time").value;
+		console.log("Time: ", Crime_Time);
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		console.log("Type: ", Crime_Type);
 		var Description = document.getElementById("description").value;
+		console.log("Description: ", Description);
 
 		/* Also send to database */	
 		var formData = $("#submit_form").serialize();
@@ -530,12 +525,12 @@ require 'dbConfig.php'; // Include the database configuration file
 			data: data,
 			success: function(result)
 			{
-				//alert(result); // Result is the id being returned
+				alert("ID: ", result); // Result is the id being returned
 				if (SmallMarkerMoved == true) {
-					placeMarker(result,Crime_Type,datetime_loc,Description,SecondLocation,map); // Place a static marker on the main map
+					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
 				}
 				else {
-					placeMarker(result,Crime_Type,datetime_loc,Description,FirstLocation,map); // Place a static marker on the main map
+					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
 				}
 				SmallMarkerMoved = false;
 				$("#modal_add_edit").modal('hide');
@@ -644,4 +639,4 @@ require 'dbConfig.php'; // Include the database configuration file
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 </body>
-</html> 
+</html>
