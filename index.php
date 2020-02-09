@@ -248,13 +248,70 @@ require 'dbConfig.php'; // Include the database configuration file
 		map: map3
 		});
 		
-		// Record if marker moved
-		// Update in database
-		//MarkerToEdit.setVisible(false);
-		//if (index !== -1) MarkerArray.splice(index, 1);
-		// Place new marker (adds back to view and array)
+		var Edit_SmallMarkerMoved = false;
+		var FirstLocation = MarkerToEdit.position;
+		var Latitude = FirstLocation.lat();
+		var Longitude = FirstLocation.lng();
 		
-		// $("#modal_add_edit").modal('hide');
+		/* ----------- */
+		
+		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
+			SecondLocation = evt.latLng;
+			Latitude = SecondLocation.lat(); // Information to be sent
+			Longitude = SecondLocation.lng();
+			Edit_SmallMarkerMoved = true;
+		});
+		
+		$("#edit_submit_form").submit(function(e) {
+		e.preventDefault();
+					
+		var dropdown = document.getElementById("Edit_Crime_Type"); // Initial step of getting crime type
+		
+		/* Update values locally */
+		var Crime_Date = document.getElementById("Edit_Date").value;
+		MarkerToEdit.Crime_Date = Crime_Date;
+		
+		var Crime_Time = document.getElementById("Edit_Time").value;
+		MarkerToEdit.Crime_Time = Crime_Time;
+		
+		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		MarkerToEdit.Crime_Type = Crime_Type;
+		
+		var Description = document.getElementById("Edit_Description").value;
+		MarkerToEdit.Description = Description;
+		
+		if (Edit_SmallMarkerMoved == true) {
+			MarkerToEdit.position = SecondLocation;
+			Edit_SmallMarkerMoved = false;
+		}
+
+		/* Also send to database */	
+		var formData = $("#edit_submit_form").serialize();
+		
+		var Vars = {ID: ID, Latitude: Latitude, Longitude: Longitude};
+		var varsData = $.param(Vars);
+
+		var data = formData + '&' + varsData;
+
+		$.ajax({
+			url: 'EditMarkers.php',
+			type: 'POST',
+			data: data,
+			success: function(result)
+			{
+                //
+			}
+			
+		});
+		
+		MarkerToEdit.setPosition(MarkerToEdit.position);
+		
+		$("#modal_edit").modal('hide');
+		
+		// Update infowindow of marker too
+		
+		});
+		
 	}
 	
 	function DeleteMarker(ID) { // Refactor to use marker not marker.ID (saves looping through entire marker array to get marker from ID)
