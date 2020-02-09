@@ -235,6 +235,19 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	
+	function ShowAllMarkerInfo() {
+	    for(i = 0; i < MarkerArray.length; i++){
+            MarkerArray[i].info.open(map, MarkerArray[i]);
+		}
+	}
+	
+	function HideAllMarkerInfo() {
+	    for(i = 0; i < MarkerArray.length; i++){
+            MarkerArray[i].info.close();
+		}
+	}
+	
+	
 	function EditMarker(ID) {
 		
 		for(i = 0; i < MarkerArray.length; i++){
