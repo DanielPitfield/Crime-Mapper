@@ -216,6 +216,25 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 	}
 	
+	function UpdateMarkerInfo(marker) {
+	 
+	marker.title = marker.Crime_Type; // Shown on hover
+		
+	var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+
+    var MarkerTime = marker.Crime_Time;
+    if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
+        MarkerTime = Crime_Time.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+    }
+	
+	    marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' + 
+					 '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
+					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
+					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" onclick=EditMarker('+marker.ID+')>Edit</button>' +
+					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>');
+	}
+	
+	
 	function EditMarker(ID) {
 		
 		for(i = 0; i < MarkerArray.length; i++){
@@ -223,6 +242,8 @@ require 'dbConfig.php'; // Include the database configuration file
 				var MarkerToEdit = MarkerArray[i]; // Get actual marker
 				var index = i; // Position in MarkerArray
 		}
+		
+		MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
 		
 		var modal = $('#modal_edit');
 		
@@ -306,9 +327,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		MarkerToEdit.setPosition(MarkerToEdit.position);
 		
+		UpdateMarkerInfo(MarkerToEdit);
+		
 		$("#modal_edit").modal('hide');
 		
-		// Update infowindow of marker too
 		
 		});
 		
