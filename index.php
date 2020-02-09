@@ -103,18 +103,18 @@ require 'dbConfig.php'; // Include the database configuration file
   </div>
 </div>
 
-<!-- Add/edit crime modal -->
-<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add_edit">
+<!-- Add crime modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-		<h5 class="modal-title">Title</h5>
+		<h5 class="modal-title">Add Crime</h5>
 		<button type="button" class="close" data-dismiss="modal">
 			<span>&times;</span>
 		</button>
 	   </div>
 	   <div class="modal-body">
-		<form name="submit_form" id="submit_form" action="SaveMarkers.php" method="post">
+		<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
 		Date:
 		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		Time:
@@ -129,7 +129,40 @@ require 'dbConfig.php'; // Include the database configuration file
 		</br></br>
 		<textarea id="Add_Description" name="Description" rows="3" cols="50"></textarea>
 		<div id="map2"></div>
-		<button type="submit" id="btn_add_confirm" class="submit_button">Button</button>
+		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
+		</form>
+	   </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit crime modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_edit">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h5 class="modal-title">Edit Crime</h5>
+		<button type="button" class="close" data-dismiss="modal">
+			<span>&times;</span>
+		</button>
+	   </div>
+	   <div class="modal-body">
+		<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
+		Date:
+		<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+		Time:
+		<input id="Edit_Time" type="time" name="Time" value="00:00" required>
+		<br></br>
+		Type:
+		<select id="Edit_Crime_Type" name="Crime_Type">
+		<option value="Arson">Arson</option>
+		<option value="Murder">Murder</option>
+		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
+		</select>
+		</br></br>
+		<textarea id="Edit_Description" name="Description" rows="3" cols="50"></textarea>
+		<div id="map3"></div>
+		<button type="submit" id="btn_edit_confirm" class="submit_button">Update</button>
 		</form>
 	   </div>
     </div>
@@ -191,14 +224,12 @@ require 'dbConfig.php'; // Include the database configuration file
 				var index = i; // Position in MarkerArray
 		}
 		
-		var modal = $('#modal_add_edit');
-		modal.find('.modal-title').text('Edit Crime');
-		modal.find('.submit_button').text('Update');
+		var modal = $('#modal_edit');
 		
-		modal.find('#Add_Crime_Type').val(MarkerToEdit.Crime_Type);
-		modal.find('#Add_Date').val(MarkerToEdit.Crime_Date);
-		modal.find('#Add_Time').val(MarkerToEdit.Crime_Time);
-		modal.find('#Add_Description').val(MarkerToEdit.Description);
+		modal.find('#Edit_Crime_Type').val(MarkerToEdit.Crime_Type);
+		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
+		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time);
+		modal.find('#Edit_Description').val(MarkerToEdit.Description);
 		
 		modal.modal('show');
 		
@@ -209,12 +240,12 @@ require 'dbConfig.php'; // Include the database configuration file
 			streetViewControl: true,
 		};
 
-		var map2 = new google.maps.Map(document.getElementById("map2"), EditMapOptions); // Show smaller map
+		var map3 = new google.maps.Map(document.getElementById("map3"), EditMapOptions); // Show smaller map
 
 		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
 		position: MarkerToEdit.position,
 		draggable: true,
-		map: map2
+		map: map3
 		});
 		
 		// Record if marker moved
@@ -374,14 +405,6 @@ require 'dbConfig.php'; // Include the database configuration file
 			MarkerDate = new Date(MarkerDate);
 			
 			var MarkerTime = MarkerArray[i].Crime_Time;
-			console.log("MarkerTime: ", MarkerTime);
-			
-			/* These date and time values should be assigned to the markers to prevent the conversion
-			   for all markers taking place each time a filter is requested */
-			   
-			/* This way the conversion is only performed once for each marker 
-			   regardless of how many times a filter is requested */
-			
 			
 			if (AllSelected == false) { // If a specific crime was selected
 				if (MarkerArray[i].Crime_Type != Crime_Type) { // And the marker's crime type is not the same as the one selected
@@ -480,9 +503,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	add_btn.addEventListener('click', event => {
 		hideContextMenu();
 		
-		var modal = $('#modal_add_edit');
-		modal.find('.modal-title').text('Add crime');
-		modal.find('.submit_button').text('Confirm');		
+		var modal = $('#modal_add');
 		modal.modal('show');
 		
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
@@ -513,23 +534,19 @@ require 'dbConfig.php'; // Include the database configuration file
 		// 3D View (adding markers in street view)
 	});
 	
-	$("#submit_form").submit(function(e) {
+	$("#add_submit_form").submit(function(e) {
 		e.preventDefault();
 					
 		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
 		
 		/* Take values locally */
 		var Crime_Date = document.getElementById("Add_Date").value;
-		console.log("Date: ", Crime_Date);
 		var Crime_Time = document.getElementById("Add_Time").value;
-		console.log("Time: ", Crime_Time);
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
-		console.log("Type: ", Crime_Type);
 		var Description = document.getElementById("Add_Description").value;
-		console.log("Description: ", Description);
 
 		/* Also send to database */	
-		var formData = $("#submit_form").serialize();
+		var formData = $("#add_submit_form").serialize();
 		
 		var Vars = {Latitude: Latitude, Longitude: Longitude};
 		var varsData = $.param(Vars);
@@ -542,7 +559,6 @@ require 'dbConfig.php'; // Include the database configuration file
 			data: data,
 			success: function(result)
 			{
-				alert("ID: ", result); // Result is the id being returned
 				if (SmallMarkerMoved == true) {
 					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
 				}
@@ -550,7 +566,7 @@ require 'dbConfig.php'; // Include the database configuration file
 					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
 				}
 				SmallMarkerMoved = false;
-				$("#modal_add_edit").modal('hide');
+				$("#modal_add").modal('hide');
 			}
 			
 		});
@@ -633,14 +649,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 	
 	}
-	
-	/*
-	|-----------------------------------------------------------------------------------------------------------
-	| Main Drop Down Menu (Mapping, Analysis and Prevention) 
-	|-----------------------------------------------------------------------------------------------------------
-	*/
-	
-	// Analysis methods should only be applied to markers that have their visible property as true (i.e markers that have not been filtered out)
 	  
 </script>
 
