@@ -200,7 +200,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
         var MarkerTime = marker.Crime_Time;
         if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
-            MarkerTime = Crime_Time.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+            MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
         }
 		
 		marker.info = new google.maps.InfoWindow({
@@ -224,7 +224,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
     var MarkerTime = marker.Crime_Time;
     if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
-        MarkerTime = Crime_Time.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+        MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
     }
 	
 	    marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' + 
@@ -237,7 +237,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	function ShowAllMarkerInfo() {
 	    for(i = 0; i < MarkerArray.length; i++){
-            MarkerArray[i].info.open(map, MarkerArray[i]);
+	            if (MarkerArray[i].getVisible() == true) {
+	                MarkerArray[i].info.open(map, MarkerArray[i]);
+	            }
 		}
 	}
 	
