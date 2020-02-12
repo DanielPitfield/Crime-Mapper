@@ -437,7 +437,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		var isMinDate = true;
 		var isMaxDate = true;
 		var isMinTime = true;
-		var isMaxTime = true;	
+		var isMaxTime = true;
+		var invalidInput = false;
 		
 		/* ---- Crime Type ---- */
 		var dropdown = document.getElementById("Filter_Crime_Type");
@@ -490,11 +491,31 @@ require 'dbConfig.php'; // Include the database configuration file
 		// Also by ID or last x/10/100 crimes?
 		// Also by date (after date or range of dates)
 		
-		for(i = 0; i < MarkerArray.length; i++){
-			MarkerArray[i].setVisible(true); // Remove any previous filters by showing all markers
-		}	
+		if (isMinDate == true && isMaxDate == true) {
+		    if (minDate > maxDate) {
+		        alert("The lower date boundary can't be later than the higher date boundary");
+		        invalidInput = true;
+		    }
+		}
 		
-		for(i = 0; i < MarkerArray.length; i++){
+		if (isMinTime == true && isMaxTime == true) {
+		    if (minTime > maxTime) {
+		        alert("The lower time boundary can't be after the higher time boundary");
+		        invalidInput = true;
+	    	}
+		}
+	    	
+		if (isMinTime == false && isMaxTime == true || isMaxTime == false && isMinTime == true) {
+		        alert("Enter a value for both time fields");
+		        invalidInput = true;
+		}
+		
+		if (invalidInput == false) {
+		    for(i = 0; i < MarkerArray.length; i++){
+			MarkerArray[i].setVisible(true); // Remove any previous filters by showing all markers
+		    }
+		    
+		    for(i = 0; i < MarkerArray.length; i++){
 			var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
 			MarkerDate = new Date(MarkerDate);
 			
@@ -529,8 +550,12 @@ require 'dbConfig.php'; // Include the database configuration file
 					MarkerArray[i].setVisible(false);
 				}
 			}
+			$("#modal_filter").modal('hide');
 			
+		    }
+		    
 		}
+		
 	}
 
 	/*
@@ -675,9 +700,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 	$("#btn_filter_confirm").click(function() {
 		FilterMarkers();
-		$("#modal_filter").modal('hide');
-		/* maxDate and maxTime must be larger than their min counterparts
-		Check values wheh confirmed or limit element when one of values is chosen? */
 	});
 	
 	/*
