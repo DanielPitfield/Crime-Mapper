@@ -33,8 +33,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item disabled" type="button">Add Crime</button>
         	<button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal_filter">Filter</button>
+        	<button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal_import">Import</button>
         </div>
     </li>
     
@@ -79,24 +79,29 @@ require 'dbConfig.php'; // Include the database configuration file
 		</button>
 	   </div>
 	   <div class="modal-body">
+	   <div class="form-group">
 		Date (from):
 		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		(to):
 		<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
-		<br></br>
+		</div>
+		
+		<div class="form-group">
 		Time (from):
 		<input type="time" id="Filter_minTime" value="">
 		(to):
 		<input type="time" id="Filter_maxTime" value="">
-		<br></br>
-		Type:
-		<select id="Filter_Crime_Type" name="Crime_Type">
-		<option value="All">All</option>
-		<option value="Arson">Arson</option>
-		<option value="Murder">Murder</option>
-		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
-		</select>
-		<br></br>
+		</div>
+		
+		<div class="form-group">
+        <select class="select form-control" id="Filter_Crime_Type" name="Crime_Type">
+        <option value="" selected disabled hidden>Select the crime type</option>
+        <option value="Arson">Arson</option>
+        <option value="Murder">Murder</option>
+        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        </select>
+        </div>
+		
 		<button id="btn_filter_confirm" class="submit_button">Confirm</button>
 	   </div>
     </div>
@@ -115,20 +120,30 @@ require 'dbConfig.php'; // Include the database configuration file
 	   </div>
 	   <div class="modal-body">
 		<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
-		Date:
+		    
+		<div class="form-group">
+		<label class="control-label " for="Add_Date">Date</label>
 		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-		Time:
+
+		<label class="control-label " for="Add_Time">Time</label>
 		<input id="Add_Time" type="time" name="Time" value="00:00" required>
-		<br></br>
-		Type:
-		<select id="Add_Crime_Type" name="Crime_Type">
-		<option value="Arson">Arson</option>
-		<option value="Murder">Murder</option>
-		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
-		</select>
-		</br></br>
-		<textarea id="Add_Description" name="Description" rows="3" cols="50"></textarea>
+		</div>
+		
+		<div class="form-group">
+        <select class="select form-control" id="Add_Crime_Type" name="Crime_Type">
+        <option value="" selected disabled hidden>Select the crime type</option>
+        <option value="Arson">Arson</option>
+        <option value="Murder">Murder</option>
+        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        </select>
+        </div>
+		
+		<div class="form-group">
+        <textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
+        </div>
+        
 		<div id="map2"></div>
+		
 		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
 		</form>
 	   </div>
@@ -148,22 +163,54 @@ require 'dbConfig.php'; // Include the database configuration file
 	   </div>
 	   <div class="modal-body">
 		<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
-		Date:
+		    
+		<div class="form-group">
+		<label class="control-label " for="Edit_Date">Date</label>
 		<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-		Time:
+		
+		<label class="control-label " for="Edit_Time">Time</label>
 		<input id="Edit_Time" type="time" name="Time" value="00:00" required>
-		<br></br>
-		Type:
-		<select id="Edit_Crime_Type" name="Crime_Type">
-		<option value="Arson">Arson</option>
-		<option value="Murder">Murder</option>
-		<option value="Anti-social Behaviour">Anti-social Behaviour</option>
-		</select>
-		</br></br>
-		<textarea id="Edit_Description" name="Description" rows="3" cols="50"></textarea>
+		</div>
+		
+		<div class="form-group">
+        <select class="select form-control" id="Edit_Crime_Type" name="Crime_Type">
+        <option value="" selected disabled hidden>Select the crime type</option>
+        <option value="Arson">Arson</option>
+        <option value="Murder">Murder</option>
+        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        </select>
+        </div>
+		
+		<div class="form-group">
+        <textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
+        </div>
+		
 		<div id="map3"></div>
 		<button type="submit" id="btn_edit_confirm" class="submit_button">Update</button>
 		</form>
+	   </div>
+    </div>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_import">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h5 class="modal-title">Import</h5>
+		<button type="button" class="close" data-dismiss="modal">
+			<span>&times;</span>
+		</button>
+	   </div>
+	   <div class="modal-body">
+        <form action="ImportFile.php">
+        <div class="custom-file mb-3">
+        <input type="file" class="custom-file-input" id="Select_ImportFile" name="filename">
+        <label class="custom-file-label" for="customFile">Choose file</label>
+        <button type="submit" id="btn_import_confirm" class="submit_button">Import</button>
+        </div>
+        </form>
 	   </div>
     </div>
   </div>
@@ -768,16 +815,23 @@ require 'dbConfig.php'; // Include the database configuration file
 	  
 </script>
 
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"> <!-- Marker Clusterer -->
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"> // Marker Clusterer
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> <!-- API Key, Libraries and map function -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> // API Key, Libraries and map function
 </script>
 
 <!-- Bootstrap Scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<script> // Showing name of file chosen (import)
+$("#Select_ImportFile").on("change", function() {
+  var fileName = $(this).val().split("\\").pop();
+  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+</script>
 
 </body>
 </html>
