@@ -828,6 +828,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script> // Showing name of file chosen (import)
 $("#Select_ImportFile").on("change", function() {
+  var filePath = $(this).val();
   var fileName = $(this).val().split("\\").pop();
   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 });
