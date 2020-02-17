@@ -204,13 +204,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		</button>
 	   </div>
 	   <div class="modal-body">
-        <form action="ImportFile.php">
         <div class="custom-file mb-3">
-        <input type="file" class="custom-file-input" id="Select_ImportFile" name="filename">
-        <label class="custom-file-label" for="customFile">Choose file</label>
+        <input type="file" class="custom-file-input" id="Import_input" accept=".csv" multiple>
+        <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
         <button type="submit" id="btn_import_confirm" class="submit_button">Import</button>
         </div>
-        </form>
 	   </div>
     </div>
   </div>
@@ -769,7 +767,23 @@ require 'dbConfig.php'; // Include the database configuration file
 		// Configure its options here
 		var markerCluster = new MarkerClusterer(map, FilteredMarkerArray,
             {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-	});		
+	});
+	
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Importing crimes
+	|-----------------------------------------------------------------------------------------------------------
+	*/
+		
+	$("#btn_import_confirm").click(function() {
+	    files = $("#Import_input")[0].files;
+
+        for (i = 0, numFiles = files.length; i < numFiles; i++) {
+            const file = files[i];
+            alert(file.type);
+            // Read each file
+        }
+	});
 		
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -827,10 +841,37 @@ require 'dbConfig.php'; // Include the database configuration file
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <script> // Showing name of file chosen (import)
-$("#Select_ImportFile").on("change", function() {
-  var filePath = $(this).val();
-  var fileName = $(this).val().split("\\").pop();
-  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+$("#Import_input").on("change", function() {
+    
+    files = this.files;
+    var allCSV = true;
+    
+    for (var i=0, l=files.length; i<l; i++) {
+        var fileName = files[i].name;
+        var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        if(ext != 'csv') {
+            allCSV = false;
+        }
+    }
+    
+    if (allCSV == false) {
+        alert('Only files with the file extension CSV are allowed');
+        this.val = "";
+    }
+    else
+    {
+        // Changing label text to files chosen
+        var string = files[0].name; // First
+        if (files.length > 1) {
+            for (var i=1, l=(files.length)-1; i<l; i++) { // All in between
+                string += ", ";
+                string += files[i].name;
+            }
+            string += ", ";
+            string += files[files.length-1].name; // Last
+        }
+        $("#import_lbl").text(string);  
+    }
 });
 </script>
 
