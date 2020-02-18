@@ -778,10 +778,62 @@ require 'dbConfig.php'; // Include the database configuration file
 	$("#btn_import_confirm").click(function() {
 	    files = $("#Import_input")[0].files;
 
-        for (i = 0, numFiles = files.length; i < numFiles; i++) {
-            const file = files[i];
-            alert(file.type);
-            // Read each file
+        for (i = 0, numFiles = files.length; i < numFiles; i++) { // For all files selected
+            var fileToRead = files[i];
+            var reader = new FileReader();
+            reader.readAsText(fileToRead);
+            
+            reader.onload = function(event) {
+                
+                var Date_index = -1;
+                var Latitude_index = -1;
+                var Longitude_index = -1;
+                var CrimeType_index = -1;
+                var Description_index = -1;
+                
+                var Accepted_Date_headers = ["Date", "date", "Month", "month"];
+                var Accepted_Latitude_headers = ["Latitude", "latitude", "Lat", "lat"];
+                var Accepted_Longitude_headers = ["Longitude", "longitude", "Long", "long", "Lng", "lng"];
+                var Accepted_CrimeType_headers = ["Crime type", "Crime Type", "crime type", "CrimeType", "crimetype", "Type", "type"];
+                var Accepted_Description_headers = ["Context", "context", "Description", "description", "Notes", "notes"];
+                
+                var csv = event.target.result;
+                var rows = csv.split('\n'); // The rows are split by new lines
+                headers = rows[0].split(','); // The first row split by commas give the headers
+            
+                for (var i = 0; i < headers.length; i++) {
+                    headers[i] = $.trim(headers[i].replace(/[\t\n]+/g,' ')); // Remove any whitespace (e.g before first header or after last header)
+                    console.log(headers[i]);
+                    if (Accepted_Date_headers.indexOf(headers[i]) !== -1) {
+                        Date_index = i;
+                    }
+                    if (Accepted_Latitude_headers.indexOf(headers[i]) !== -1) {
+                        Latitude_index = i;
+                    }
+                    if (Accepted_Longitude_headers.indexOf(headers[i]) !== -1) {
+                        Longitude_index = i;
+                    }
+                    if (Accepted_CrimeType_headers.indexOf(headers[i]) !== -1) {
+                        CrimeType_index = i;
+                    }
+                    if (Accepted_Description_headers.indexOf(headers[i]) !== -1) {
+                        Description_index = i;
+                    }
+                }
+                console.log("Date: ", Date_index);
+                console.log("Longitude: ", Longitude_index);
+                console.log("Latitude: ", Latitude_index);
+                console.log("Crime Type: ", CrimeType_index);
+                console.log("Description: ", Description_index);
+                
+                for (var i = 1; i < rows.length; i++) {
+                    cols = rows[i].split(',');
+                     for (var j = 0; j < cols.length; j++) {
+                        var value = cols[j];
+                        console.log(value);
+                     }
+                }
+              }
         }
 	});
 		
@@ -834,6 +886,8 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> // API Key, Libraries and map function
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.js"></script>
 
 <!-- Bootstrap Scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
