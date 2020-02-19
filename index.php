@@ -784,7 +784,7 @@ require 'dbConfig.php'; // Include the database configuration file
             reader.readAsText(fileToRead);
             
             reader.onload = function(event) {
-                
+                // Needs better validation/error handling
                 var Date_index = -1;
                 var Latitude_index = -1;
                 var Longitude_index = -1;
@@ -821,23 +821,71 @@ require 'dbConfig.php'; // Include the database configuration file
                     }
                 }
                 
-                for (var i = 1; i < rows.length; i++) {
+                for (var i = 1; i < 10; i++) {
                     row_values = rows[i].split(',');
-                
-                    imp_Crime_Date = row_values[Date_index];
-                    imp_Latitude = row_values[Latitude_index];
-                    imp_Longitude = row_values[Longitude_index];
-                    var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude);
-                    imp_Crime_Type = row_values[CrimeType_index];
-                    imp_Description = row_values[Description_index];
-
-                    placeMarker(999,imp_Crime_Type,imp_Crime_Date,'00:00',imp_Description,imp_Location,map); 
                     
-                    /* Send to database and place marker if sent successfully */	
+                    if (row_values[Date_index] == null) { // If missing date value, skip the line
+                        continue;
+                    }
+                    else {
+                        imp_Crime_Date = row_values[Date_index];
+                        if (imp_Crime_Date.length == 7) { // Add on first day f month if not specified
+                            imp_Crime_Date = imp_Crime_Date + "-01";
+                        }
+                    }
+                    
+                    if (row_values[Latitude_index] == null) {
+                        continue;
+                    }
+                    else {
+                        imp_Latitude = row_values[Latitude_index];
+                    }
+                    
+                    if (row_values[Longitude_index] == null) {
+                        continue;
+                    }
+                    else {
+                        imp_Longitude = row_values[Longitude_index];
+                    }
+                    
+                    if (row_values[Latitude_index] == null || row_values[Longitude_index] == null) { // If either latitude or longitude value is missing, skip the line
+                        continue;
+                    }
+                    else {
+                        var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude); // Because both values are needed for this location variable
+                    }
+                    
+                    // CrimeType and Description are deemed non-essential
+                    if (row_values[CrimeType_index] == null) {
+                        imp_Crime_Type = "Unknown"; // Don;t skip the line just state the crime type as unknown
+                    }
+                    else {
+                        imp_Crime_Type = row_values[CrimeType_index];
+                    }
+                    
                     /*
+                    if (row_values[Description_index] == null) {
+                        imp_Description = "test"; // Don't skip just put - as the description
+                    }
+                    else {
+                        imp_Description = row_values[Description_index];
+                    }
+                    */
+                    imp_Description = "test"; // Description acting up
+                    
+                    /*
+                    console.log("Date: ", imp_Crime_Date);
+                    console.log("Latitude: ", imp_Latitude);
+                    console.log("Longitude: ", imp_Longitude);
+                    console.log("Type: ", imp_Crime_Type);
+                    console.log("Description: ", imp_Description);
+                    console.log("Length: ", imp_Description.length)
+                    */
+                    
             		$.ajax({
             			url: 'ImportMarkers.php',
             			type: 'POST',
+            			async: false,
             			data: {
             			    imp_Crime_Date: imp_Crime_Date, 
             			    imp_Latitude: imp_Latitude, 
@@ -847,15 +895,16 @@ require 'dbConfig.php'; // Include the database configuration file
             			},
             			success: function(result)
             			{
-            				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00',imp_Description,imp_Location,map); 
+            				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map); 
             			}
             			
-            		});*/
+            		});
             		
                 }
                 
               }
         }
+        $("#modal_import").modal('hide');
 	});
 		
 	/*
