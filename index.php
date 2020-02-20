@@ -208,6 +208,10 @@ require 'dbConfig.php'; // Include the database configuration file
         <input type="file" class="custom-file-input" id="Import_input" accept=".csv" multiple>
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
         <button type="submit" id="btn_import_confirm" class="submit_button">Import</button>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">
+                </div>
+            </div>
         </div>
 	   </div>
     </div>
@@ -821,66 +825,85 @@ require 'dbConfig.php'; // Include the database configuration file
                     }
                 }
                 
-                for (var i = 1; i < 10; i++) {
-                    row_values = rows[i].split(',');
+                for (var i = 1; i < 20; i++) {
+                    validLatitude = false;
+                    validLongitude = false;
+                    var dateRead;
                     
-                    if (row_values[Date_index] == null) { // If missing date value, skip the line
+                    row_values = rows[i].split(','); // Split rows for values
+                    
+                    /* Date */
+                    if (row_values[Date_index].length == 7) {
+                        dateRead = row_values[Date_index] + "-01"; // Add on day
+                    }
+                    else
+                    {
+                        dateRead = row_values[Date_index];
+                    }
+                    
+                    var dateCheck = moment(dateRead);
+                    if(dateCheck.isValid() == true) { // If valid date
+                        imp_Crime_Date = dateRead;
+                    }
+                    else
+                    {
                         continue;
                     }
-                    else {
-                        imp_Crime_Date = row_values[Date_index];
-                        if (imp_Crime_Date.length == 7) { // Add on first day f month if not specified
-                            imp_Crime_Date = imp_Crime_Date + "-01";
+                    
+                    /* Latitude */
+                    if (isNaN(row_values[Latitude_index]) == false && row_values[Latitude_index] >=-90 && row_values[Latitude_index] <=90) {
+                        imp_Latitude = row_values[Latitude_index];
+                        validLatitude = true;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    /* Longitude */
+                    if (isNaN(row_values[Longitude_index]) == false && row_values[Longitude_index] >=-180 && row_values[Longitude_index] <=180) {
+                        imp_Longitude = row_values[Longitude_index];
+                        validLongitude = true;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    /* Location */
+                    if (validLatitude == true && validLongitude == true) { 
+                        var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    /* Crime Type */
+                    var checkFor = new RegExp("[0-9a-zA-Z]"); /* Atleast one alphanumeric character */
+                    
+                    if (typeof row_values[CrimeType_index] === 'string' || row_values[CrimeType_index] instanceof String) {
+                        imp_Crime_Type = "Unknown";
+                        if (checkFor.test(row_values[CrimeType_index]) == true) {
+                            imp_Crime_Type = row_values[CrimeType_index];
                         }
                     }
-                    
-                    if (row_values[Latitude_index] == null) {
-                        continue;
-                    }
-                    else {
-                        imp_Latitude = row_values[Latitude_index];
+                    else 
+                    {
+                        imp_Crime_Type = "Unknown";
                     }
                     
-                    if (row_values[Longitude_index] == null) {
-                        continue;
+                    /* Description */
+                    if (typeof row_values[Description_index] === 'string' || row_values[Description_index] instanceof String) {
+                        imp_Description = "-";
+                        if (checkFor.test(row_values[Description_index]) == true) {
+                            imp_Description = row_values[Description_index];
+                        }
                     }
-                    else {
-                        imp_Longitude = row_values[Longitude_index];
+                    else 
+                    {
+                        imp_Description = "-";
                     }
-                    
-                    if (row_values[Latitude_index] == null || row_values[Longitude_index] == null) { // If either latitude or longitude value is missing, skip the line
-                        continue;
-                    }
-                    else {
-                        var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude); // Because both values are needed for this location variable
-                    }
-                    
-                    // CrimeType and Description are deemed non-essential
-                    if (row_values[CrimeType_index] == null) {
-                        imp_Crime_Type = "Unknown"; // Don;t skip the line just state the crime type as unknown
-                    }
-                    else {
-                        imp_Crime_Type = row_values[CrimeType_index];
-                    }
-                    
-                    /*
-                    if (row_values[Description_index] == null) {
-                        imp_Description = "test"; // Don't skip just put - as the description
-                    }
-                    else {
-                        imp_Description = row_values[Description_index];
-                    }
-                    */
-                    imp_Description = "test"; // Description acting up
-                    
-                    /*
-                    console.log("Date: ", imp_Crime_Date);
-                    console.log("Latitude: ", imp_Latitude);
-                    console.log("Longitude: ", imp_Longitude);
-                    console.log("Type: ", imp_Crime_Type);
-                    console.log("Description: ", imp_Description);
-                    console.log("Length: ", imp_Description.length)
-                    */
                     
             		$.ajax({
             			url: 'ImportMarkers.php',
@@ -895,16 +918,20 @@ require 'dbConfig.php'; // Include the database configuration file
             			},
             			success: function(result)
             			{
-            				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map); 
+            				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map);
             			}
             			
             		});
+            		/* Update progress of progress bar */
+            		var width = (i/(19)) * 100;
+            		width = width +"%";
+            		document.getElementsByClassName("progress-bar")[0].style.width = width;
             		
                 }
                 
               }
         }
-        $("#modal_import").modal('hide');
+        //$("#modal_import").modal('hide');
 	});
 		
 	/*
