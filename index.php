@@ -781,6 +781,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 	$("#btn_import_confirm").click(function() {
 	    files = $("#Import_input")[0].files;
+	    $(".progress-bar").css("width", "0%").text("Ready");
 
         for (i = 0, numFiles = files.length; i < numFiles; i++) { // For all files selected
             var fileToRead = files[i];
@@ -855,9 +856,19 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 if (validFile === true) {
-                    //numRows = rows.length;
-                    numRows = 50;
-                    for (var i = 1; i < 50; i++) {
+                    $(".progress-bar").css("width", "0%").text("Ready");
+                    numRows = rows.length;
+                    
+                    if (numRows >= 50 && numRows <=500) {
+                        alert("The file has " + numRows + " rows\n" + "The import process may take a while\n" + "Please wait for the progress bar to reach 100% before attempting to perform any other actions");
+                    }
+                    
+                    if (numRows > 500) {
+                        alert("The file has " + numRows + " rows\n" + "Only the first 500 rows will be imported\n" + "The import process may take a while\n" + "Please wait for the progress bar to reach 100% before attempting to perform any other actions");
+                        numRows = 500;
+                    }
+                    
+                    for (var i = 1; i < numRows; i++) {
                         validLatitude = false;
                         validLongitude = false;
                         var dateRead;
@@ -937,27 +948,28 @@ require 'dbConfig.php'; // Include the database configuration file
                             imp_Description = "-";
                         }
                         
-                		$.ajax({
-                			url: 'ImportMarkers.php',
-                			type: 'POST',
-                			async: false,
-                			data: {
-                			    imp_Crime_Date: imp_Crime_Date, 
-                			    imp_Latitude: imp_Latitude, 
-                			    imp_Longitude: imp_Longitude, 
-                			    imp_Crime_Type: imp_Crime_Type, 
-                			    imp_Description: imp_Description
-                			},
-                			success: function(result)
-                			{
-                				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map);
-                			}
-                			
-                		});
+                    	$.ajax({
+                    		url: 'ImportMarkers.php',
+                    		type: 'POST',
+                    		async: false,
+                    		data: {
+                    			   imp_Crime_Date: imp_Crime_Date, 
+                    			   imp_Latitude: imp_Latitude, 
+                    			   imp_Longitude: imp_Longitude, 
+                    			   imp_Crime_Type: imp_Crime_Type, 
+                    			   imp_Description: imp_Description
+                    		},
+                    		success: function(result)
+                    		{
+                    			placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map);
+                    		}
+                    			
+                    	});
                 		/* Update progress and text of progress bar */
-                		var increment = 100/(numRows-1);
-                		$(".progress-bar").css("width", i*increment + "%").text(i*increment + " %"); 
+                		/*var increment = 100/(numRows-1);
+                		$(".progress-bar").css("width", i*increment + "%").text(i*increment + " %"); */
                     }
+                    $(".progress-bar").css("width", "100%").text("Complete");
                 }
                 
               }
