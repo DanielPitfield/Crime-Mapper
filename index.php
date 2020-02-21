@@ -855,7 +855,9 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 if (validFile === true) {
-                    for (var i = 1; i < 20; i++) {
+                    //numRows = rows.length;
+                    numRows = 50;
+                    for (var i = 1; i < 50; i++) {
                         validLatitude = false;
                         validLongitude = false;
                         var dateRead;
@@ -952,11 +954,9 @@ require 'dbConfig.php'; // Include the database configuration file
                 			}
                 			
                 		});
-                		/* Update progress of progress bar */
-                		var width = (i/(19)) * 100;
-                		width = width +"%";
-                		document.getElementsByClassName("progress-bar")[0].style.width = width;
-                		
+                		/* Update progress and text of progress bar */
+                		var increment = 100/(numRows-1);
+                		$(".progress-bar").css("width", i*increment + "%").text(i*increment + " %"); 
                     }
                 }
                 
