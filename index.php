@@ -789,11 +789,12 @@ require 'dbConfig.php'; // Include the database configuration file
             
             reader.onload = function(event) {
                 // Needs better validation/error handling
-                var Date_index = -1;
-                var Latitude_index = -1;
-                var Longitude_index = -1;
-                var CrimeType_index = -1;
-                var Description_index = -1;
+                var default_value = -1;
+                var Date_index = default_value;
+                var Latitude_index = default_value;
+                var Longitude_index = default_value;
+                var CrimeType_index = default_value;
+                var Description_index = default_value;
                 
                 var Accepted_Date_headers = ["Date", "date", "Month", "month"];
                 var Accepted_Latitude_headers = ["Latitude", "latitude", "Lat", "lat"];
@@ -825,108 +826,138 @@ require 'dbConfig.php'; // Include the database configuration file
                     }
                 }
                 
-                for (var i = 1; i < 20; i++) {
-                    validLatitude = false;
-                    validLongitude = false;
-                    var dateRead;
-                    
-                    row_values = rows[i].split(','); // Split rows for values
-                    
-                    /* Date */
-                    if (row_values[Date_index].length == 7) {
-                        dateRead = row_values[Date_index] + "-01"; // Add on day
-                    }
-                    else
-                    {
-                        dateRead = row_values[Date_index];
-                    }
-                    
-                    var dateCheck = moment(dateRead);
-                    if(dateCheck.isValid() == true) { // If valid date
-                        imp_Crime_Date = dateRead;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                    
-                    /* Latitude */
-                    if (isNaN(row_values[Latitude_index]) == false && row_values[Latitude_index] >=-90 && row_values[Latitude_index] <=90) {
-                        imp_Latitude = row_values[Latitude_index];
-                        validLatitude = true;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                    
-                    /* Longitude */
-                    if (isNaN(row_values[Longitude_index]) == false && row_values[Longitude_index] >=-180 && row_values[Longitude_index] <=180) {
-                        imp_Longitude = row_values[Longitude_index];
-                        validLongitude = true;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                    
-                    /* Location */
-                    if (validLatitude == true && validLongitude == true) { 
-                        var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude);
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                    
-                    /* Crime Type */
-                    var checkFor = new RegExp("[0-9a-zA-Z]"); /* Atleast one alphanumeric character */
-                    
-                    if (typeof row_values[CrimeType_index] === 'string' || row_values[CrimeType_index] instanceof String) {
-                        imp_Crime_Type = "Unknown";
-                        if (checkFor.test(row_values[CrimeType_index]) == true) {
-                            imp_Crime_Type = row_values[CrimeType_index];
+                var validFile = true;
+                var err_str = "File is missing columns titled/for: ";
+                
+                if (Date_index === default_value) {
+                    err_str = err_str + "\nDate";
+                    var validFile = false;
+                }
+                if (Latitude_index === default_value) {
+                    err_str = err_str + "\nLatitude";
+                    var validFile = false;
+                }
+                if (Longitude_index === default_value) {
+                    err_str = err_str + "\nLongitude";
+                    var validFile = false;
+                }
+                if (CrimeType_index === default_value) {
+                    err_str = err_str + "\nCrime Type";
+                    var validFile = false;
+                }
+                if (Description_index === default_value) {
+                    err_str = err_str + "\nDescription";
+                    var validFile = false;
+                }
+                
+                if (validFile === false) {
+                    alert(err_str);
+                }
+                
+                if (validFile === true) {
+                    for (var i = 1; i < 20; i++) {
+                        validLatitude = false;
+                        validLongitude = false;
+                        var dateRead;
+                        
+                        row_values = rows[i].split(','); // Split rows for values
+                        
+                        /* Date */
+                        if (row_values[Date_index].length == 7) {
+                            dateRead = row_values[Date_index] + "-01"; // Add on day
                         }
-                    }
-                    else 
-                    {
-                        imp_Crime_Type = "Unknown";
-                    }
-                    
-                    /* Description */
-                    if (typeof row_values[Description_index] === 'string' || row_values[Description_index] instanceof String) {
-                        imp_Description = "-";
-                        if (checkFor.test(row_values[Description_index]) == true) {
-                            imp_Description = row_values[Description_index];
+                        else
+                        {
+                            dateRead = row_values[Date_index];
                         }
+                        
+                        var dateCheck = moment(dateRead);
+                        if(dateCheck.isValid() == true) { // If valid date
+                            imp_Crime_Date = dateRead;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        
+                        /* Latitude */
+                        if (isNaN(row_values[Latitude_index]) == false && row_values[Latitude_index] >=-90 && row_values[Latitude_index] <=90) {
+                            imp_Latitude = row_values[Latitude_index];
+                            validLatitude = true;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        
+                        /* Longitude */
+                        if (isNaN(row_values[Longitude_index]) == false && row_values[Longitude_index] >=-180 && row_values[Longitude_index] <=180) {
+                            imp_Longitude = row_values[Longitude_index];
+                            validLongitude = true;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        
+                        /* Location */
+                        if (validLatitude == true && validLongitude == true) { 
+                            var imp_Location = new google.maps.LatLng(imp_Latitude, imp_Longitude);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        
+                        /* Crime Type */
+                        var checkFor = new RegExp("[0-9a-zA-Z]"); /* Atleast one alphanumeric character */
+                        
+                        if (typeof row_values[CrimeType_index] === 'string' || row_values[CrimeType_index] instanceof String) {
+                            imp_Crime_Type = "Unknown";
+                            if (checkFor.test(row_values[CrimeType_index]) == true) {
+                                imp_Crime_Type = row_values[CrimeType_index];
+                            }
+                        }
+                        else 
+                        {
+                            imp_Crime_Type = "Unknown";
+                        }
+                        
+                        /* Description */
+                        if (typeof row_values[Description_index] === 'string' || row_values[Description_index] instanceof String) {
+                            imp_Description = "-";
+                            if (checkFor.test(row_values[Description_index]) == true) {
+                                imp_Description = row_values[Description_index];
+                            }
+                        }
+                        else 
+                        {
+                            imp_Description = "-";
+                        }
+                        
+                		$.ajax({
+                			url: 'ImportMarkers.php',
+                			type: 'POST',
+                			async: false,
+                			data: {
+                			    imp_Crime_Date: imp_Crime_Date, 
+                			    imp_Latitude: imp_Latitude, 
+                			    imp_Longitude: imp_Longitude, 
+                			    imp_Crime_Type: imp_Crime_Type, 
+                			    imp_Description: imp_Description
+                			},
+                			success: function(result)
+                			{
+                				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map);
+                			}
+                			
+                		});
+                		/* Update progress of progress bar */
+                		var width = (i/(19)) * 100;
+                		width = width +"%";
+                		document.getElementsByClassName("progress-bar")[0].style.width = width;
+                		
                     }
-                    else 
-                    {
-                        imp_Description = "-";
-                    }
-                    
-            		$.ajax({
-            			url: 'ImportMarkers.php',
-            			type: 'POST',
-            			async: false,
-            			data: {
-            			    imp_Crime_Date: imp_Crime_Date, 
-            			    imp_Latitude: imp_Latitude, 
-            			    imp_Longitude: imp_Longitude, 
-            			    imp_Crime_Type: imp_Crime_Type, 
-            			    imp_Description: imp_Description
-            			},
-            			success: function(result)
-            			{
-            				placeMarker(result,imp_Crime_Type,imp_Crime_Date,'00:00:00',imp_Description,imp_Location,map);
-            			}
-            			
-            		});
-            		/* Update progress of progress bar */
-            		var width = (i/(19)) * 100;
-            		width = width +"%";
-            		document.getElementsByClassName("progress-bar")[0].style.width = width;
-            		
                 }
                 
               }
