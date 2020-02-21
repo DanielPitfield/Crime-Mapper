@@ -242,32 +242,24 @@ font-family: Arial;
 input[type=date], input[type=time], select {
  height:35px;
  font-family:Arial;
- font-size:18px;
- background-color: grey;
+ font-size:16px;
+ background-color: white;
  outline: none;
- border: 0;
+ border: 5;
  border-radius: 3px;
  padding: 5px;
- color: white;
+ color: black;
 }
 
 input[type=date] {
+ min-width:150px;
  width:35%;
 }
 
 input[type=time] {
+ min-width:100px;
  width:22.5%;
 }
-
-select {
- width:65%;
- padding: 0px;
-}
-
-textarea {
-   resize: none;
-   background-color: grey;
-}	
 
 input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
 input[type="date"]::-webkit-inner-spin-button,
