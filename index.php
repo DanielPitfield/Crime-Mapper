@@ -42,8 +42,7 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" id="btn_marker_cluster" type="button">MarkerClusterer</button>
-        	<button class="dropdown-item" id="btn_marker_cluster_dis" type="button">Disable it</button>
+        	<button class="dropdown-item" id="btn_marker_cluster" type="button">Marker Clustering</button>
         </div>
     </li>
     
@@ -51,8 +50,7 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Predict<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item disabled" type="button">Warning</button>
-        	<button class="dropdown-item disabled" type="button">RTM</button>
+        	<button class="dropdown-item disabled" type="button">-</button>
         </div>
     </li>
 	
@@ -130,11 +128,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		</div>
 		
 		<div class="form-group">
-        <select class="select form-control" id="Add_Crime_Type" name="Crime_Type">
-        <option value="" selected disabled hidden>Select the crime type</option>
-        <option value="Arson">Arson</option>
-        <option value="Murder">Murder</option>
-        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        <select class="select form-control" id="Add_Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        </select>
+        <select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
 		
@@ -708,7 +706,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	$("#add_submit_form").submit(function(e) {
 		e.preventDefault();
 					
-		var dropdown = document.getElementById("Add_Crime_Type"); // Initial step of getting crime type
+		var dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
 		
 		/* Take values locally */
 		var Crime_Date = document.getElementById("Add_Date").value;
@@ -1045,6 +1043,87 @@ require 'dbConfig.php'; // Include the database configuration file
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<!-- On Page Load -->
+<script>
+    $(document).ready(function() {
+        var select = document.getElementById("Add_Crime_Type"); 
+        var options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society"]; 
+        
+        for(var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            var el = document.createElement("option");
+            el.textContent = opt;
+            el.value = opt;
+            select.appendChild(el);
+        }
+        
+        var sub_select = document.getElementById("Add_Crime_Type_sub");
+        
+        function AddOptions(sub_options) {
+            for(var i = 0; i < sub_options.length; i++) {
+                    var sub_opt = sub_options[i];
+                    var el = document.createElement("option");
+                    el.textContent = sub_opt;
+                    el.value = sub_opt;
+                    sub_select.appendChild(el);
+                }
+        }
+        
+        $("#Add_Crime_Type").change(function() { // When main category selected
+            $("#Add_Crime_Type_sub").empty(); // Remove any previous values (if any)
+            var sub_options = [];
+            
+            var el = $(this);
+            if(el.val() === "Violence against the person") { // Check which main category was chosen
+                sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"]; // Create array to create the relevant sub-options
+                AddOptions(sub_options); // Create these options and add to the subcategory select
+            }
+            else if (el.val() === "Public Order") {
+                sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Drug offences") {
+                sub_options = ["Trafficking in controlled drugs","Posession of controlled drugs (Cannabis)","Posession of controlled drugs (excluding Cannabis)","Other drug offences"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Vehicle offences") {
+                sub_options = ["Aggravated vehicle taking","Theft from vehicle","Theft or unauthorised taking of motor vehicle"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Sexual offences") {
+                sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Arson and criminal damage") {
+                sub_options = ["Arson endangering life","Arson not endangering life","Criminal damage to a dwelling","Criminal damage to a building other than a dwelling","Criminal damage to a vehicle","Other criminal damage"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Possession of weapons") {
+                sub_options = ["Possession of firearms with intent","Possession of firearms offences","Possession of other weapons","Possession of article with blade or point","Other firearms offences","Other knives offences"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Theft") {
+                sub_options = ["Blackmail","Theft from the person","Theft in a dwelling other than from an automatic machine or meter","Theft by an employee","Theft of mail","Dishonest use of electricity","Theft or unauthorised taking of a pedal cycle","Shoplifting","Theft from an automatic machine or meter","Making off without payment","Other theft"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Burglary") {
+                sub_options = ["Burglary - Residential","Attempted burglary - Residential","Distraction burglary - Residential","Attempted distraction burglary - Residential","Aggravated burglary in a dwelling","Burglary - Business and Community","Attempted burglary - Business and Community","Aggravated burglary - Business and Community"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Robbery") {
+                sub_options = ["Robbery of business property","Robbery of personal property"]; 
+                AddOptions(sub_options);
+            }
+            else if (el.val() === "Miscellaneous crimes against society") {
+                sub_options = ["Concelaing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"]; 
+                AddOptions(sub_options);
+            }
+        });
+
+        
+    })
+</script>
 
 <script> // Showing name of file chosen (import)
 $("#Import_input").on("change", function() {
