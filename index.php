@@ -92,11 +92,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		</div>
 		
 		<div class="form-group">
-        <select class="select form-control" id="Filter_Crime_Type" name="Crime_Type">
-        <option value="" selected disabled hidden>Select the crime type</option>
-        <option value="Arson">Arson</option>
-        <option value="Murder">Murder</option>
-        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        <select class="select form-control" id="Filter_Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        </select>
+        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
 		
@@ -491,7 +491,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		var invalidInput = false;
 		
 		/* ---- Crime Type ---- */
-		var dropdown = document.getElementById("Filter_Crime_Type");
+		var dropdown = document.getElementById("Filter_Crime_Type_sub");
 		
 		if (dropdown.options[dropdown.selectedIndex].value == "All") {
 			console.log("All selected");
@@ -1047,78 +1047,145 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- On Page Load -->
 <script>
     $(document).ready(function() {
-        var select = document.getElementById("Add_Crime_Type"); 
-        var options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society"]; 
+        /* Main category select elements */ 
+        var add_select = document.getElementById("Add_Crime_Type");
+        var filter_select = document.getElementById("Filter_Crime_Type");
         
-        for(var i = 0; i < options.length; i++) {
-            var opt = options[i];
-            var el = document.createElement("option");
-            el.textContent = opt;
-            el.value = opt;
-            select.appendChild(el);
-        }
+        /* Subcategory select elements */ 
+        var add_sub_select = document.getElementById("Add_Crime_Type_sub");
+        var filter_sub_select = document.getElementById("Filter_Crime_Type_sub");
         
-        var sub_select = document.getElementById("Add_Crime_Type_sub");
+        var main_options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society","Other"]; 
         
-        function AddOptions(sub_options) {
-            for(var i = 0; i < sub_options.length; i++) {
-                    var sub_opt = sub_options[i];
+        function AddOptions(select,options) { /* Add parameter options to parameter select */
+            for(var i = 0; i < options.length; i++) {
+                    var opt = options[i];
                     var el = document.createElement("option");
-                    el.textContent = sub_opt;
-                    el.value = sub_opt;
-                    sub_select.appendChild(el);
+                    el.textContent = opt;
+                    el.value = opt;
+                    select.appendChild(el);
                 }
         }
         
+        AddOptions(add_select,main_options);
+        AddOptions(filter_select,main_options);
+        
+        violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
+        
+        public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];
+        
+        drug_sub_options = ["Trafficking in controlled drugs","Posession of controlled drugs (Cannabis)","Posession of controlled drugs (excluding Cannabis)","Other drug offences"];
+        
+        vehicle_sub_options = ["Aggravated vehicle taking","Theft from vehicle","Theft or unauthorised taking of motor vehicle"];
+        
+        sexual_sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"]; 
+        arson_sub_options = ["Arson endangering life","Arson not endangering life","Criminal damage to a dwelling","Criminal damage to a building other than a dwelling","Criminal damage to a vehicle","Other criminal damage"];
+        
+        weapons_sub_options = ["Possession of firearms with intent","Possession of firearms offences","Possession of other weapons","Possession of article with blade or point","Other firearms offences","Other knives offences"];
+        
+        theft_sub_options = ["Blackmail","Theft from the person","Theft in a dwelling other than from an automatic machine or meter","Theft by an employee","Theft of mail","Dishonest use of electricity","Theft or unauthorised taking of a pedal cycle","Shoplifting","Theft from an automatic machine or meter","Making off without payment","Other theft"];
+        
+        burglary_sub_options = ["Burglary - Residential","Attempted burglary - Residential","Distraction burglary - Residential","Attempted distraction burglary - Residential","Aggravated burglary in a dwelling","Burglary - Business and Community","Attempted burglary - Business and Community","Aggravated burglary - Business and Community"];
+        
+        robbery_sub_options = ["Robbery of business property","Robbery of personal property"];
+        
+        misc_sub_options = ["Concelaing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"];
+        
+        other_sub_options = ["Unspecified Crime", "Other crime"]; 
+        
+        
         $("#Add_Crime_Type").change(function() { // When main category selected
             $("#Add_Crime_Type_sub").empty(); // Remove any previous values (if any)
-            var sub_options = [];
-            
             var el = $(this);
+            
             if(el.val() === "Violence against the person") { // Check which main category was chosen
-                sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"]; // Create array to create the relevant sub-options
-                AddOptions(sub_options); // Create these options and add to the subcategory select
+                AddOptions(add_sub_select,violence_sub_options);
             }
             else if (el.val() === "Public Order") {
-                sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,public_sub_options);
             }
             else if (el.val() === "Drug offences") {
-                sub_options = ["Trafficking in controlled drugs","Posession of controlled drugs (Cannabis)","Posession of controlled drugs (excluding Cannabis)","Other drug offences"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,drug_sub_options);
             }
             else if (el.val() === "Vehicle offences") {
-                sub_options = ["Aggravated vehicle taking","Theft from vehicle","Theft or unauthorised taking of motor vehicle"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,vehicle_sub_options);
             }
             else if (el.val() === "Sexual offences") {
-                sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,sexual_sub_options);
             }
             else if (el.val() === "Arson and criminal damage") {
-                sub_options = ["Arson endangering life","Arson not endangering life","Criminal damage to a dwelling","Criminal damage to a building other than a dwelling","Criminal damage to a vehicle","Other criminal damage"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,arson_sub_options);
             }
             else if (el.val() === "Possession of weapons") {
-                sub_options = ["Possession of firearms with intent","Possession of firearms offences","Possession of other weapons","Possession of article with blade or point","Other firearms offences","Other knives offences"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,weapons_sub_options);
             }
             else if (el.val() === "Theft") {
-                sub_options = ["Blackmail","Theft from the person","Theft in a dwelling other than from an automatic machine or meter","Theft by an employee","Theft of mail","Dishonest use of electricity","Theft or unauthorised taking of a pedal cycle","Shoplifting","Theft from an automatic machine or meter","Making off without payment","Other theft"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,theft_sub_options);
             }
             else if (el.val() === "Burglary") {
-                sub_options = ["Burglary - Residential","Attempted burglary - Residential","Distraction burglary - Residential","Attempted distraction burglary - Residential","Aggravated burglary in a dwelling","Burglary - Business and Community","Attempted burglary - Business and Community","Aggravated burglary - Business and Community"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,burglary_sub_options);
             }
             else if (el.val() === "Robbery") {
-                sub_options = ["Robbery of business property","Robbery of personal property"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,robbery_sub_options);
             }
             else if (el.val() === "Miscellaneous crimes against society") {
-                sub_options = ["Concelaing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"]; 
-                AddOptions(sub_options);
+                AddOptions(add_sub_select,misc_sub_options);
             }
+            else if (el.val() === "Other") {
+                AddOptions(add_sub_select,other_sub_options);
+            }
+            /*
+            else {
+                alert("Unexpected main category chosen");
+            }
+            */
+        });
+        
+        $("#Filter_Crime_Type").change(function() {
+            $("#Filter_Crime_Type_sub").empty();
+            var el = $(this);
+            
+            if(el.val() === "Violence against the person") {
+                AddOptions(filter_sub_select,violence_sub_options);
+            }
+            else if (el.val() === "Public Order") {
+                AddOptions(filter_sub_select,public_sub_options);
+            }
+            else if (el.val() === "Drug offences") {
+                AddOptions(filter_sub_select,drug_sub_options);
+            }
+            else if (el.val() === "Vehicle offences") {
+                AddOptions(filter_sub_select,vehicle_sub_options);
+            }
+            else if (el.val() === "Sexual offences") {
+                AddOptions(filter_sub_select,sexual_sub_options);
+            }
+            else if (el.val() === "Arson and criminal damage") {
+                AddOptions(filter_sub_select,arson_sub_options);
+            }
+            else if (el.val() === "Possession of weapons") {
+                AddOptions(filter_sub_select,weapons_sub_options);
+            }
+            else if (el.val() === "Theft") {
+                AddOptions(filter_sub_select,theft_sub_options);
+            }
+            else if (el.val() === "Burglary") {
+                AddOptions(filter_sub_select,burglary_sub_options);
+            }
+            else if (el.val() === "Robbery") {
+                AddOptions(filter_sub_select,robbery_sub_options);
+            }
+            else if (el.val() === "Miscellaneous crimes against society") {
+                AddOptions(filter_sub_select,misc_sub_options);
+            }
+            else if (el.val() === "Other") {
+                AddOptions(filter_sub_select,other_sub_options);
+            }
+            /*
+            else {
+                alert("Unexpected main category chosen");
+            }
+            */
         });
 
         
