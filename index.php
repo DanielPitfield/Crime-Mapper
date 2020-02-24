@@ -42,8 +42,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" id="btn_analyse" type="button">MarkerClusterer</button>
-        	<button class="dropdown-item disabled" type="button">Clustering</button>
+        	<button class="dropdown-item" id="btn_marker_cluster" type="button">MarkerClusterer</button>
+        	<button class="dropdown-item" id="btn_marker_cluster_dis" type="button">Disable it</button>
         </div>
     </li>
     
@@ -207,9 +207,11 @@ require 'dbConfig.php'; // Include the database configuration file
         <div class="custom-file mb-3">
         <input type="file" class="custom-file-input" id="Import_input" accept=".csv" multiple>
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
+        <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
+        <br></br>
         <button type="submit" id="btn_import_confirm" class="submit_button">Import</button>
             <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">Progress Bar
                 </div>
             </div>
         </div>
@@ -432,6 +434,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		var menuDisplayed = false;
 		var Latitude = 0;
 		var Longitude = 0;
+		var first_time = true;
 		
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
@@ -757,7 +760,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	const analyse_btn = document.getElementById("btn_analyse"); // 'Analyse' button
+	const analyse_btn = document.getElementById("btn_marker_cluster"); // 'Analyse' button
 	analyse_btn.addEventListener('click', event => {
 		hideContextMenu();
 		
@@ -767,10 +770,21 @@ require 'dbConfig.php'; // Include the database configuration file
 			}
 		}
 		
-		// Use this new array of markers and apply a MarkerClusterer to them
-		// Configure its options here
-		var markerCluster = new MarkerClusterer(map, FilteredMarkerArray,
-            {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+		if (first_time === false) {
+		    if (markerCluster.getMap() === null) {
+		        markerCluster.setMap(map);
+		    }
+		    if (markerCluster.getMap() === map) {
+		        markerCluster.setMap(null);
+		    }
+		}
+		
+		if (first_time === true) {
+		    var markerCluster = new MarkerClusterer(map, FilteredMarkerArray,
+                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+            first_time = false;
+		}
+
 	});
 	
 	/*
@@ -965,10 +979,8 @@ require 'dbConfig.php'; // Include the database configuration file
                     		}
                     			
                     	});
-                		/* Update progress and text of progress bar */
-                		/*var increment = 100/(numRows-1);
-                		$(".progress-bar").css("width", i*increment + "%").text(i*increment + " %"); */
                     }
+                    /* Show complete progress bar when all markers imported */
                     $(".progress-bar").css("width", "100%").text("Complete");
                 }
                 
