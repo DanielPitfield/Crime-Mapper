@@ -42,7 +42,7 @@ require 'dbConfig.php'; // Include the database configuration file
     <li class="col-8 px-1">
         <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
         <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" id="btn_marker_cluster" type="button">Marker Clustering</button>
+        	<button class="dropdown-item" id="btn_marker_cluster" type="button">Clustering (enable)</button>
         </div>
     </li>
     
@@ -298,7 +298,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 	}
 	
-	
 	function EditMarker(ID) {
 		
 		for(i = 0; i < MarkerArray.length; i++){
@@ -478,7 +477,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		var menuDisplayed = false;
 		var Latitude = 0;
 		var Longitude = 0;
-		var first_time = true;
+		var Clusterer_count = 0;
 		
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
@@ -526,6 +525,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 	}
 	LoadMarkers();
+	
+	var markerCluster = new MarkerClusterer(null, MarkerArray,
+                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+    markerCluster.setIgnoreHidden(true);
 	
 	function FilterMarkers() {
 		
@@ -805,29 +808,22 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
+	var Cluster_Active = false; // Clusterer initialised as unactive
 	const analyse_btn = document.getElementById("btn_marker_cluster"); // 'Analyse' button
 	analyse_btn.addEventListener('click', event => {
 		hideContextMenu();
 		
-		for(i = 0; i < MarkerArray.length; i++){
-			if (MarkerArray[i].getVisible() == true) { // If the marker is shown on the map (unfiltered)
-				FilteredMarkerArray.push(MarkerArray[i]); // Add it to a new array
-			}
+		if (Cluster_Active == true) { // If active and button was pressed
+		    $("#btn_marker_cluster").text('Clustering (enable)');
+		    markerCluster.setMap(null); // Hide clusterer
+		    Cluster_Active = false; // Alternate variable
 		}
-		
-		if (first_time === false) {
-		    if (markerCluster.getMap() === null) {
-		        markerCluster.setMap(map);
-		    }
-		    if (markerCluster.getMap() === map) {
-		        markerCluster.setMap(null);
-		    }
-		}
-		
-		if (first_time === true) {
-		    var markerCluster = new MarkerClusterer(map, FilteredMarkerArray,
-                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-            first_time = false;
+		else {
+		    $("#btn_marker_cluster").text('Clustering (disable)');
+            markerCluster.addMarkers(MarkerArray); // Update markers to cluster
+            markerCluster.setMap(map);
+            markerCluster.repaint(); // Redraw and show clusterer
+            Cluster_Active = true;
 		}
 
 	});
@@ -1078,13 +1074,10 @@ require 'dbConfig.php'; // Include the database configuration file
 	  
 </script>
 
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"> // Marker Clusterer
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> // API Key, Libraries and map function
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.js"></script>
 
 <!-- Bootstrap Scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
@@ -1116,18 +1109,8 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
         }
         
-        /*
-        function AddAllOption(select) {
-            var el = document.createElement("option");
-            el.textContent = "All";
-            el.value = "All";
-            select.appendChild(el); 
-        }
-        */
-        
         AddOptions(add_select,main_options);
         AddOptions(filter_select,main_options);
-        //AddAllOption(filter_select);
         AddOptions(edit_select,main_options);
         
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
