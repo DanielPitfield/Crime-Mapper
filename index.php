@@ -93,10 +93,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		<div class="form-group">
         <select class="select form-control" id="Filter_Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        <option value="All" selected disabled hidden>Crime Type - Main Category</option>
         </select>
         <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
+        <option value="All" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
 		
@@ -171,11 +171,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		</div>
 		
 		<div class="form-group">
-        <select class="select form-control" id="Edit_Crime_Type" name="Crime_Type">
-        <option value="" selected disabled hidden>Select the crime type</option>
-        <option value="Arson">Arson</option>
-        <option value="Murder">Murder</option>
-        <option value="Anti-social Behaviour">Anti-social Behaviour</option>
+        <select class="select form-control" id="Edit_Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        </select>
+        <select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
+        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
 		
@@ -310,8 +310,57 @@ require 'dbConfig.php'; // Include the database configuration file
 		MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
 		
 		var modal = $('#modal_edit');
+
+	    if (violence_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Violence against the person').change();
+	    }
+	    else if (public_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Public Order').change();
+	    }
+	    else if (drug_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Drug offences').change();
+	    }
+	    else if (vehicle_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Vehicle offences').change();
+	    }
+	    else if (sexual_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Sexual offences').change();
+	    }
+	    else if (drug_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Drug offences').change();
+	    }
+	    else if (arson_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Arson and criminal damage').change();
+	    }
+	    else if (weapons_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Possession of weapons').change();
+	    }
+	    else if (theft_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Theft').change();
+	    }
+	    else if (burglary_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Burglary').change();
+	    }
+	    else if (robbery_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Robbery').change();
+	    }
+	    else if (robbery_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Robbery').change();
+	    }
+	    else if (misc_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Miscellaneous crimes against society').change();
+	    }
+	    else if (other_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
+	        $('#Edit_Crime_Type').val('Other').change();
+	    }
+	    /*
+	    else {
+	        console.log("Unexpected main category chosen")
+	    }
+	    */
 		
-		modal.find('#Edit_Crime_Type').val(MarkerToEdit.Crime_Type);
+		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
+		
 		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
 		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time);
 		modal.find('#Edit_Description').val(MarkerToEdit.Description);
@@ -350,7 +399,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		$("#edit_submit_form").submit(function(e) {
 		e.preventDefault();
 					
-		var dropdown = document.getElementById("Edit_Crime_Type"); // Initial step of getting crime type
+		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
 		
 		/* Update values locally */
 		var Crime_Date = document.getElementById("Edit_Date").value;
@@ -390,11 +439,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 		
 		MarkerToEdit.setPosition(MarkerToEdit.position);
-		
 		UpdateMarkerInfo(MarkerToEdit);
-		
 		$("#modal_edit").modal('hide');
-		
 		
 		});
 		
@@ -571,6 +617,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			
 			var MarkerTime = MarkerArray[i].Crime_Time;
 			
+			// here, changes to select elements mean all is false and no crime type is selected, so all markers are hidden
 			if (AllSelected == false) { // If a specific crime was selected
 				if (MarkerArray[i].Crime_Type != Crime_Type) { // And the marker's crime type is not the same as the one selected
 					MarkerArray[i].setVisible(false); // Hide it
@@ -1050,10 +1097,12 @@ require 'dbConfig.php'; // Include the database configuration file
         /* Main category select elements */ 
         var add_select = document.getElementById("Add_Crime_Type");
         var filter_select = document.getElementById("Filter_Crime_Type");
+        var edit_select = document.getElementById("Edit_Crime_Type");
         
         /* Subcategory select elements */ 
         var add_sub_select = document.getElementById("Add_Crime_Type_sub");
         var filter_sub_select = document.getElementById("Filter_Crime_Type_sub");
+        var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
         
         var main_options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society","Other"]; 
         
@@ -1067,8 +1116,19 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
         }
         
+        /*
+        function AddAllOption(select) {
+            var el = document.createElement("option");
+            el.textContent = "All";
+            el.value = "All";
+            select.appendChild(el); 
+        }
+        */
+        
         AddOptions(add_select,main_options);
         AddOptions(filter_select,main_options);
+        //AddAllOption(filter_select);
+        AddOptions(edit_select,main_options);
         
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
         
@@ -1180,6 +1240,53 @@ require 'dbConfig.php'; // Include the database configuration file
             }
             else if (el.val() === "Other") {
                 AddOptions(filter_sub_select,other_sub_options);
+            }
+            /*
+            else {
+                alert("Unexpected main category chosen");
+            }
+            */
+        });
+        
+        $("#Edit_Crime_Type").change(function() {
+            $("#Edit_Crime_Type_sub").empty();
+            var el = $(this);
+            
+            if(el.val() === "Violence against the person") {
+                AddOptions(edit_sub_select,violence_sub_options);
+            }
+            else if (el.val() === "Public Order") {
+                AddOptions(edit_sub_select,public_sub_options);
+            }
+            else if (el.val() === "Drug offences") {
+                AddOptions(edit_sub_select,drug_sub_options);
+            }
+            else if (el.val() === "Vehicle offences") {
+                AddOptions(edit_sub_select,vehicle_sub_options);
+            }
+            else if (el.val() === "Sexual offences") {
+                AddOptions(edit_sub_select,sexual_sub_options);
+            }
+            else if (el.val() === "Arson and criminal damage") {
+                AddOptions(edit_sub_select,arson_sub_options);
+            }
+            else if (el.val() === "Possession of weapons") {
+                AddOptions(edit_sub_select,weapons_sub_options);
+            }
+            else if (el.val() === "Theft") {
+                AddOptions(edit_sub_select,theft_sub_options);
+            }
+            else if (el.val() === "Burglary") {
+                AddOptions(edit_sub_select,burglary_sub_options);
+            }
+            else if (el.val() === "Robbery") {
+                AddOptions(edit_sub_select,robbery_sub_options);
+            }
+            else if (el.val() === "Miscellaneous crimes against society") {
+                AddOptions(edit_sub_select,misc_sub_options);
+            }
+            else if (el.val() === "Other") {
+                AddOptions(edit_sub_select,other_sub_options);
             }
             /*
             else {
