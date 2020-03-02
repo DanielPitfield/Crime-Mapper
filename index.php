@@ -22,36 +22,31 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-  <!-- Logo -->
-  <a class="navbar-brand" href="#">Crime Mapper</a>
   
-  <!-- <input id="pac-input" class="controls" type="text" placeholder="Enter a town, city or postcode"> <!-- Search box -->
-
   <ul class="navbar-nav">
     
-    <!-- Map Dropdown -->
-    <li class="col-8 px-1">
-        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Map<sub><i class="fa fa-angle-down" aria-									hidden="true"></i></sub></button>
-        <div class="dropdown-menu w-100">
-        	<button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal_filter">Filter</button>
-        	<button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal_import">Import</button>
-        </div>
+    <!-- Filter Crime -->
+    <li class="col-5 px-1">
+        	<button class="btn btn-outline-primary btn-block" role="button" data-toggle="modal" data-target="#modal_filter" style="margin-left:5px;">Filter Crime</button>
     </li>
     
-    <!-- Analyse Dropdown -->
-    <li class="col-8 px-1">
-        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analyse<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
-        <div class="dropdown-menu w-100">
-        	<button class="dropdown-item" id="btn_marker_cluster" type="button">Clustering (enable)</button>
-        </div>
+    <!-- Import Crime -->
+    <li class="col-5 px-1">
+        	<button class="btn btn-outline-primary btn-block" role="button" data-toggle="modal" data-target="#modal_import" style="margin-left:2px;">Import Crime</button>
     </li>
     
-    <!-- Predict Dropdown -->
-    <li class="col-8 px-1">
-        <button class="btn btn-outline-primary btn-block dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Predict<sub><i class="fa fa-angle-down" aria-								hidden="true"></i></sub></button>
-        <div class="dropdown-menu w-100">
-        	<button class="dropdown-item disabled" type="button">-</button>
-        </div>
+    <li class="col-10 px-1">
+        <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="margin-left:2px;">
+    </li>
+
+    <!-- Analyse Crime -->
+    <li class="col-5 px-1">
+        <button class="btn btn-outline-primary btn-block" id="btn_marker_cluster" role="button" style="margin-left:2px;margin-right:0px;">Analyse Crime</button>
+    </li>
+    
+    <!-- Predict Crime (disabled) -->
+    <li class="col-5 px-1">
+        	<button class="btn btn-outline-primary btn-block disabled" role="button" style="margin-right:0px;">Predict Crime</button>
     </li>
 	
   </ul>
@@ -814,12 +809,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		hideContextMenu();
 		
 		if (Cluster_Active == true) { // If active and button was pressed
-		    $("#btn_marker_cluster").text('Clustering (enable)');
+		    //$("#btn_marker_cluster").text('Clustering (enable)');
 		    markerCluster.setMap(null); // Hide clusterer
 		    Cluster_Active = false; // Alternate variable
 		}
 		else {
-		    $("#btn_marker_cluster").text('Clustering (disable)');
+		    //$("#btn_marker_cluster").text('Clustering (disable)');
             markerCluster.addMarkers(MarkerArray); // Update markers to cluster
             markerCluster.setMap(map);
             markerCluster.repaint(); // Redraw and show clusterer
