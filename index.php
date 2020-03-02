@@ -35,6 +35,7 @@ require 'dbConfig.php'; // Include the database configuration file
         	<button class="btn btn-outline-primary btn-block" role="button" data-toggle="modal" data-target="#modal_import" style="margin-left:2px;">Import Crime</button>
     </li>
     
+    <!-- Location Search Bar -->
     <li class="col-10 px-1">
         <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="margin-left:2px;">
     </li>
@@ -477,7 +478,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
 		
-		/*
 		// Create the search box and link it to the UI element.
 		var input = document.getElementById('pac-input');
 		var searchBox = new google.maps.places.SearchBox(input);
@@ -487,7 +487,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		map.addListener('bounds_changed', function() {
 			searchBox.setBounds(map.getBounds());
 		});
-		*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1031,7 +1030,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 
-	/*
     searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
         var places = searchBox.getPlaces();
 
@@ -1063,7 +1061,6 @@ require 'dbConfig.php'; // Include the database configuration file
           });
           map.fitBounds(bounds);
         });
-	*/
 	
 	}
 	  
