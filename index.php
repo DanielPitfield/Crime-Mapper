@@ -96,7 +96,7 @@ require 'dbConfig.php'; // Include the database configuration file
         </select>
         </div>
 		
-		<button id="btn_filter_confirm" class="submit_button">Confirm</button>
+		<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
 	   </div>
     </div>
   </div>
@@ -138,7 +138,7 @@ require 'dbConfig.php'; // Include the database configuration file
         
 		<div id="map2"></div>
 		
-		<button type="submit" id="btn_add_confirm" class="submit_button">Confirm</button>
+		<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
 		</form>
 	   </div>
     </div>
@@ -180,7 +180,7 @@ require 'dbConfig.php'; // Include the database configuration file
         </div>
 		
 		<div id="map3"></div>
-		<button type="submit" id="btn_edit_confirm" class="submit_button">Update</button>
+		<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;">Update</button>
 		</form>
 	   </div>
     </div>
@@ -203,7 +203,7 @@ require 'dbConfig.php'; // Include the database configuration file
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
         <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
         <br></br>
-        <button type="submit" id="btn_import_confirm" class="submit_button">Import</button>
+        <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;">Import</button>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">Progress Bar
                 </div>
