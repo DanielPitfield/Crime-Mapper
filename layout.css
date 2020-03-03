@@ -1,49 +1,13 @@
 html, body {
 margin:0;
-height: 100%
+height: 100%;
 width: 100%;
 font-family: Arial;
-}
-
-.icon-bar {
-  width: 100%;
-  background-color: #555;
-  overflow: auto;
-}
-
-.IconBarBtn {
-  border: none;
-  text-align: center;
-  padding: 10px 0;
-  font-weight:bold;
-  font-family:Arial;
-  text-decoration:none;
-  color: white;
-  font-size: 20px;
-  background-color: #555;
-}
-
-.IconBarBtn:hover {
-  background-color: #000;
-}
-
-.IconBarBtn.active {
-  background-color: #4CAF50;
 }
 
 .Map {
   float: left;
   width: 25%;	
-}
-
-.Signin {
-  float: right;
-  width: 5%;
-}
-
-.Settings {
-  float: right;
-  width: 20%;
 }
 
 #map {
@@ -61,21 +25,6 @@ font-family: Arial;
 #map3 {
   width:100%;
   height:300px;  
-}
-
-.submit_button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  font: bold 15px Arial;
-}
-
-.submit_button:hover {
-  opacity: 0.8;
 }
 
 #description {
@@ -192,7 +141,6 @@ font-family: Arial;
   background-color: rgba(0,0,0,0.4);
 }
 
-
 .modal-content {
   position: relative;
   background-color: #fefefe;
@@ -233,7 +181,7 @@ font-family: Arial;
 
 .modal-header {
   padding: 2px 18px;
-  background-color: #5cb85c;
+  background-color: rgb(52, 58, 64);
   color: white;
 }
 
