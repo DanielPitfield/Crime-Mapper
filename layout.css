@@ -174,7 +174,7 @@ font-family: Arial;
 
 .close:hover,
 .close:focus {
-  color: #000;
+  color: red;
   text-decoration: none;
   cursor: pointer;
 }
@@ -212,3 +212,11 @@ input[type=time] {
 input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display: none; }
+
+#Filter_Crime_Type option[value="[ALL]"] {
+    background:rgba(0,255,0,0.3);
+}
+
+#Filter_Crime_Type_sub option[value="[ALL]"] {
+    background:rgba(0,255,0,0.3);
+}
