@@ -13,43 +13,33 @@ require 'dbConfig.php'; // Include the database configuration file
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
 <link rel="stylesheet" href="layout.css">  <!-- Everything else -->
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
+<!-- 1st - 0% left
+     2nd - 0.25% left
+     3rd - 0.25% left and right
+     4th - 0.25% right
+     5th - 0% right
+-->
+
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-  
-  <ul class="navbar-nav">
-    
     <!-- Filter Crime -->
-    <li class="col-5 px-1">
-        	<button class="btn btn-outline-primary btn-block" role="button" data-toggle="modal" data-target="#modal_filter" style="margin-left:5px;">Filter Crime</button>
-    </li>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="width:40%;margin-left:0%;">Filter Crime</button>
     
     <!-- Import Crime -->
-    <li class="col-5 px-1">
-        	<button class="btn btn-outline-primary btn-block" role="button" data-toggle="modal" data-target="#modal_import" style="margin-left:2px;">Import Crime</button>
-    </li>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="width:40%;margin-left:0.25%;">Import Crime</button>
     
     <!-- Location Search Bar -->
-    <li class="col-10 px-1">
-        <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="margin-left:2px;">
-    </li>
+    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="margin-left:0.25%;margin-right:0.25%;">
 
     <!-- Analyse Crime -->
-    <li class="col-5 px-1">
-        <button class="btn btn-outline-primary btn-block" id="btn_marker_cluster" role="button" style="margin-left:2px;margin-right:0px;">Analyse Crime</button>
-    </li>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="width:40%;margin-right:0.25%;">Analyse Crime</button>
     
     <!-- Predict Crime (disabled) -->
-    <li class="col-5 px-1">
-        	<button class="btn btn-outline-primary btn-block disabled" role="button" style="margin-right:0px;">Predict Crime</button>
-    </li>
-	
-  </ul>
-  
+    <button class="btn btn-outline-primary navbar-btn disabled" role="button" style="width:40%;margin-right:0%;">Predict Crime</button>
 </nav>
 
 <!-- Map -->
@@ -622,6 +612,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		    for (i = 0; i < MarkerArray.length; i++){
 			    MarkerArray[i].setVisible(true);
 			    
+			    /* ---- Convert date into comparable object ---- */
 			    var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
 			    MarkerDate = new Date(MarkerDate);
 			
