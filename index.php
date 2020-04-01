@@ -13,8 +13,6 @@ require 'dbConfig.php'; // Include the database configuration file
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  <!-- For navigation bar icons -->
 <link rel="stylesheet" href="layout.css">  <!-- Everything else -->
 
@@ -180,7 +178,7 @@ require 'dbConfig.php'; // Include the database configuration file
         </div>
 		
 		<div id="map3"></div>
-		<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;">Update</button>
+		<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
 		</form>
 	   </div>
     </div>
@@ -202,10 +200,9 @@ require 'dbConfig.php'; // Include the database configuration file
         <input type="file" class="custom-file-input" id="Import_input" accept=".csv" multiple>
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
         <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
-        <br></br>
-        <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;">Import</button>
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">Progress Bar
+        <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
+            <div class="progress" style="margin-top:8px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
                 </div>
             </div>
         </div>
@@ -348,11 +345,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	    else if (other_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
 	        $('#Edit_Crime_Type').val('Other').change();
 	    }
-	    /*
 	    else {
-	        console.log("Unexpected main category chosen")
+	        console.log("Unexpected main category chosen (Load/Edit)");
+	        $('#Edit_Crime_Type').val('[Import]').change();
+	        //$('#Edit_Crime_Type_sub').val(MakerToEdit.Crime_Type).change();
 	    }
-	    */
 		
 		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 		
@@ -449,7 +446,10 @@ require 'dbConfig.php'; // Include the database configuration file
 				var index = i; // Position in MarkerArray
 		}
 		
-		MarkerToDelete.info.close(); // Close infowindow
+		if (MarkerToDelete.info != null) { // Additional check
+		    MarkerToDelete.info.close(); // Close infowindow
+		}
+		
 		MarkerToDelete.setVisible(false); // Hide marker
 		
 		if (index !== -1) MarkerArray.splice(index, 1); // Remove marker from array
@@ -526,27 +526,40 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	function FilterMarkers() {
 		
-		var AllSelected = false;
+		var AllMainSelected = false;
+		var AllSubSelected = false;
 		var isMinDate = true;
 		var isMaxDate = true;
 		var isMinTime = true;
 		var isMaxTime = true;
 		var invalidInput = false;
 		
-		/* ---- Crime Type ---- */
-		var dropdown = document.getElementById("Filter_Crime_Type_sub");
+		/* -------- Getting input values -------- */
 		
-		if (dropdown.options[dropdown.selectedIndex].value == "All") {
-			console.log("All selected");
-			AllSelected = true;
+		/* ---- Main Crime Type ---- */
+		var main_dropdown = document.getElementById("Filter_Crime_Type");
+		
+		if (main_dropdown.options[main_dropdown.selectedIndex].value == "[ALL]")
+		{
+			AllMainSelected = true;
 		}
 		else {
-			var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+			var Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
+		}
+		
+		/* ---- Sub Crime Type ---- */
+		var sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
+		
+		if (sub_dropdown.options[sub_dropdown.selectedIndex].value == "[ALL]")
+		{
+			AllSubSelected = true;
+		}
+		else {
+			var Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
 		}
 		
 		/* ---- Date ---- */
 		if (document.getElementById("Filter_minDate").value == "") {
-			console.log("No minimum date was entered");
 			isMinDate = false;
 		}
 		else {
@@ -555,7 +568,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 		
 		if (document.getElementById("Filter_maxDate").value == "") {
-			console.log("No maximum date was entered");
 			isMaxDate = false;
 		}
 		else {
@@ -565,7 +577,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		/* ---- Time ---- */
 		if (document.getElementById("Filter_minTime").value == "") {
-			console.log("No minimum time was entered");
 			isMinTime = false;
 		}
 		else {
@@ -573,7 +584,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 		
 		if (document.getElementById("Filter_maxTime").value == "") {
-			console.log("No maximum time was entered");
 			isMaxTime = false;
 		}
 		else {
@@ -583,6 +593,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		// Also by ID or last x/10/100 crimes?
 		// Also by date (after date or range of dates)
+		
+		/* -------- Input validation -------- */
 		
 		if (isMinDate == true && isMaxDate == true) {
 		    if (minDate > maxDate) {
@@ -603,53 +615,117 @@ require 'dbConfig.php'; // Include the database configuration file
 		        invalidInput = true;
 		}
 		
-		if (invalidInput == false) {
-		    for(i = 0; i < MarkerArray.length; i++){
-			MarkerArray[i].setVisible(true); // Remove any previous filters by showing all markers
-		    }
-		    
-		    for(i = 0; i < MarkerArray.length; i++){
-			var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
-			MarkerDate = new Date(MarkerDate);
-			
-			var MarkerTime = MarkerArray[i].Crime_Time;
-			
-			// here, changes to select elements mean all is false and no crime type is selected, so all markers are hidden
-			if (AllSelected == false) { // If a specific crime was selected
-				if (MarkerArray[i].Crime_Type != Crime_Type) { // And the marker's crime type is not the same as the one selected
-					MarkerArray[i].setVisible(false); // Hide it
-				}
-			}	
-			
-			if (isMinDate == true) { // If a minimum date was entered
-				if (MarkerDate < minDate) { // And the marker's date is before than that date
-					MarkerArray[i].setVisible(false); // Hide it
-				}
-			}
-			
-			if (isMaxDate == true) {
-				if (MarkerDate > maxDate) {
-					MarkerArray[i].setVisible(false);
-				}
-			}
-			
-			if (isMinTime == true) {
-				if (MarkerTime < minTime) {
-					MarkerArray[i].setVisible(false);
-				}
-			}
-			
-			if (isMaxTime == true) {
-				if (MarkerTime > maxTime) {
-					MarkerArray[i].setVisible(false);
-				}
-			}
-			$("#modal_filter").modal('hide');
-			
-		    }
-		    
-		}
+		/* -------- Filtering -------- */
 		
+		/* ---- Remove any previous filters ---- */
+		if (invalidInput == false) {
+		    for (i = 0; i < MarkerArray.length; i++){
+			    MarkerArray[i].setVisible(true);
+			    
+			    var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
+			    MarkerDate = new Date(MarkerDate);
+			
+			    var MarkerTime = MarkerArray[i].Crime_Time;
+
+    			if (AllMainSelected == false) {
+    			    if (AllSubSelected == false) { // One specific crime
+    			        if (MarkerArray[i].Crime_Type != Sub_Crime_Type) {
+    			            MarkerArray[i].setVisible(false);
+    			        }
+    			    }
+    			    if (AllSubSelected == true) { // One main category of crime
+    			        if (Main_Crime_Type == "Violence against the person") {
+    			            if (violence_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            }
+    			        }
+    			        if (Main_Crime_Type == "Public Order") {
+    			            if (public_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Drug offences") {
+    			            if (drug_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Vehicle offences") {
+    			            if (vehicle_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Sexual offences") {
+    			            if (sexual_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Arson and criminal damage") {
+    			            if (arson_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Posession of weapons") {
+    			            if (weapons_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Theft") {
+    			            if (theft_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Burglary") {
+    			            if (burglary_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Robbery") {
+    			            if (robbery_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Miscellaneous crimes against society") {
+    			            if (misc_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			        if (Main_Crime_Type == "Other") {
+    			            if (other_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
+    			                MarkerArray[i].setVisible(false);
+    			            } 
+    			        }
+    			    }
+    			
+    			if (isMinDate == true) { // If a minimum date was entered
+    				if (MarkerDate < minDate) { // And the marker's date is before than that date
+    					MarkerArray[i].setVisible(false); // Hide it
+    				}
+    			}
+    			
+    			if (isMaxDate == true) {
+    				if (MarkerDate > maxDate) {
+    					MarkerArray[i].setVisible(false);
+    				}
+    			}
+    			
+    			if (isMinTime == true) {
+    				if (MarkerTime < minTime) {
+    					MarkerArray[i].setVisible(false);
+    				}
+    			}
+    			
+    			if (isMaxTime == true) {
+    				if (MarkerTime > maxTime) {
+    					MarkerArray[i].setVisible(false);
+    				}
+    			}
+    			$("#modal_filter").modal('hide');
+    			
+    		}
+		    
+		  }
+		
+	    }
 	}
 
 	/*
@@ -1102,10 +1178,16 @@ require 'dbConfig.php'; // Include the database configuration file
         }
         
         AddOptions(add_select,main_options);
+        
+        all_option = ["[ALL]"];
+        AddOptions(filter_select,all_option);
         AddOptions(filter_select,main_options);
+        
         AddOptions(edit_select,main_options);
         
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
+        
+        AddOptions(add_sub_select,violence_sub_options);
         
         public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];
         
@@ -1113,7 +1195,8 @@ require 'dbConfig.php'; // Include the database configuration file
         
         vehicle_sub_options = ["Aggravated vehicle taking","Theft from vehicle","Theft or unauthorised taking of motor vehicle"];
         
-        sexual_sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"]; 
+        sexual_sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"];
+        
         arson_sub_options = ["Arson endangering life","Arson not endangering life","Criminal damage to a dwelling","Criminal damage to a building other than a dwelling","Criminal damage to a vehicle","Other criminal damage"];
         
         weapons_sub_options = ["Possession of firearms with intent","Possession of firearms offences","Possession of other weapons","Possession of article with blade or point","Other firearms offences","Other knives offences"];
@@ -1124,10 +1207,9 @@ require 'dbConfig.php'; // Include the database configuration file
         
         robbery_sub_options = ["Robbery of business property","Robbery of personal property"];
         
-        misc_sub_options = ["Concelaing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"];
+        misc_sub_options = ["Concealing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"];
         
-        other_sub_options = ["Unspecified Crime", "Other crime"]; 
-        
+        other_sub_options = ["Unspecified Crime", "Other crime"];
         
         $("#Add_Crime_Type").change(function() { // When main category selected
             $("#Add_Crime_Type_sub").empty(); // Remove any previous values (if any)
@@ -1169,11 +1251,9 @@ require 'dbConfig.php'; // Include the database configuration file
             else if (el.val() === "Other") {
                 AddOptions(add_sub_select,other_sub_options);
             }
-            /*
             else {
-                alert("Unexpected main category chosen");
+                console.log("Unexpected main category chosen (Add)");
             }
-            */
         });
         
         $("#Filter_Crime_Type").change(function() {
@@ -1181,46 +1261,59 @@ require 'dbConfig.php'; // Include the database configuration file
             var el = $(this);
             
             if(el.val() === "Violence against the person") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,violence_sub_options);
             }
             else if (el.val() === "Public Order") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,public_sub_options);
             }
             else if (el.val() === "Drug offences") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,drug_sub_options);
             }
             else if (el.val() === "Vehicle offences") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,vehicle_sub_options);
             }
             else if (el.val() === "Sexual offences") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,sexual_sub_options);
             }
             else if (el.val() === "Arson and criminal damage") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,arson_sub_options);
             }
             else if (el.val() === "Possession of weapons") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,weapons_sub_options);
             }
             else if (el.val() === "Theft") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,theft_sub_options);
             }
             else if (el.val() === "Burglary") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,burglary_sub_options);
             }
             else if (el.val() === "Robbery") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,robbery_sub_options);
             }
             else if (el.val() === "Miscellaneous crimes against society") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,misc_sub_options);
             }
             else if (el.val() === "Other") {
+                AddOptions(filter_sub_select,all_option);
                 AddOptions(filter_sub_select,other_sub_options);
             }
-            /*
-            else {
-                alert("Unexpected main category chosen");
+            else if (el.val() === "[ALL]") {
+                AddOptions(filter_sub_select,all_option);
             }
-            */
+            else {
+                console.log("Unexpected main category chosen (Filter)");
+            }
         });
         
         $("#Edit_Crime_Type").change(function() {
@@ -1263,11 +1356,9 @@ require 'dbConfig.php'; // Include the database configuration file
             else if (el.val() === "Other") {
                 AddOptions(edit_sub_select,other_sub_options);
             }
-            /*
             else {
-                alert("Unexpected main category chosen");
+                console.log("Unexpected main category chosen (Edit)");
             }
-            */
         });
 
         
