@@ -187,16 +187,15 @@ font-family: Arial;
 
 .modal-body {padding: 14px 10px;}
 
-input[type=date], input[type=time], select {
+input[type=date], input[type=time] {
  height:35px;
  font-family:Arial;
  font-size:15px;
- background-color: white;
- outline: none;
- border: 5;
- border-radius: 3px;
  padding: 5px;
  color: black;
+ border: 1px solid #ccc;
+ border-radius: 4px;
+ background-color:#e6eeff;
 }
 
 input[type=date] {
@@ -210,6 +209,11 @@ input[type=time] {
 input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display: none; }
+
+.form-control {
+ background-color:#e6eeff;
+ width:93%;
+}
 
 #Filter_Crime_Type option[value="[ALL]"] {
     background:rgba(0,255,0,0.3);
@@ -226,10 +230,9 @@ input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display
 }
 
 #modal_right {
-    margin-left:5px;
     border: 1px solid black;
     display: inline-block;
-    width:46.5%;
+    width:47.5%;
     float:right;
 }
 
