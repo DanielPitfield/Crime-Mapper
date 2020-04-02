@@ -62,24 +62,24 @@ require 'dbConfig.php'; // Include the database configuration file
 	   </div>
 	   <div class="modal-body">
 	   <div class="form-group">
-		Date (from):
+		Date:
 		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
-		(to):
+		to
 		<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		</div>
 		
 		<div class="form-group">
-		Time (from):
+		Time:
 		<input type="time" id="Filter_minTime" value="">
-		(to):
+		to
 		<input type="time" id="Filter_maxTime" value="">
 		</div>
 		
 		<div class="form-group">
-        <select class="select form-control" id="Filter_Crime_Type">
+        <select class="select form-control" id="Filter_Crime_Type" style="width:100%;">
         <option value="All" selected disabled hidden>Crime Type - Main Category</option>
         </select>
-        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
+        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type" style="width:100%;">
         <option value="All" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
@@ -105,19 +105,19 @@ require 'dbConfig.php'; // Include the database configuration file
 		<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
 		    
 		<div class="form-group">
-		<label class="control-label " for="Add_Date">Date</label>
+		<label class="control-label " for="Add_Date">Date:</label>
 		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 
-		<label class="control-label " for="Add_Time">Time</label>
+		<label class="control-label " for="Add_Time">Time:</label>
 		<input id="Add_Time" type="time" name="Time" value="00:00" required>
 		</div>
 		
 		<div class="form-group">
         <select class="select form-control" id="Add_Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        <option value="" selected disabled hidden>Crime Category</option>
         </select>
         <select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
+        <option value="" selected disabled hidden>Crime Type</option>
         </select>
         </div>
 	
@@ -150,19 +150,19 @@ require 'dbConfig.php'; // Include the database configuration file
 		<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
 		    
 		<div class="form-group">
-		<label class="control-label " for="Edit_Date">Date</label>
+		<label class="control-label " for="Edit_Date">Date:</label>
 		<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		
-		<label class="control-label " for="Edit_Time">Time</label>
+		<label class="control-label " for="Edit_Time">Time:</label>
 		<input id="Edit_Time" type="time" name="Time" value="00:00" required>
 		</div>
 		
 		<div class="form-group">
         <select class="select form-control" id="Edit_Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Main Category</option>
+        <option value="" selected disabled hidden>Crime Category</option>
         </select>
         <select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
+        <option value="" selected disabled hidden>Crime Type</option>
         </select>
         </div>
 		
