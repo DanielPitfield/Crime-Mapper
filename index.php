@@ -52,7 +52,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Filter modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl" style="min-width:1100px;">
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Filter</h5>
@@ -92,7 +92,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Add crime modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl" id="modal_add_dialog">
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Add Crime</h5>
@@ -101,6 +101,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		</button>
 	   </div>
 	   <div class="modal-body">
+	   <div id="modal_left">
 		<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
 		    
 		<div class="form-group">
@@ -119,12 +120,13 @@ require 'dbConfig.php'; // Include the database configuration file
         <option value="" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
-		
-		<div class="form-group">
+	
         <textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
         </div>
         
+        <div id="modal_right">
 		<div id="map2"></div>
+		</div>
 		
 		<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
 		</form>
@@ -135,7 +137,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Edit crime modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_edit">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl" id="modal_edit_dialog">
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Edit Crime</h5>
@@ -144,6 +146,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		</button>
 	   </div>
 	   <div class="modal-body">
+	   <div id="modal_left">
 		<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
 		    
 		<div class="form-group">
@@ -163,11 +166,13 @@ require 'dbConfig.php'; // Include the database configuration file
         </select>
         </div>
 		
-		<div class="form-group">
         <textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
         </div>
 		
+		<div id="modal_right">
 		<div id="map3"></div>
+		</div>
+		
 		<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
 		</form>
 	   </div>
