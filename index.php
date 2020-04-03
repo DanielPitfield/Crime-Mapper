@@ -42,6 +42,11 @@ require 'dbConfig.php'; // Include the database configuration file
     <button class="btn btn-outline-primary navbar-btn disabled" role="button" style="width:40%;margin-right:0%;">Predict Crime</button>
 </nav>
 
+<!-- Loading Symbol -->
+<div class="spinner-border text-primary" role="status" id="loading_symbol">
+  <span class="sr-only">Loading...</span>
+</div>
+
 <!-- Map -->
 <div id="map"></div>
 
@@ -253,6 +258,20 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 	}
 	
+	function ShowLoading() {
+	    LoadingSymbol = document.getElementById("loading_symbol");
+		LoadingSymbol.style.left = "calc(50% - 50px)";
+		LoadingSymbol.style.top = "calc(50% - 50px)";
+		LoadingSymbol.style.display = "block";
+	}
+	
+	function HideLoading() {
+	    LoadingSymbol = document.getElementById("loading_symbol");
+		LoadingSymbol.style.left = "-500px";
+		LoadingSymbol.style.top = "-500px";
+		LoadingSymbol.style.display = "none";
+	}
+
 	function UpdateMarkerInfo(marker) {
 	 
 	marker.title = marker.Crime_Type; // Shown on hover
@@ -287,7 +306,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	function EditMarker(ID) {
-		
 		for(i = 0; i < MarkerArray.length; i++){
 			if (MarkerArray[i].ID == ID)
 				var MarkerToEdit = MarkerArray[i]; // Get actual marker
@@ -385,6 +403,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		$("#edit_submit_form").submit(function(e) {
 		e.preventDefault();
+	    ShowLoading();
 					
 		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
 		
@@ -427,6 +446,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		MarkerToEdit.setPosition(MarkerToEdit.position);
 		UpdateMarkerInfo(MarkerToEdit);
+		HideLoading();
 		$("#modal_edit").modal('hide');
 		
 		});
@@ -434,6 +454,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	function DeleteMarker(ID) { // Refactor to use marker not marker.ID (saves looping through entire marker array to get marker from ID)
+	    ShowLoading();
 		
 		for(i = 0; i < MarkerArray.length; i++){
 			if (MarkerArray[i].ID == ID)
@@ -460,6 +481,8 @@ require 'dbConfig.php'; // Include the database configuration file
 					//
 				}
 			});
+			
+		HideLoading();
 		
 	}
 
@@ -489,7 +512,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
-	function LoadMarkers() {	
+	function LoadMarkers() {
 		var markers = [
 			<?php 
 			$result = $db->query("SELECT * FROM markers"); // Returns output of statement
@@ -511,6 +534,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			var Point = new google.maps.LatLng(markers[i][5], markers[i][6]);
 			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
 		}
+		setTimeout(() => {HideLoading();}, 500);
 		
 	}
 	LoadMarkers();
@@ -520,7 +544,6 @@ require 'dbConfig.php'; // Include the database configuration file
     markerCluster.setIgnoreHidden(true);
 	
 	function FilterMarkers() {
-		
 		var AllMainSelected = false;
 		var AllSubSelected = false;
 		var isMinDate = true;
@@ -715,13 +738,13 @@ require 'dbConfig.php'; // Include the database configuration file
     					MarkerArray[i].setVisible(false);
     				}
     			}
-    			$("#modal_filter").modal('hide');
     			
     		}
 		    
 		  }
 		
 	    }
+	    $("#modal_filter").modal('hide');
 	}
 
 	/*
@@ -821,6 +844,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	$("#add_submit_form").submit(function(e) {
 		e.preventDefault();
+		ShowLoading();
 					
 		var dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
 		
@@ -851,6 +875,7 @@ require 'dbConfig.php'; // Include the database configuration file
 					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
 				}
 				SmallMarkerMoved = false;
+				HideLoading();
 				$("#modal_add").modal('hide');
 			}
 			
@@ -865,7 +890,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 		
 	$("#btn_filter_confirm").click(function() {
+	    ShowLoading();
 		FilterMarkers();
+		HideLoading();
 	});
 	
 	/*
@@ -878,6 +905,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	const analyse_btn = document.getElementById("btn_marker_cluster"); // 'Analyse' button
 	analyse_btn.addEventListener('click', event => {
 		hideContextMenu();
+		ShowLoading();
 		
 		if (Cluster_Active == true) { // If active and button was pressed
 		    //$("#btn_marker_cluster").text('Clustering (enable)');
@@ -891,6 +919,8 @@ require 'dbConfig.php'; // Include the database configuration file
             markerCluster.repaint(); // Redraw and show clusterer
             Cluster_Active = true;
 		}
+		
+		HideLoading();
 
 	});
 	
@@ -1151,6 +1181,8 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- On Page Load -->
 <script>
     $(document).ready(function() {
+        ShowLoading();
+        
         /* Main category select elements */ 
         var add_select = document.getElementById("Add_Crime_Type");
         var filter_select = document.getElementById("Filter_Crime_Type");
