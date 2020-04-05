@@ -57,7 +57,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Filter modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
-  <div class="modal-dialog modal-xl" style="min-width:1100px;">
+  <div class="modal-dialog modal-xl" id="modal_filter_dialog">
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Filter</h5>
@@ -66,30 +66,42 @@ require 'dbConfig.php'; // Include the database configuration file
 		</button>
 	   </div>
 	   <div class="modal-body">
+	   <div id="modal_left">
 	   <div class="form-group">
-		Date:
+	    Date:
 		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
-		to
 		<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 		</div>
 		
 		<div class="form-group">
 		Time:
 		<input type="time" id="Filter_minTime" value="">
-		to
 		<input type="time" id="Filter_maxTime" value="">
 		</div>
 		
 		<div class="form-group">
-        <select class="select form-control" id="Filter_Crime_Type" style="width:100%;">
-        <option value="All" selected disabled hidden>Crime Type - Main Category</option>
+        <select class="select form-control" id="Filter_Crime_Type">
+        <option value="[ALL]" selected disabled hidden>Crime Type - Main Category</option>
         </select>
-        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type" style="width:100%;">
-        <option value="All" selected disabled hidden>Crime Type - Subcategory</option>
+        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
+        <option value="[ALL]" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
+        
+        <div class="form-group">
+            <select class="select form-control" id="Filter_Location" disabled>
+        <option value="[ALL]" selected disabled hidden>Search Radius (km)</option>
+        </select>
+        </div> 
+            
+        </div>
+        
+        <div id="modal_right">
+		<div id="map4"></div>
+		</div>
 		
 		<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
+
 	   </div>
     </div>
   </div>
@@ -543,7 +555,16 @@ require 'dbConfig.php'; // Include the database configuration file
                 {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
     markerCluster.setIgnoreHidden(true);
 	
-	function FilterMarkers() {
+	function FilterMarkers(center_loc, distance) {
+	    if (distance == null) {
+	        distance = "[ALL]";
+	    }
+	    
+	    var AllDistanceSelected = false;
+	    if (distance == "[ALL]") {
+	        AllDistanceSelected = true;
+	    }
+	    
 		var AllMainSelected = false;
 		var AllSubSelected = false;
 		var isMinDate = true;
@@ -557,6 +578,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		/* ---- Main Crime Type ---- */
 		var main_dropdown = document.getElementById("Filter_Crime_Type");
 		
+		if (main_dropdown.options[main_dropdown.selectedIndex].value == null)
+		{
+			AllMainSelected = true;
+		}
+		
 		if (main_dropdown.options[main_dropdown.selectedIndex].value == "[ALL]")
 		{
 			AllMainSelected = true;
@@ -567,6 +593,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		/* ---- Sub Crime Type ---- */
 		var sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
+		
+		if (sub_dropdown.options[sub_dropdown.selectedIndex].value == null)
+		{
+			AllSubSelected = true;
+		}
 		
 		if (sub_dropdown.options[sub_dropdown.selectedIndex].value == "[ALL]")
 		{
@@ -714,6 +745,7 @@ require 'dbConfig.php'; // Include the database configuration file
     			            } 
     			        }
     			    }
+    			}
     			
     			if (isMinDate == true) { // If a minimum date was entered
     				if (MarkerDate < minDate) { // And the marker's date is before than that date
@@ -739,11 +771,17 @@ require 'dbConfig.php'; // Include the database configuration file
     				}
     			}
     			
-    		}
+    			if (AllDistanceSelected == false) {
+    			    var distanceInMiles = google.maps.geometry.spherical.computeDistanceBetween(center_loc, MarkerArray[i].getPosition());
+    			    distanceInMiles = (distanceInMiles / 1609);
+    			    if (distanceInMiles > distance) {
+    			        MarkerArray[i].setVisible(false);
+    			    }
+    			}
 		    
-		  }
+		  } // For all markers (end)
 		
-	    }
+	    } // invalid input (end)
 	    $("#modal_filter").modal('hide');
 	}
 
@@ -888,12 +926,106 @@ require 'dbConfig.php'; // Include the database configuration file
 	| Filtering crimes
 	|-----------------------------------------------------------------------------------------------------------
 	*/
+	
+	var filter_marker_hold = [];
+	var UK_center = new google.maps.LatLng(52.636879, -1.139759);
+	
+	var filter_marker = new google.maps.Marker({
+                position: UK_center, 
+                map: null
+                });
+    filter_marker_hold.push(filter_marker);
+	
+	$('#modal_filter').on('shown.bs.modal', function () {
+	    $("#Filter_Location").prop("selectedIndex", 0);
+	    $('#Filter_Location').prop('disabled', 'disabled');
+	    
+        var MapOptions = {
+			center: UK_center,
+			zoom: 6,
+			disableDefaultUI: true, // Remove all controls but street view
+			streetViewControl: true,
+		};
+
+		var map4 = new google.maps.Map(document.getElementById("map4"), MapOptions); // Show smaller map
 		
-	$("#btn_filter_confirm").click(function() {
-	    ShowLoading();
-		FilterMarkers();
-		HideLoading();
-	});
+		var marker_placed = false;
+        
+        google.maps.event.addListener(map4, 'click', function(event) {
+		    if (marker_placed == false) {
+		        var filter_marker = new google.maps.Marker({
+                position: event.latLng, 
+                map: map4
+                });
+                filter_marker_hold[0] = filter_marker;
+                
+                marker_placed = true;
+                $('#Filter_Location').prop('disabled', false);
+		    }
+		    else
+		    {
+		        filter_marker_hold[0].setPosition(event.latLng);
+		    }
+        });
+        
+        var circle_placed = false;
+        var circle_hidden = false;
+        var circle_hold = [];
+        var distance_val;
+        
+        $("#Filter_Location").on("change", function() {
+            distance_val = $(this).val();
+            
+            if (distance_val == "[ALL]") {
+                $('#Filter_Location').prop('disabled', 'disabled');
+                if (circle_placed == true) {
+                    circle_hold[0].setMap(null);
+                    circle_hidden = true;
+                }
+                if (marker_placed == true) {
+                    filter_marker_hold[0].setMap(null);
+                    marker_placed = false;
+                }
+            }
+            else 
+            {
+                if (circle_hidden == true) {
+                    circle_hold[0].setMap(map4);
+                }
+                
+                var f_marker = filter_marker_hold[0];
+            
+                if (circle_placed == false) {
+                    var circle = new google.maps.Circle({
+                    map: map4,
+                    radius: 1,    // 10 miles in metres
+                    fillColor: '#AA0000'
+                    });
+                
+                    circle_hold.push(circle);
+                    circle_placed = true;
+                }
+            
+                circle_hold[0].bindTo('center', f_marker, 'position');
+                circle_hold[0].setRadius(distance_val*1609); // Convert miles to metres
+            }
+            
+            
+        });
+        
+        $("#btn_filter_confirm").click(function() {
+    	    ShowLoading();
+    	    
+    	    var f_marker = filter_marker_hold[0];
+    	    var center_lat = f_marker.getPosition().lat();
+    	    var center_lng = f_marker.getPosition().lng();
+    	    var center_loc = new google.maps.LatLng(center_lat, center_lng);
+    	    
+    		FilterMarkers(center_loc, distance_val);
+    		HideLoading();
+	    });
+		
+    })
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1170,7 +1302,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=places&callback=initMap" async defer> // API Key, Libraries and map function
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=geometry,places&callback=initMap" async defer> // API Key, Libraries and map function
 </script>
 
 <!-- Bootstrap Scripts -->
@@ -1182,6 +1314,30 @@ require 'dbConfig.php'; // Include the database configuration file
 <script>
     $(document).ready(function() {
         ShowLoading();
+        
+        function AddOptions(select,options) { /* Add parameter options to parameter select */
+            for(var i = 0; i < options.length; i++) {
+                    var opt = options[i];
+                    var el = document.createElement("option");
+                    el.textContent = opt;
+                    el.value = opt;
+                    select.appendChild(el);
+                }
+        }
+        
+        function AddLocationOptions(select,options) { /* Add parameter options to parameter select */
+            for(var i = 0; i < options.length; i++) {
+                    var opt = options[i];
+                    var el = document.createElement("option");
+                    el.textContent = "Within " + opt + " miles";
+                    el.value = opt;
+                    select.appendChild(el);
+                }
+        }
+        
+        var filter_loc = document.getElementById("Filter_Location");
+        
+        var loc_options = ["1","3","5","10","15","20","30","40","50","100","250"];
         
         /* Main category select elements */ 
         var add_select = document.getElementById("Add_Crime_Type");
@@ -1195,19 +1351,27 @@ require 'dbConfig.php'; // Include the database configuration file
         
         var main_options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society","Other"]; 
         
-        function AddOptions(select,options) { /* Add parameter options to parameter select */
-            for(var i = 0; i < options.length; i++) {
-                    var opt = options[i];
-                    var el = document.createElement("option");
-                    el.textContent = opt;
-                    el.value = opt;
-                    select.appendChild(el);
-                }
-        }
-        
         AddOptions(add_select,main_options);
         
         all_option = ["[ALL]"];
+        
+        AddOptions(filter_loc,all_option); // All at top
+        
+        var opt = "1/4";
+        var el = document.createElement("option");
+        el.textContent = "Within " + opt + " miles";
+        el.value = 0.25;
+        filter_loc.appendChild(el);
+                    
+        var opt = "1/2";
+        var el = document.createElement("option");
+        el.textContent = "Within " + opt + " miles";
+        el.value = 0.5;
+        filter_loc.appendChild(el);
+        // Add 1/4 and 1/2 manually becuase their values are different
+
+        AddLocationOptions(filter_loc,loc_options); // Rest of the options
+        
         AddOptions(filter_select,all_option);
         AddOptions(filter_select,main_options);
         
@@ -1388,7 +1552,6 @@ require 'dbConfig.php'; // Include the database configuration file
                 console.log("Unexpected main category chosen (Edit)");
             }
         });
-
         
     })
 </script>
