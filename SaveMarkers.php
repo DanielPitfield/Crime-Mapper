@@ -34,10 +34,13 @@ if(isset($_POST['Longitude']))
 }
 
 // Insert information into database
-$sql = "INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude)
-		VALUES ('$crime_type', '$date', '$time', '$description', '$latitude', '$longitude')";
-$db->query($sql);
+$stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude)
+		VALUES (?,?,?,?,?,?)');
 
-$id= mysqli_insert_id($db);
+$stmt->bind_param('ssssdd', $crime_type, $date, $time, $description, $latitude, $longitude);
+
+$stmt->execute();
+
+$id = mysqli_insert_id($db);
 echo $id;	
 ?>
