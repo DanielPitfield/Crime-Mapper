@@ -6,7 +6,9 @@ if(isset($_POST['MarkerID']))
     $MarkerID = $_POST['MarkerID'];
 }
 
-// Delete marker from database
-$sql = "DELETE FROM markers WHERE id = $MarkerID";
-$db->query($sql);		
+$stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
+
+$stmt->bind_param('i', $MarkerID);
+
+$stmt->execute();
 ?>
