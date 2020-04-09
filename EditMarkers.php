@@ -38,9 +38,9 @@ if(isset($_POST['Longitude']))
     $longitude = $_POST['Longitude'];
 }
 
-// Insert information into database
-$sql = "UPDATE markers
-        SET Crime_Type = '$crime_type', Crime_Date = '$date', Crime_Time = '$time', Description = '$description', Latitude = '$latitude', Longitude = '$longitude' WHERE ID = '$id';";
-		
-$db->query($sql);
+$stmt = $db->prepare('UPDATE markers SET Crime_Type = ?, Crime_Date = ?, Crime_Time = ?, Description = ?, Latitude = ?, Longitude = ? WHERE ID = ?');
+
+$stmt->bind_param('ssssddi', $crime_type, $date, $time, $description, $latitude, $longitude, $id);
+
+$stmt->execute();
 ?>
