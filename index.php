@@ -11,6 +11,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 </head>
 
 <link rel="stylesheet" href="layout.css">  <!-- Everything else -->
@@ -131,10 +132,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		<div class="form-group">
         <select class="select form-control" id="Add_Crime_Type">
-        <option value="" selected disabled hidden>Crime Category</option>
+        <option value="" selected disabled hidden>Crime Type - Main Category</option>
         </select>
         <select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type</option>
+        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
         </select>
         </div>
 	
@@ -1378,8 +1379,6 @@ require 'dbConfig.php'; // Include the database configuration file
         AddOptions(edit_select,main_options);
         
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
-        
-        AddOptions(add_sub_select,violence_sub_options);
         
         public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];
         
