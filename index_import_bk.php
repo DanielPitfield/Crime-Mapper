@@ -211,13 +211,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	   <div class="modal-body">
         <div class="custom-file mb-3">
             
-        <form name="import_submit_form" id="import_submit_form" action="ImportMarkers.php" method="post" enctype="multipart/form-data"> 
-            
         <input type="file" id="FileInput" class="custom-file-input" name="fileToUpload" accept=".csv">
-        <input type="submit" value="Upload File" name="submit" id="Import_Submit">
+        <input type="button" value="Upload File" id="import_submit">
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
-        
-        </form>
         
         </div>
         </div>
@@ -1065,9 +1061,142 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 		
-	$("#btn_import_confirm").click(function() {
-	    
-	});
+	$("#Import_input").on("change", function() {
+    files = this.files;
+    var allCSV = true;
+    
+    for (var i=0, l=files.length; i<l; i++) {
+        var fileName = files[i].name;
+        var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        if(ext != 'csv') {
+            allCSV = false;
+        }
+    }
+    
+    if (allCSV == false) {
+        alert('Only files with the file extension CSV are allowed');
+        this.val = "";
+    }
+    else
+    {
+        // Changing label text to files chosen
+        var string = files[0].name; // First
+        if (files.length > 1) {
+            for (var i=1, l=(files.length)-1; i<l; i++) { // All in between
+                string += ", ";
+                string += files[i].name;
+            }
+            string += ", ";
+            string += files[files.length-1].name; // Last
+        }
+        $("#import_lbl").text(string);  
+    }
+    });
+
+    $('#import_submit').on('click', function() { // Sending selected file to PHP file (to be handled)
+        if($('#FileInput').prop('files').length > 0)
+        {
+            file = $('#FileInput').prop('files')[0];
+            
+            var reader = new FileReader();
+            reader.readAsText(file);
+            
+            reader.onload = function(event) {
+                var Date_index = -1;
+                var Latitude_index = -1;
+                var Longitude_index = -1;
+                var CrimeType_index = -1;
+                var Description_index = -1;
+                
+                var Accepted_Date_headers = ["Date", "date", "Month", "month"];
+                var Accepted_Latitude_headers = ["Latitude", "latitude", "Lat", "lat"];
+                var Accepted_Longitude_headers = ["Longitude", "longitude", "Long", "long", "Lng", "lng"];
+                var Accepted_CrimeType_headers = ["Crime type", "Crime Type", "crime type", "CrimeType", "crimetype", "Type", "type"];
+                var Accepted_Description_headers = ["Context", "context", "Description", "description", "Notes", "notes"];
+                
+                // Read file locally
+                var csv = event.target.result;
+                var rows = csv.split('\n');
+                
+                // Check headers
+                headers = rows[0].split(','); // The first row split by commas give the headers
+            
+                for (var i = 0; i < headers.length; i++) {
+                    headers[i] = $.trim(headers[i].replace(/[\t\n]+/g,' ')); // Remove any whitespace (e.g before first header or after last header)
+                    //console.log(headers[i]);
+                    if (Accepted_Date_headers.indexOf(headers[i]) !== -1) {
+                        Date_index = i;
+                    }
+                    if (Accepted_Latitude_headers.indexOf(headers[i]) !== -1) {
+                        Latitude_index = i;
+                    }
+                    if (Accepted_Longitude_headers.indexOf(headers[i]) !== -1) {
+                        Longitude_index = i;
+                    }
+                    if (Accepted_CrimeType_headers.indexOf(headers[i]) !== -1) {
+                        CrimeType_index = i;
+                    }
+                    if (Accepted_Description_headers.indexOf(headers[i]) !== -1) {
+                        Description_index = i;
+                    }
+                }
+                
+                var validFile = true;
+                var err_str = "FILE UPLOAD ERROR";
+                
+                if (Date_index === -1) {
+                    err_str = err_str + "\nMissing 'Date' column in file";
+                    validFile = false;
+                }
+                if (Latitude_index === -1) {
+                    err_str = err_str + "\nMissing 'Latitude' column in file";
+                    validFile = false;
+                }
+                if (Longitude_index === -1) {
+                    err_str = err_str + "\nMissing 'Longitude' column in file";
+                    validFile = false;
+                }
+                if (CrimeType_index === -1) {
+                    err_str = err_str + "\nMissing 'Crime Type' column in file";
+                    validFile = false;
+                }
+                if (Description_index === -1) {
+                    err_str = err_str + "\nMissing 'Description' column in file";
+                    validFile = false;
+                }
+                
+                // Check number of rows
+                var num_rows = rows.length;
+                
+                if (num_rows > 7500) {
+                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
+                    validFile = false;
+                }
+                
+                if (validFile == true) {
+                    formdata = new FormData();
+                    formdata.append("fileToUpload", file);
+                            
+                    $.ajax({
+                			url: 'ImportMarkers.php',
+                			type: 'POST',
+                			data: formdata,
+                			processData: false,
+                            contentType: false,
+                			success: function(result) // When file is recieved (and processed?) by server
+                			{
+                			    location.reload(); // Reload the page so that information to place markers doesn't need to be sent back
+                			    ShowLoading(); // Start loading (end when map shows)
+                			}
+                	});
+                }
+                else {
+                    alert(err_str);
+                }
+                
+            }
+        }
+    });
 		
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1363,46 +1492,6 @@ require 'dbConfig.php'; // Include the database configuration file
         });
         
     })
-</script>
-
-<script> // Showing name of file chosen (import)
-$("#Import_input").on("change", function() {
-    
-    files = this.files;
-    var allCSV = true;
-    
-    for (var i=0, l=files.length; i<l; i++) {
-        var fileName = files[i].name;
-        var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        if(ext != 'csv') {
-            allCSV = false;
-        }
-    }
-    
-    if (allCSV == false) {
-        alert('Only files with the file extension CSV are allowed');
-        this.val = "";
-    }
-    else
-    {
-        // Changing label text to files chosen
-        var string = files[0].name; // First
-        if (files.length > 1) {
-            for (var i=1, l=(files.length)-1; i<l; i++) { // All in between
-                string += ", ";
-                string += files[i].name;
-            }
-            string += ", ";
-            string += files[files.length-1].name; // Last
-        }
-        $("#import_lbl").text(string);  
-    }
-});
-
-$("#import_submit_form").submit(function(e) {
-    
-});
-
 </script>
 
 </body>
