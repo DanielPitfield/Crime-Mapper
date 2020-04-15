@@ -211,9 +211,14 @@ require 'dbConfig.php'; // Include the database configuration file
 	   <div class="modal-body">
         <div class="custom-file mb-3">
             
-        <input type="file" id="FileInput" class="custom-file-input" name="fileToUpload" accept=".csv">
-        <input type="button" value="Upload File" id="import_submit">
+        <input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
         <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
+        <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
+        <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
+        <div class="progress" style="margin-top:8px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
+            </div>
+        </div>
         
         </div>
         </div>
@@ -1061,7 +1066,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 		
-	$("#Import_input").on("change", function() {
+	$("#Import_Input").on("change", function() {
     files = this.files;
     var allCSV = true;
     
@@ -1093,10 +1098,10 @@ require 'dbConfig.php'; // Include the database configuration file
     }
     });
 
-    $('#import_submit').on('click', function() { // Sending selected file to PHP file (to be handled)
-        if($('#FileInput').prop('files').length > 0)
+    $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
+        if($('#Import_Input').prop('files').length > 0)
         {
-            file = $('#FileInput').prop('files')[0];
+            file = $('#Import_Input').prop('files')[0];
             
             var reader = new FileReader();
             reader.readAsText(file);
