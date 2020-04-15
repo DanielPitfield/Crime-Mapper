@@ -1,6 +1,8 @@
 <?php
 require 'dbConfig.php';
 
+file_put_contents("counts.txt", "");
+
 // Check there are no errors with file upload
 if($_FILES['fileToUpload']['error'] == 0){
     $name = $_FILES['fileToUpload']['name'];
@@ -53,8 +55,11 @@ if($_FILES['fileToUpload']['error'] == 0){
         }
         
         $timeToSend = '00:00:00'; // Hardcoded time value
+        $num_rows = count($csvAsArray);
+        $check_interval = $num_rows / 20;
+        $check_interval = round($check_interval, 0);
             
-        for ($j = 1; $j < count($csvAsArray); $j++)
+        for ($j = 1; $j < $num_rows; $j++)
         {
             // Date
             $dateRead = "";
@@ -138,10 +143,15 @@ if($_FILES['fileToUpload']['error'] == 0){
                 $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude) VALUES (?,?,?,?,?,?)');
                 $stmt->bind_param('ssssdd', $crimeToSend, $dateToSend, $timeToSend, $descriptionToSend, $latitudeToSend, $longitudeToSend);
                 if($stmt->execute()) {
-                    // Record inserted
+                    $lines_success++;
                 }
                 else {
+                    $lines_fail++;
                     continue;
+                }
+                $lines_total++;
+                if ($lines_total % $check_interval == 0) {
+                    file_put_contents("counts.txt",($lines_total/($num_rows-1))*100);
                 }
 
             }
