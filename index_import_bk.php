@@ -216,7 +216,11 @@ require 'dbConfig.php'; // Include the database configuration file
         <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
         <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
         <div class="progress" style="margin-top:8px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
+            <div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
+            </div>
+        </div>
+        <div class="progress" style="margin-top:8px;">
+            <div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
             </div>
         </div>
         
@@ -1179,10 +1183,30 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 if (validFile == true) {
+                    $("#progress_file_upload").css("width", "0%").text("Ready");
                     formdata = new FormData();
                     formdata.append("fileToUpload", file);
                             
                     $.ajax({
+                            // File upload progress
+                            xhr: function() {
+                                var xhr = new window.XMLHttpRequest();
+                                xhr.upload.addEventListener("progress", function(evt) {
+                                    if (evt.lengthComputable) {
+                                        var percentComplete = evt.loaded / evt.total;
+                                        var percentage = percentComplete*100;
+                                        if (percentage = 100) {
+                                            $("#progress_file_upload").css("width",         percentage + "%").text("Complete");
+                                        }
+                                        else {
+                                            $("#progress_file_upload").css("width",         percentage + "%").text(percentage +     "%");
+                                        }
+
+                                    }
+                               }, false);
+                               return xhr;
+                            },
+                        
                 			url: 'ImportMarkers.php',
                 			type: 'POST',
                 			data: formdata,
@@ -1194,6 +1218,24 @@ require 'dbConfig.php'; // Include the database configuration file
                 			    ShowLoading(); // Start loading (end when map shows)
                 			}
                 	});
+                	
+                	setInterval(function()
+                	{
+                    	$(function(){
+                    	    // Insert statement progress
+                            $.ajax({
+                                url: "/counts.txt",
+                                async: false,
+                                cache: false,
+                                dataType: "text",
+                                success: function( data, textStatus, jqXHR ) {
+                                    var percentage = data;
+                                    $("#progress_insert_upload").css("width", Math.round(percentage) + "%").text(Math.round(percentage) + "%");
+                                }
+                            });
+                        });
+                	}, 1000); // Every second check contents of file and update progress bar accordingly
+                	
                 }
                 else {
                     alert(err_str);
