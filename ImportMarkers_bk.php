@@ -9,12 +9,14 @@ if($_FILES['fileToUpload']['error'] == 0){
 
     // Check file is a csv file
     if($ext === 'csv'){
-        // Read column headers again
-        $file = fopen($tmpName, 'r');
-        $firstline = fgetcsv($file);
-        fclose($file);
+        // Convert csv to array
+        $csvAsArray = array_map('str_getcsv', file($tmpName));
+        // Get the first line
+        $firstline = $csvAsArray[0];
+        // Get the length of this first line
+        $header_count = sizeof($firstline);
         
-        // Check column headers
+        // State acceptable column headers
         $Date_headers = array("Date", "date", "Month", "month");
         $Latitude_headers = array("Latitude", "latitude", "Lat", "lat");
         $Longitude_headers = array("Longitude", "longitude", "Long", "long", "Lng", "lng");
@@ -27,10 +29,11 @@ if($_FILES['fileToUpload']['error'] == 0){
         $CrimeType_index;
         $Description_index;
         
-        for ($i = 0; $i < count($firstline); $i++)
+        for ($i = 0; $i < $header_count; $i++)
         {
-           $actual_header = $firstline[$i];
+           $actual_header = $firstline[$i]; // Get each header
            
+           // Find which of the arrays it belongs to and update the index
            if (in_array($actual_header, $Date_headers)) {
                $Date_index = $i;
            }
@@ -49,8 +52,7 @@ if($_FILES['fileToUpload']['error'] == 0){
            
         }
         
-        $csvAsArray = array_map('str_getcsv', file($tmpName));
-        $timeToSend = '00:00:00';
+        $timeToSend = '00:00:00'; // Hardcoded time value
             
         for ($j = 1; $j < count($csvAsArray); $j++)
         {
