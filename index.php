@@ -1213,10 +1213,10 @@ require 'dbConfig.php'; // Include the database configuration file
                                         var percentComplete = evt.loaded / evt.total;
                                         var percentage = percentComplete*100;
                                         if (percentage == 100) {
-                                            $("#progress_file_upload").css("width",         percentage + "%").text("Complete");
+                                            $("#progress_file_upload").css("width", percentage + "%").text("File Upload (Complete)");
                                         }
                                         else {
-                                            $("#progress_file_upload").css("width",         percentage + "%").text(percentage +     "%");
+                                            $("#progress_file_upload").css("width", Math.round(percentage) + "%").text("File Upload (" + percentage + "%)");
                                         }
 
                                     }
@@ -1247,7 +1247,12 @@ require 'dbConfig.php'; // Include the database configuration file
                                 dataType: "text",
                                 success: function( data, textStatus, jqXHR ) {
                                     var percentage = data;
-                                    $("#progress_insert_upload").css("width", Math.round(percentage) + "%").text(Math.round(percentage) + "%");
+                                    if (percentage == 100) {
+                                        $("#progress_insert_upload").css("width", percentage + "%").text("Import (Complete)");
+                                    }
+                                    else {
+                                        $("#progress_insert_upload").css("width", Math.round(percentage) + "%").text("Import (" + Math.round(percentage) + "%)");
+                                    }
                                 }
                             });
                         });
