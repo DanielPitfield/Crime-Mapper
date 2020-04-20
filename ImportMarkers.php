@@ -1,13 +1,14 @@
 <?php
 require 'dbConfig.php';
 
-file_put_contents("counts.txt", "");
+file_put_contents("counts.txt", "0");
 
 // Check there are no errors with file upload
 if($_FILES['fileToUpload']['error'] == 0){
     $name = $_FILES['fileToUpload']['name'];
     $ext = strtolower(end(explode('.', $_FILES['fileToUpload']['name'])));
     $tmpName = $_FILES['fileToUpload']['tmp_name'];
+    // Check type too
 
     // Check file is a csv file
     if($ext === 'csv'){
@@ -195,5 +196,8 @@ if($_FILES['fileToUpload']['error'] == 0){
             
         }
     }
+}
+else {
+  file_put_contents("counts.txt", "-1000");  
 }
 ?>
