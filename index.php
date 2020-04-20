@@ -1200,7 +1200,8 @@ require 'dbConfig.php'; // Include the database configuration file
                     if (FileWarning == true) {
                         alert(warning_str);
                     }
-                    $("#progress_file_upload").css("width", "0%").text("Ready");
+                    
+                    $("#progress_file_upload").css("width", "100%").text("Ready");
                     formdata = new FormData();
                     formdata.append("fileToUpload", file);
                     
@@ -1211,14 +1212,14 @@ require 'dbConfig.php'; // Include the database configuration file
                                 xhr.upload.addEventListener("progress", function(evt) {
                                     if (evt.lengthComputable) {
                                         var percentComplete = evt.loaded / evt.total;
-                                        var percentage = percentComplete*100;
-                                        if (percentage == 100) {
-                                            $("#progress_file_upload").css("width", percentage + "%").text("File Upload (Complete)");
+                                        var upload_percentage = percentComplete*100;
+                                        if (upload_percentage = 100) {
+                                            $("#progress_file_upload").css("width", "100%").text("File Upload (Processing)");
                                         }
                                         else {
-                                            $("#progress_file_upload").css("width", Math.round(percentage) + "%").text("File Upload (" + percentage + "%)");
+                                            $("#progress_file_upload").css("width", Math.round(upload_percentage) + "%").text("File Upload (" + upload_percentage + "%)");
                                         }
-
+                                        
                                     }
                                }, false);
                                return xhr;
@@ -1229,53 +1230,77 @@ require 'dbConfig.php'; // Include the database configuration file
                 			data: formdata,
                 			processData: false,
                             contentType: false,
-                			success: function(result) // When file is recieved by server
+                			success: function()
                 			{
-                			    
+                			    $("#progress_file_upload").css("width", "100%").text("File Upload (Complete)");
+                			},
+                			fail: function()
+                			{
+                			    $("#progress_file_upload").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
+                                $("#progress_file_upload").css("width", "100%").text("File Upload (Failed)");
+                			},
+                			error: function()
+                			{
+                			    $("#progress_file_upload").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
+                                $("#progress_file_upload").css("width", "100%").text("File Upload (Error)");
                 			}
                 	});
                 	
                 	var NoChangeCounter = 0;
+                	var FinishCheckCounter = 0;
+                	var TimeoutCounter = 0;
+                	var Timed_Out = 0;
                 	var data_hold = -10;
                 	
                 	var t=setInterval(CheckProgressFile,1000); // Run below function every second
                 	
                 	function CheckProgressFile() {
-                    	$(function(){
-                    	    // Insert statement progress
-                            $.ajax({
-                                url: "/counts.txt",
-                                async: false,
-                                cache: false,
-                                dataType: "text",
-                                success: function( data, textStatus, jqXHR ) {
-                                    var percentage = data;
-                                    
-                                    if (percentage == data_hold) {
-                                        NoChangeCounter = NoChangeCounter + 1;
+                        $.ajax({
+                            url: "/counts.txt",
+                            cache: false,
+                            async: false,
+                            dataType: "text",
+                            success: function( data, textStatus, jqXHR ) {
+                                TimeoutCounter += 1;
+                                var import_percentage = data;
+                                
+                                if (import_percentage == 0) {
+                                    NoChangeCounter += 1;
+                                }
+                                
+                                if (TimeoutCounter == 30 || import_percentage == "-1000" || NoChangeCounter == 5) { // Timeout, file upload error or no update
+                                    clearInterval(t);
+                                    // Show full width red progress bar
+                                    $("#progress_insert_upload").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
+                                    $("#progress_insert_upload").css("width", "100%").text("Import (Failed)");
+                                    Timed_Out = 1;
+                                }
+                                
+                                if (Timed_Out == 0 && import_percentage != 0) {
+                                    if (import_percentage == data_hold) {
+                                        FinishCheckCounter += 1;
                                     }
-                                        
-                                    if (NoChangeCounter == 3) {
+                                            
+                                    if (FinishCheckCounter == 3) {
                                         $("#progress_insert_upload").css("width", "100%").text("Import (Complete)");
                                     }
+                                            
+                                    if (FinishCheckCounter == 5) {
+                         	               clearInterval(t);
+                    	                   ShowLoading();
+                    	                   location.reload();
+                                    }
+     
+                                    data_hold = import_percentage;
                                         
-                                    if (NoChangeCounter == 5) {
-                     	                clearInterval(t);
-                	                    ShowLoading();
-                	                    location.reload();
+                                    if (FinishCheckCounter < 3) {
+                                        $("#progress_insert_upload").css("width", Math.round(import_percentage) + "%").text("Import (" + Math.round(import_percentage) + "%)");
                                     }
- 
-                                    data_hold = percentage;
-                                    
-                                    if (NoChangeCounter < 3) {
-                                        $("#progress_insert_upload").css("width", Math.round(percentage) + "%").text("Import (" + Math.round(percentage) + "%)");
-                                    }
-                                    
                                 }
-                            });
+                                    
+                            }
                         });
                 	}
-                	
                 	
                 }
                 else {
