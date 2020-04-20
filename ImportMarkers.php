@@ -67,44 +67,6 @@ if($_FILES['fileToUpload']['error'] == 0){
             
         for ($j = 1; $j < $num_rows; $j++)
         {
-            // Date
-            $dateToSend = date("Y-m-d");
-            
-            if ($Date_index != -1) {
-                $dateRead = "";
-                
-                if (isset($csvAsArray[$j][$Date_index])) {
-                    $dateRead = $csvAsArray[$j][$Date_index];
-                }
-                    
-                if ($dateRead != null) {
-                    if (strlen($dateRead) == 7) {
-                        $dateRead = $dateRead . "-01";
-                    }
-                    if (strtotime($dateRead)) {
-                        $dateToSend = $dateRead;
-                    }
-                }
-            }
-            
-            // Time
-            $timeToSend = date("h:i");
-            
-            if ($Time_index != -1) {
-                $timeRead = "";
-                
-                if (isset($csvAsArray[$j][$Time_index])) {
-                    $timeRead = $csvAsArray[$j][$Time_index];
-                }
-                
-                if ($timeRead != null) {
-                    if (strtotime($timeRead)) {
-                        $timeToSend = $timeRead;
-                    }
-                }
-
-            }
-            
             // Latitude
             $validLatitude = 0;
                 
@@ -127,54 +89,94 @@ if($_FILES['fileToUpload']['error'] == 0){
             // Longitude
             $validLongitude = 0;
             
-            if ($Longitude_index != 1 && $validLatitude == 1) {
-                $longitudeRead = 0;
-                $longitudeToSend = 0;
-                    
-                if (isset($csvAsArray[$j][$Longitude_index])) {
-                    $longitudeRead = $csvAsArray[$j][$Longitude_index];
-                }
-                    
-                if (is_numeric($longitudeRead)) {
-                    if ($longitudeRead >= -180 && $longitudeRead <= 180) {
-                        $longitudeToSend = $longitudeRead;
-                        $validLongitude = 1;
+            if ($validLatitude == 1) {
+                if ($Longitude_index != 1) {
+                    $longitudeRead = 0;
+                    $longitudeToSend = 0;
+                        
+                    if (isset($csvAsArray[$j][$Longitude_index])) {
+                        $longitudeRead = $csvAsArray[$j][$Longitude_index];
                     }
-                }
-            }
-                
-            // Crime Type
-            $crimeToSend = "Unknown";
-            
-            if ($CrimeType_index != 1)  {
-                $crimeRead = "";
-                if (isset($csvAsArray[$j][$CrimeType_index])) {
-                    $crimeRead = $csvAsArray[$j][$CrimeType_index];
-                    if (ctype_space($crimeRead) == false && $crimeRead != '') {
-                        if (is_string($crimeRead)) {
-                            $crimeToSend = $crimeRead;
+                        
+                    if (is_numeric($longitudeRead)) {
+                        if ($longitudeRead >= -180 && $longitudeRead <= 180) {
+                            $longitudeToSend = $longitudeRead;
+                            $validLongitude = 1;
                         }
                     }
                 }
             }
-                
-            // Description
-            $descriptionToSend = "-";
             
-            if ($CrimeType_index != 1) {
-                $descriptionRead = "";
-                if (isset($csvAsArray[$j][$Description_index])) {
-                    $descriptionRead = $csvAsArray[$j][$Description_index];
-                    if (ctype_space($descriptionRead) == false && $descriptionRead != '') {
-                        if (is_string($descriptionRead)) {
-                            $descriptionToSend = $descriptionRead;
-                        }
-                    }
-                }
-            }
-                
-            // Upload
             if ($validLatitude == 1 && $validLongitude == 1) {
+                // Date
+                $dateToSend = date("Y-m-d");
+                
+                if ($Date_index != -1) {
+                    $dateRead = "";
+                    
+                    if (isset($csvAsArray[$j][$Date_index])) {
+                        $dateRead = $csvAsArray[$j][$Date_index];
+                    }
+                        
+                    if ($dateRead != null) {
+                        if (strlen($dateRead) == 7) {
+                            $dateRead = $dateRead . "-01";
+                        }
+                        if (strtotime($dateRead)) {
+                            $dateToSend = $dateRead;
+                        }
+                    }
+                }
+                
+                // Time
+                $timeToSend = date("h:i");
+                
+                if ($Time_index != -1) {
+                    $timeRead = "";
+                    
+                    if (isset($csvAsArray[$j][$Time_index])) {
+                        $timeRead = $csvAsArray[$j][$Time_index];
+                    }
+                    
+                    if ($timeRead != null) {
+                        if (strtotime($timeRead)) {
+                            $timeToSend = $timeRead;
+                        }
+                    }
+    
+                }
+                    
+                // Crime Type
+                $crimeToSend = "Unknown";
+                
+                if ($CrimeType_index != 1)  {
+                    $crimeRead = "";
+                    if (isset($csvAsArray[$j][$CrimeType_index])) {
+                        $crimeRead = $csvAsArray[$j][$CrimeType_index];
+                        if (ctype_space($crimeRead) == false && $crimeRead != '') {
+                            if (is_string($crimeRead)) {
+                                $crimeToSend = $crimeRead;
+                            }
+                        }
+                    }
+                }
+                    
+                // Description
+                $descriptionToSend = "-";
+                
+                if ($CrimeType_index != 1) {
+                    $descriptionRead = "";
+                    if (isset($csvAsArray[$j][$Description_index])) {
+                        $descriptionRead = $csvAsArray[$j][$Description_index];
+                        if (ctype_space($descriptionRead) == false && $descriptionRead != '') {
+                            if (is_string($descriptionRead)) {
+                                $descriptionToSend = $descriptionRead;
+                            }
+                        }
+                    }
+                }
+                
+                // Upload
                 $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude) VALUES (?,?,?,?,?,?)');
                 $stmt->bind_param('ssssdd', $crimeToSend, $dateToSend, $timeToSend, $descriptionToSend, $latitudeToSend, $longitudeToSend);
                 if($stmt->execute()) {
@@ -184,14 +186,14 @@ if($_FILES['fileToUpload']['error'] == 0){
                     $lines_fail++;
                     continue;
                 }
-                $lines_total++;
-                if ($lines_total % $check_interval == 0) {
-                    file_put_contents("counts.txt",($lines_total/($num_rows-1))*100);
-                }
-
+  
             }
+            $lines_total++;
+            if ($lines_total % $check_interval == 0) {
+                file_put_contents("counts.txt",($lines_total/($num_rows-1))*100);
+            }
+            
         }
     }
 }
-
 ?>
