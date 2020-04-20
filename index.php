@@ -1191,8 +1191,8 @@ require 'dbConfig.php'; // Include the database configuration file
                 // Check number of rows
                 var num_rows = rows.length;
                 
-                if (num_rows > 7500) {
-                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
+                if (num_rows > 27500) {
+                    err_str = err_str + "\nOnly 27500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
                     validFile = false;
                 }
                 
@@ -1203,7 +1203,7 @@ require 'dbConfig.php'; // Include the database configuration file
                     $("#progress_file_upload").css("width", "0%").text("Ready");
                     formdata = new FormData();
                     formdata.append("fileToUpload", file);
-                            
+                    
                     $.ajax({
                             // File upload progress
                             xhr: function() {
@@ -1229,15 +1229,18 @@ require 'dbConfig.php'; // Include the database configuration file
                 			data: formdata,
                 			processData: false,
                             contentType: false,
-                			success: function(result) // When file is recieved (and processed?) by server
+                			success: function(result) // When file is recieved by server
                 			{
-                			    location.reload(); // Reload the page so that information to place markers doesn't need to be sent back
-                			    ShowLoading(); // Start loading (end when map shows)
+                			    
                 			}
                 	});
                 	
-                	setInterval(function()
-                	{
+                	var NoChangeCounter = 0;
+                	var data_hold = -10;
+                	
+                	var t=setInterval(CheckProgressFile,1000); // Run below function every second
+                	
+                	function CheckProgressFile() {
                     	$(function(){
                     	    // Insert statement progress
                             $.ajax({
@@ -1247,16 +1250,32 @@ require 'dbConfig.php'; // Include the database configuration file
                                 dataType: "text",
                                 success: function( data, textStatus, jqXHR ) {
                                     var percentage = data;
-                                    if (percentage == 100) {
-                                        $("#progress_insert_upload").css("width", percentage + "%").text("Import (Complete)");
+                                    
+                                    if (percentage == data_hold) {
+                                        NoChangeCounter = NoChangeCounter + 1;
                                     }
-                                    else {
+                                        
+                                    if (NoChangeCounter == 3) {
+                                        $("#progress_insert_upload").css("width", "100%").text("Import (Complete)");
+                                    }
+                                        
+                                    if (NoChangeCounter == 5) {
+                     	                clearInterval(t);
+                	                    ShowLoading();
+                	                    location.reload();
+                                    }
+ 
+                                    data_hold = percentage;
+                                    
+                                    if (NoChangeCounter < 3) {
                                         $("#progress_insert_upload").css("width", Math.round(percentage) + "%").text("Import (" + Math.round(percentage) + "%)");
                                     }
+                                    
                                 }
                             });
                         });
-                	}, 1000); // Every second check contents of file and update progress bar accordingly
+                	}
+                	
                 	
                 }
                 else {
