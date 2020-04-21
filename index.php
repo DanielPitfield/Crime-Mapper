@@ -257,23 +257,25 @@ require 'dbConfig.php'; // Include the database configuration file
 		MarkerArray.push(marker);
 		
 		marker.title = marker.Crime_Type; // Shown on hover
-		
-		var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
-
-        var MarkerTime = marker.Crime_Time;
-        if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
-            MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
-        }
-		
-		marker.info = new google.maps.InfoWindow({
-			content: '<div id="iw-container">' + '<div class="iw-content">' + 
-					 '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
-					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
-					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" onclick=EditMarker('+marker.ID+')>Edit</button>' +
-					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>' // Send marker not marker.ID?
-		});
 
 		google.maps.event.addListener(marker, 'click', function() {
+		    var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+
+            var MarkerTime = marker.Crime_Time;
+            if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
+                MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+            }
+    		
+    		marker.info = new google.maps.InfoWindow({
+    			content: '<div id="iw-container">' + '<div class="iw-content">' + 
+    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
+    					 '<br><b>Time: </b>' + MarkerTime + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
+    					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
+    					 '<button id="btn_delete" type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>',
+    		minWidth: 200,
+    		maxWidth: 500
+    		});
+    		
 			marker.info.open(map,marker);
 		});
 	}
@@ -1191,8 +1193,8 @@ require 'dbConfig.php'; // Include the database configuration file
                 // Check number of rows
                 var num_rows = rows.length;
                 
-                if (num_rows > 27500) {
-                    err_str = err_str + "\nOnly 27500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
+                if (num_rows > 7500) {
+                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
                     validFile = false;
                 }
                 
