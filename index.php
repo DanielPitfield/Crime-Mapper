@@ -259,6 +259,15 @@ require 'dbConfig.php'; // Include the database configuration file
 		marker.title = marker.Crime_Type; // Shown on hover
 
 		google.maps.event.addListener(marker, 'click', function() {
+		    if (typeof(marker.info) === "undefined"){
+                //
+            }
+            else{ // If marker already has an InfoWindow
+                if (marker.info.getMap()) { // And it is open
+                    marker.info.close(); // Close it and make/open new one
+                }
+            }
+		    
 		    var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
 
             var MarkerTime = marker.Crime_Time;
@@ -310,21 +319,6 @@ require 'dbConfig.php'; // Include the database configuration file
 					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
 					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" onclick=EditMarker('+marker.ID+')>Edit</button>' +
 					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>');
-	}
-	
-	
-	function ShowAllMarkerInfo() {
-	    for(i = 0; i < MarkerArray.length; i++){
-	            if (MarkerArray[i].getVisible() == true) {
-	                MarkerArray[i].info.open(map, MarkerArray[i]);
-	            }
-		}
-	}
-	
-	function HideAllMarkerInfo() {
-	    for(i = 0; i < MarkerArray.length; i++){
-            MarkerArray[i].info.close();
-		}
 	}
 	
 	function EditMarker(ID) {
