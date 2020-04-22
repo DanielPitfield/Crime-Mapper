@@ -7,11 +7,24 @@ file_put_contents("counts.txt", "0");
 if($_FILES['fileToUpload']['error'] == 0){
     $name = $_FILES['fileToUpload']['name'];
     $ext = strtolower(end(explode('.', $_FILES['fileToUpload']['name'])));
+    $type = $_FILES['fileToUpload']['type'];
     $tmpName = $_FILES['fileToUpload']['tmp_name'];
-    // Check type too
+    
+    $csvMimes = array(
+        'text/csv',
+        'text/plain',
+        'application/csv',
+        'text/comma-separated-values',
+        'application/excel',
+        'application/vnd.ms-excel',
+        'application/vnd.msexcel',
+        'text/anytext',
+        'application/octet-stream',
+        'application/txt',
+    );
 
-    // Check file is a csv file
-    if($ext === 'csv'){
+    // Check file is a csv file (extension and type)
+    if($ext === 'csv' && (in_array($type, $csvMimes) === true)){
         // Convert csv to array
         $csvAsArray = array_map('str_getcsv', file($tmpName));
         // Get the first line
