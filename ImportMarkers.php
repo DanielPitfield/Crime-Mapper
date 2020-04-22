@@ -171,7 +171,12 @@ if($_FILES['fileToUpload']['error'] == 0){
                         $descriptionRead = $csvAsArray[$j][$Description_index];
                         if (ctype_space($descriptionRead) == false && $descriptionRead != '') {
                             if (is_string($descriptionRead)) {
-                                $descriptionToSend = $descriptionRead;
+                                if (strlen($descriptionRead) <=500) { // If read description is <=500 characters
+                                	$descriptionToSend = $descriptionRead; // Assign to send variable
+                                }
+                                else {
+                                    $descriptionToSend = substr($descriptionRead,0,500); // Otherwise, only take and assign first 500 characters
+                                }
                             }
                         }
                     }
