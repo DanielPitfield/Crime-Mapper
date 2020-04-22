@@ -418,52 +418,56 @@ require 'dbConfig.php'; // Include the database configuration file
 		});
 		
 		$("#edit_submit_form").submit(function(e) {
-		e.preventDefault();
-	    ShowLoading();
-					
-		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
-		
-		/* Update values locally */
-		var Crime_Date = document.getElementById("Edit_Date").value;
-		MarkerToEdit.Crime_Date = Crime_Date;
-		
-		var Crime_Time = document.getElementById("Edit_Time").value;
-		MarkerToEdit.Crime_Time = Crime_Time;
-		
-		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
-		MarkerToEdit.Crime_Type = Crime_Type;
-		
-		var Description = document.getElementById("Edit_Description").value;
-		MarkerToEdit.Description = Description;
-		
-		if (Edit_SmallMarkerMoved == true) {
-			MarkerToEdit.position = SecondLocation;
-			Edit_SmallMarkerMoved = false;
-		}
-
-		/* Also send to database */	
-		var formData = $("#edit_submit_form").serialize();
-		
-		var Vars = {ID: ID, Latitude: Latitude, Longitude: Longitude};
-		var varsData = $.param(Vars);
-
-		var data = formData + '&' + varsData;
-
-		$.ajax({
-			url: 'EditMarkers.php',
-			type: 'POST',
-			data: data,
-			success: function(result)
-			{
-                //
-			}
-			
-		});
-		
-		MarkerToEdit.setPosition(MarkerToEdit.position);
-		UpdateMarkerInfo(MarkerToEdit);
-		HideLoading();
-		$("#modal_edit").modal('hide');
+    		e.preventDefault();
+    					
+    		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
+    		
+    		/* Update values locally */
+    		var Crime_Date = document.getElementById("Edit_Date").value;
+    		MarkerToEdit.Crime_Date = Crime_Date;
+    		
+    		var Crime_Time = document.getElementById("Edit_Time").value;
+    		MarkerToEdit.Crime_Time = Crime_Time;
+    		
+    		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+    		MarkerToEdit.Crime_Type = Crime_Type;
+    		
+    		var Description = document.getElementById("Edit_Description").value;
+    		MarkerToEdit.Description = Description;
+    		
+    		if (Edit_SmallMarkerMoved == true) {
+    			MarkerToEdit.position = SecondLocation;
+    			Edit_SmallMarkerMoved = false;
+    		}
+    
+    		if (Description.length <= 500) {
+        		/* Also send to database */	
+        		var formData = $("#edit_submit_form").serialize();
+        		
+        		var Vars = {ID: ID, Latitude: Latitude, Longitude: Longitude};
+        		var varsData = $.param(Vars);
+        
+        		var data = formData + '&' + varsData;
+        		
+        		ShowLoading();
+        
+        		$.ajax({
+        			url: 'EditMarkers.php',
+        			type: 'POST',
+        			data: data,
+        			success: function(result)
+        			{
+                        MarkerToEdit.setPosition(MarkerToEdit.position);
+                		UpdateMarkerInfo(MarkerToEdit);
+                		HideLoading();
+                		$("#modal_edit").modal('hide');
+        			}
+        			
+        		});  
+    		}
+    		else {
+    		    alert("The description can only be a maximum of 500 characters");
+    		}
 		
 		});
 		
@@ -888,8 +892,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	$("#add_submit_form").submit(function(e) {
 		e.preventDefault();
-		ShowLoading();
-					
+		
 		var dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
 		
 		/* Take values locally */
@@ -897,33 +900,40 @@ require 'dbConfig.php'; // Include the database configuration file
 		var Crime_Time = document.getElementById("Add_Time").value;
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("Add_Description").value;
-
-		/* Also send to database */	
-		var formData = $("#add_submit_form").serialize();
 		
-		var Vars = {Latitude: Latitude, Longitude: Longitude};
-		var varsData = $.param(Vars);
-
-		var data = formData + '&' + varsData;
-
-		$.ajax({
-			url: 'SaveMarkers.php',
-			type: 'POST',
-			data: data,
-			success: function(result)
-			{
-				if (SmallMarkerMoved == true) {
-					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
-				}
-				else {
-					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
-				}
-				SmallMarkerMoved = false;
-				HideLoading();
-				$("#modal_add").modal('hide');
-			}
-			
-		});
+		if (Description.length <= 500) {
+		    /* Also send to database */	
+    		var formData = $("#add_submit_form").serialize();
+    		
+    		var Vars = {Latitude: Latitude, Longitude: Longitude};
+    		var varsData = $.param(Vars);
+    
+    		var data = formData + '&' + varsData;
+    		
+    		ShowLoading();
+    
+    		$.ajax({
+    			url: 'SaveMarkers.php',
+    			type: 'POST',
+    			data: data,
+    			success: function(result)
+    			{
+    				if (SmallMarkerMoved == true) {
+    					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
+    				}
+    				else {
+    					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
+    				}
+    				SmallMarkerMoved = false;
+    				HideLoading();
+    				$("#modal_add").modal('hide');
+    			}
+    			
+    		});
+		}
+		else {
+		    alert("The description can only be a maximum of 500 characters");
+		}
 
 	});
 	
