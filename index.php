@@ -1077,41 +1077,30 @@ require 'dbConfig.php'; // Include the database configuration file
 	| Importing crimes
 	|-----------------------------------------------------------------------------------------------------------
 	*/
-		
+	
+	var isFileSelected = false;	
+	var isCSV = false;
 	$("#Import_Input").on("change", function() {
-    files = this.files;
-    var allCSV = true;
-    
-    for (var i=0, l=files.length; i<l; i++) {
-        var fileName = files[i].name;
+	    // Checking CSV extension and presence of file
+	    isFileSelected = true;
+	    isCSV = false;
+	    
+        files = this.files;
+        
+        var fileName = files[0].name;
         var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        if(ext != 'csv') {
-            allCSV = false;
+        
+        if(ext == 'csv') {
+            isCSV = true;
         }
-    }
-    
-    if (allCSV == false) {
-        alert('Only files with the file extension CSV are allowed');
-        this.val = "";
-    }
-    else
-    {
+        
         // Changing label text to files chosen
         var string = files[0].name; // First
-        if (files.length > 1) {
-            for (var i=1, l=(files.length)-1; i<l; i++) { // All in between
-                string += ", ";
-                string += files[i].name;
-            }
-            string += ", ";
-            string += files[files.length-1].name; // Last
-        }
         $("#import_lbl").text(string);  
-    }
     });
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
-        if($('#Import_Input').prop('files').length > 0)
+        if($('#Import_Input').prop('files').length > 0 && (isCSV === true))
         {
             file = $('#Import_Input').prop('files')[0];
             
@@ -1320,6 +1309,17 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
             }
+        }
+        else {
+            if (isCSV === false) { // File of input is not a .csv file
+                if (isFileSelected === false) { // And no file has been added
+                    alert("No file has been selected for import");
+                }
+                else {
+                    alert("The file is not a .csv file");
+                }
+            }
+            
         }
     });
 		
