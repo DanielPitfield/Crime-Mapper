@@ -204,16 +204,18 @@ require 'dbConfig.php'; // Include the database configuration file
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Import</h5>
-		<button type="button" class="close" data-dismiss="modal">
+		
+		<a href="template.csv" class="btn btn-info" role="button" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Download Template</a>
+		
+		<button type="button" class="close" id="btn_import_close" data-dismiss="modal">
 			<span>&times;</span>
 		</button>
 	   </div>
 	   <div class="modal-body">
+	       
         <div class="custom-file mb-3">
-            
         <input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
-        <label class="custom-file-label" id="import_lbl" for="customFile" style="display: inline-block;overflow: hidden; text-overflow:clip">Choose file</label>
-        <a href="template.csv" class="btn btn-secondary" role="button" style="width:100%;margin-top:8px;">Download Template</a>
+        <label class="custom-file-label" id="import_lbl" for="customFile" style="display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Choose file</label>
         <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
         <div class="progress" style="margin-top:8px;">
             <div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
@@ -1078,6 +1080,18 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
+	$('#modal_import').on('shown.bs.modal', function () {
+	    if ($('#progress_file_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) { // If class was to changed to class used for showing errors
+	        $("#progress_file_upload").attr('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change it back to default
+	    }
+	    $("#progress_file_upload").css("width", "0%");
+	    
+	    if ($('#progress_insert_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
+	        $("#progress_insert_upload").attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+	    }
+	    $("#progress_insert_upload").css("width", "0%");
+	});
+	
 	var isFileSelected = false;	
 	var isCSV = false;
 	$("#Import_Input").on("change", function() {
@@ -1100,6 +1114,9 @@ require 'dbConfig.php'; // Include the database configuration file
     });
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
+        $('#btn_import_confirm').attr('disabled', true); // Disable import button
+        $('#btn_import_close').attr('disabled', true); // Disable close button
+        
         if($('#Import_Input').prop('files').length > 0 && (isCSV === true))
         {
             file = $('#Import_Input').prop('files')[0];
@@ -1269,6 +1286,8 @@ require 'dbConfig.php'; // Include the database configuration file
                                     $("#progress_insert_upload").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
                                     $("#progress_insert_upload").css("width", "100%").text("Import (Failed)");
                                     Timed_Out = 1;
+                                    $('#btn_import_confirm').attr('disabled', false);
+                                    $('#btn_import_close').attr('disabled', false);
                                 }
                                 
                                 if (Timed_Out == 0 && import_percentage != 0) {
@@ -1305,6 +1324,8 @@ require 'dbConfig.php'; // Include the database configuration file
                     else {
                         alert(err_str); 
                     }
+                    $('#btn_import_confirm').attr('disabled', false);
+                    $('#btn_import_close').attr('disabled', false);
                     
                 }
                 
@@ -1319,6 +1340,8 @@ require 'dbConfig.php'; // Include the database configuration file
                     alert("The file is not a .csv file");
                 }
             }
+            $('#btn_import_confirm').attr('disabled', false);
+            $('#btn_import_close').attr('disabled', false);
             
         }
     });
