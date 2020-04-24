@@ -28,19 +28,19 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     <!-- Filter Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="width:40%;margin-left:0%;">Filter Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="width:16%;margin-left:0%;">Filter Crime</button>
     
     <!-- Import Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="width:40%;margin-left:0.25%;">Import Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="width:16%;margin-left:0.25%;">Import Crime</button>
     
     <!-- Location Search Bar -->
-    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="margin-left:0.25%;margin-right:0.25%;">
+    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="width:35%;margin-left:0.25%;margin-right:0.25%;">
 
     <!-- Analyse Crime -->
-    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="width:40%;margin-right:0.25%;">Analyse Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="width:16%;margin-right:0.25%;">Analyse Crime</button>
     
     <!-- Predict Crime (disabled) -->
-    <button class="btn btn-outline-primary navbar-btn disabled" role="button" style="width:40%;margin-right:0%;">Predict Crime</button>
+    <button class="btn btn-outline-primary navbar-btn disabled" role="button" style="width:16%;margin-right:0%;">Predict Crime</button>
 </nav>
 
 <!-- Loading Symbol -->
@@ -526,9 +526,9 @@ require 'dbConfig.php'; // Include the database configuration file
 		//map.controls[google.maps.ControlPosition.LEFT].push(input);
 
 		// Bias the SearchBox results towards current map's viewport.
-		map.addListener('bounds_changed', function() {
+		/*map.addListener('bounds_changed', function() {
 			searchBox.setBounds(map.getBounds());
-		});
+		});*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1353,26 +1353,18 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 
     searchBox.addListener('places_changed', function() { // Selecting a prediction from the list
-        var places = searchBox.getPlaces();
+        var places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
 
         if (places.length == 0) {
 			return;
         }
 
-          // For each place, get the icon, name and location.
         var bounds = new google.maps.LatLngBounds();
         places.forEach(function(place) {
 			if (!place.geometry) {
 				console.log("Returned place contains no geometry");
 				return;
             }
-            var icon = {
-              url: place.icon,
-              size: new google.maps.Size(71, 71),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(17, 34),
-              scaledSize: new google.maps.Size(25, 25)
-            };
 
             if (place.geometry.viewport) {
               // Only geocodes have viewport.
@@ -1381,7 +1373,7 @@ require 'dbConfig.php'; // Include the database configuration file
               bounds.extend(place.geometry.location);
             }
           });
-          map.fitBounds(bounds);
+          map.fitBounds(bounds); // Move map to place location
         });
 	
 	}
