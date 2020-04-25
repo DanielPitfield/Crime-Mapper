@@ -53,7 +53,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Context Menu -->
 <div class="custom_contextmenu" id="menu">
-	<div class="custom_contextmenu_btn add" id="btn_add">Add crime</div>
+	<div class="custom_contextmenu_btn add" id="btn_add">Add Crime</div>
 </div>
 
 <!-- Filter modal -->
@@ -62,6 +62,9 @@ require 'dbConfig.php'; // Include the database configuration file
     <div class="modal-content">
       <div class="modal-header">
 		<h5 class="modal-title">Filter</h5>
+		
+		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
+		
 		<button type="button" class="close" data-dismiss="modal">
 			<span>&times;</span>
 		</button>
@@ -441,8 +444,13 @@ require 'dbConfig.php'; // Include the database configuration file
     			MarkerToEdit.position = SecondLocation;
     			Edit_SmallMarkerMoved = false;
     		}
+    		
+    		var edit_containsTags = false;
+    		if (Description.includes("<") && Description.includes(">")) {
+    		    edit_containsTags = true;
+    		}
     
-    		if (Description.length <= 500) {
+    		if (Description.length <= 500 && edit_containsTags == false) {
         		/* Also send to database */	
         		var formData = $("#edit_submit_form").serialize();
         		
@@ -468,7 +476,17 @@ require 'dbConfig.php'; // Include the database configuration file
         		});  
     		}
     		else {
-    		    alert("The description can only be a maximum of 500 characters");
+    		    if (Description.length > 500) {
+    		        if (edit_containsTags == false) { // Long Description and tags
+    		            alert("The description can only be a maximum of 500 characters");
+    		        }
+    		        else { // Just tags
+    		            alert("The description can not have both < and > characters\nThe description can only be a maximum of 500 characters");
+    		        }
+    		    }
+    		    else {
+    		        alert("The description can not have both < and > characters");
+    		    }
     		}
 		
 		});
@@ -855,6 +873,15 @@ require 'dbConfig.php'; // Include the database configuration file
 	|-----------------------------------------------------------------------------------------------------------
 	*/
 	
+	$('#modal_add').on('shown.bs.modal', function () {
+	    $('#Add_Date').val("<?php echo date("Y-m-d"); ?>");
+	    $('#Add_Time').val("00:00");
+	    $('#Add_Crime_Type').val("");
+	    $('#Add_Crime_Type_sub option:not(:first)').remove();
+	    $('#Add_Crime_Type_sub').val("");
+	    $('#Add_Description').val("");
+	});
+	
 	var SmallMarkerMoved = false;
 			
 	const add_btn = document.getElementById("btn_add"); // 'Add crime' button
@@ -903,7 +930,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
 		var Description = document.getElementById("Add_Description").value;
 		
-		if (Description.length <= 500) {
+		var add_containsTags = false;
+		if (Description.includes("<") && Description.includes(">")) {
+		    add_containsTags = true;
+		}
+		
+		if (Description.length <= 500 && add_containsTags == false) {
 		    /* Also send to database */	
     		var formData = $("#add_submit_form").serialize();
     		
@@ -934,7 +966,18 @@ require 'dbConfig.php'; // Include the database configuration file
     		});
 		}
 		else {
-		    alert("The description can only be a maximum of 500 characters");
+		    if (Description.length > 500) {
+		        if (add_containsTags == false) { // Long Description and tags
+		            alert("The description can only be a maximum of 500 characters");
+		        }
+		        else { // Just tags
+		            alert("The description can not have both < and > characters\nThe description can only be a maximum of 500 characters");
+		        }
+		    }
+		    else {
+		        alert("The description can not have both < and > characters");
+		    }
+
 		}
 
 	});
@@ -944,6 +987,18 @@ require 'dbConfig.php'; // Include the database configuration file
 	| Filtering crimes
 	|-----------------------------------------------------------------------------------------------------------
 	*/
+	
+	$("#Filter_Clear").click(function() {
+        $('#Filter_minDate').val("");
+	    $('#Filter_maxDate').val("");
+	    $('#Filter_minTime').val("");
+	    $('#Filter_maxTime').val("");
+	    $('#Filter_Crime_Type').val("[ALL]");
+	    $('#Filter_Crime_Type_sub option:not(:first)').remove();
+	    $('#Filter_Crime_Type_sub').val("[ALL]");
+	    $("#Filter_Location").prop("selectedIndex", 0);
+	    $('#Filter_Location').prop('disabled', 'disabled');
+	});
 	
 	var filter_marker_hold = [];
 	var UK_center = new google.maps.LatLng(52.636879, -1.139759);
@@ -1482,7 +1537,7 @@ require 'dbConfig.php'; // Include the database configuration file
         other_sub_options = ["Unspecified Crime", "Other crime"];
         
         $("#Add_Crime_Type").change(function() { // When main category selected
-            $("#Add_Crime_Type_sub").empty(); // Remove any previous values (if any)
+            $('#Add_Crime_Type_sub option:not(:first)').remove(); // Remove all but the default hidden value
             var el = $(this);
             
             if(el.val() === "Violence against the person") { // Check which main category was chosen
@@ -1527,7 +1582,7 @@ require 'dbConfig.php'; // Include the database configuration file
         });
         
         $("#Filter_Crime_Type").change(function() {
-            $("#Filter_Crime_Type_sub").empty();
+            $('#Filter_Crime_Type_sub option:not(:first)').remove();
             var el = $(this);
             
             if(el.val() === "Violence against the person") {
@@ -1587,7 +1642,7 @@ require 'dbConfig.php'; // Include the database configuration file
         });
         
         $("#Edit_Crime_Type").change(function() {
-            $("#Edit_Crime_Type_sub").empty();
+            $('#Edit_Crime_Type_sub option:not(:first)').remove();
             var el = $(this);
             
             if(el.val() === "Violence against the person") {
