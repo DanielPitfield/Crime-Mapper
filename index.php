@@ -39,8 +39,8 @@ require 'dbConfig.php'; // Include the database configuration file
     <!-- Analyse Crime -->
     <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="width:16%;margin-right:0.25%;">Analyse Crime</button>
     
-    <!-- Predict Crime (disabled) -->
-    <button class="btn btn-outline-primary navbar-btn disabled" role="button" style="width:16%;margin-right:0%;">Predict Crime</button>
+    <!-- Options -->
+    <button class="btn btn-outline-primary navbar-btn" role="button" style="width:16%;margin-right:0%;">Options</button>
 </nav>
 
 <!-- Loading Symbol -->
@@ -538,6 +538,35 @@ require 'dbConfig.php'; // Include the database configuration file
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
 		
+		/*
+		var styles = {
+            default: null,
+            hide: [
+              {
+                featureType: 'poi',
+                stylers: [{visibility: 'off'}]
+              },
+              {
+                featureType: 'poi.park',
+                stylers: [{visibility: 'off'}]
+              },
+              {
+                featureType: 'poi.business',
+                stylers: [{visibility: 'off'}]
+              },
+              {
+                featureType: 'administrative',
+                stylers: [{visibility: 'off'}]
+              },
+              {
+                featureType: 'transit',
+                elementType: 'labels.icon',
+                stylers: [{visibility: 'off'}]
+              }
+            ]
+        };
+        map.setOptions({styles: styles['hide']}); */
+		
 		// Create the search box and link it to the UI element.
 		var input = document.getElementById('pac-input');
 		var searchBox = new google.maps.places.SearchBox(input);
@@ -581,9 +610,47 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	LoadMarkers();
 	
-	var markerCluster = new MarkerClusterer(null, MarkerArray,
-                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+	/*
+	|-----------------------------------------------------------------------------------------------------------
+	| Marker Clustering
+	|-----------------------------------------------------------------------------------------------------------
+	*/
+	
+	var clusterStyles = [
+      {
+        textColor: 'white',
+        url: 'SmallCluster.png',
+        height: 53,
+        width: 53
+      },
+      {
+        textColor: 'white',
+        url: 'MediumCluster.png',
+        height: 56,
+        width: 56
+      },
+      {
+        textColor: 'white',
+        url: 'LargeCluster.png',
+        height: 66,
+        width: 66
+      }
+    ];
+    
+    var mcOptions = {
+        gridSize: 50,
+        styles: clusterStyles,
+        maxZoom: 15
+    };
+	
+	var markerCluster = new MarkerClusterer(null, MarkerArray, mcOptions);
     markerCluster.setIgnoreHidden(true);
+    
+    /*
+	|-----------------------------------------------------------------------------------------------------------
+	| Filtering Markers
+	|-----------------------------------------------------------------------------------------------------------
+	*/
 	
 	function FilterMarkers(center_loc, distance) {
 	    if (distance == null) {
