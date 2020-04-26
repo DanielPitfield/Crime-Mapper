@@ -26,21 +26,21 @@ require 'dbConfig.php'; // Include the database configuration file
 -->
 
 <!-- Navigation Bar -->
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+<nav class="navbar navbar-dark bg-dark">
     <!-- Filter Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="width:16%;margin-left:0%;">Filter Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="color:white;width:16%;margin-left:0%;">Filter Crime</button>
     
     <!-- Import Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="width:16%;margin-left:0.25%;">Import Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="color:white;width:16%;margin-left:0.25%;">Import Crime</button>
     
     <!-- Location Search Bar -->
-    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="width:35%;margin-left:0.25%;margin-right:0.25%;">
+    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="color:black;width:35%;margin-left:0.25%;margin-right:0.25%;">
 
     <!-- Analyse Crime -->
-    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="width:16%;margin-right:0.25%;">Analyse Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="color:white;width:16%;margin-right:0.25%;">Analyse Crime</button>
     
     <!-- Options -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" style="width:16%;margin-right:0%;">Options</button>
+    <button class="btn btn-outline-primary disabled navbar-btn" role="button" style="color:white;width:16%;margin-right:0%;">Predict Crime</button>
 </nav>
 
 <!-- Loading Symbol -->
@@ -301,6 +301,14 @@ require 'dbConfig.php'; // Include the database configuration file
 		LoadingSymbol.style.display = "block";
 	}
 	
+	
+	function ShowLoading() {
+	    LoadingSymbol = document.getElementById("loading_symbol");
+		LoadingSymbol.style.left = "calc(50% - 50px)";
+		LoadingSymbol.style.top = "calc(50% - 50px)";
+		LoadingSymbol.style.display = "block";
+	}
+	
 	function HideLoading() {
 	    LoadingSymbol = document.getElementById("loading_symbol");
 		LoadingSymbol.style.left = "-500px";
@@ -380,12 +388,22 @@ require 'dbConfig.php'; // Include the database configuration file
 	        $('#Edit_Crime_Type').val('Other').change();
 	    }
 	    else {
-	        console.log("Unexpected main category chosen (Load/Edit)");
-	        $('#Edit_Crime_Type').val('[Import]').change();
-	        //$('#Edit_Crime_Type_sub').val(MakerToEdit.Crime_Type).change();
+	        console.log("Imported Crime Type");
+	        
+	        $('#Edit_Crime_Type').val('Other').change();
+	        
+    	    var opt = MarkerToEdit.Crime_Type;
+            var el = document.createElement("option");
+            el.textContent = opt;
+            el.value = opt;
+            var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
+            edit_sub_select.appendChild(el);
+            
+	        $('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
+	        
+	        $('#Edit_Crime_Type').prop('disabled', true);
+	        $('#Edit_Crime_Type_sub').prop('disabled', true);
 	    }
-		
-		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 		
 		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
 		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time);
@@ -763,6 +781,13 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		/* -------- Filtering -------- */
 		
+		function HideMarker(marker) {
+		    marker.setVisible(false); // Marker
+		    if (marker.info.getMap()) { // InfoWindow
+                marker.info.close();
+            }
+		}
+		
 		/* ---- Remove any previous filters ---- */
 		if (invalidInput == false) {
 		    for (i = 0; i < MarkerArray.length; i++){
@@ -777,68 +802,68 @@ require 'dbConfig.php'; // Include the database configuration file
     			if (AllMainSelected == false) {
     			    if (AllSubSelected == false) { // One specific crime
     			        if (MarkerArray[i].Crime_Type != Sub_Crime_Type) {
-    			            MarkerArray[i].setVisible(false);
+    			            HideMarker(MarkerArray[i]);
     			        }
     			    }
     			    if (AllSubSelected == true) { // One main category of crime
     			        if (Main_Crime_Type == "Violence against the person") {
     			            if (violence_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            }
     			        }
     			        if (Main_Crime_Type == "Public Order") {
     			            if (public_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Drug offences") {
     			            if (drug_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Vehicle offences") {
     			            if (vehicle_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Sexual offences") {
     			            if (sexual_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Arson and criminal damage") {
     			            if (arson_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Posession of weapons") {
     			            if (weapons_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Theft") {
     			            if (theft_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Burglary") {
     			            if (burglary_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Robbery") {
     			            if (robbery_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Miscellaneous crimes against society") {
     			            if (misc_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			        if (Main_Crime_Type == "Other") {
     			            if (other_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                MarkerArray[i].setVisible(false);
+    			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
     			    }
@@ -846,25 +871,25 @@ require 'dbConfig.php'; // Include the database configuration file
     			
     			if (isMinDate == true) { // If a minimum date was entered
     				if (MarkerDate < minDate) { // And the marker's date is before than that date
-    					MarkerArray[i].setVisible(false); // Hide it
+    					HideMarker(MarkerArray[i]); // Hide it
     				}
     			}
     			
     			if (isMaxDate == true) {
     				if (MarkerDate > maxDate) {
-    					MarkerArray[i].setVisible(false);
+    					HideMarker(MarkerArray[i]);
     				}
     			}
     			
     			if (isMinTime == true) {
     				if (MarkerTime < minTime) {
-    					MarkerArray[i].setVisible(false);
+    					HideMarker(MarkerArray[i]);
     				}
     			}
     			
     			if (isMaxTime == true) {
     				if (MarkerTime > maxTime) {
-    					MarkerArray[i].setVisible(false);
+    					HideMarker(MarkerArray[i]);
     				}
     			}
     			
@@ -872,14 +897,14 @@ require 'dbConfig.php'; // Include the database configuration file
     			    var distanceInMiles = google.maps.geometry.spherical.computeDistanceBetween(center_loc, MarkerArray[i].getPosition());
     			    distanceInMiles = (distanceInMiles / 1609);
     			    if (distanceInMiles > distance) {
-    			        MarkerArray[i].setVisible(false);
+    			        HideMarker(MarkerArray[i]);
     			    }
     			}
 		    
-		  } // For all markers (end)
+		  }
+		  $("#modal_filter").modal('hide');
 		
-	    } // invalid input (end)
-	    $("#modal_filter").modal('hide');
+	    }
 	}
 
 	/*
