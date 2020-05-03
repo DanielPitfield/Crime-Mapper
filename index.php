@@ -626,7 +626,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		setTimeout(() => {HideLoading();}, 500);
 		
 	}
+	
+	// t0 = performance.now();
 	LoadMarkers();
+	//var t1 = performance.now();
+	
+	//console.log("LoadMarkers() duration: " + (t1-t0) + "ms");
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1261,6 +1266,9 @@ require 'dbConfig.php'; // Include the database configuration file
     });
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
+    
+        var t2 = performance.now();
+    
         $('#btn_import_confirm').attr('disabled', true); // Disable import button
         $('#btn_import_close').attr('disabled', true); // Disable close button
         
@@ -1448,6 +1456,10 @@ require 'dbConfig.php'; // Include the database configuration file
                                             
                                     if (FinishCheckCounter == 5) {
                          	               clearInterval(t);
+                         	               
+                         	               //var t3 = performance.now();
+	                                       //console.log("LoadMarkers() duration: " + (t3-t2) + "ms");
+                         	               
                     	                   ShowLoading();
                     	                   location.reload();
                                     }
