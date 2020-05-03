@@ -323,7 +323,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
 
     var MarkerTime = marker.Crime_Time;
-    if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
+    if (MarkerTime.length == 8) { // If time is retrieved form database which includes seconds
         MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
     }
 	
@@ -398,13 +398,12 @@ require 'dbConfig.php'; // Include the database configuration file
             el.value = opt;
             var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
             edit_sub_select.appendChild(el);
-            
-	        $('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 	        
 	        $('#Edit_Crime_Type').prop('disabled', true);
 	        $('#Edit_Crime_Type_sub').prop('disabled', true);
 	    }
 		
+		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
 		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time);
 		modal.find('#Edit_Description').val(MarkerToEdit.Description);
@@ -468,7 +467,7 @@ require 'dbConfig.php'; // Include the database configuration file
     		    edit_containsTags = true;
     		}
     
-    		if (Description.length <= 500 && edit_containsTags == false) {
+    		if (Description.length <= 500 && edit_containsTags == false && MarkerArray.length < 50000) {
         		/* Also send to database */	
         		var formData = $("#edit_submit_form").serialize();
         		
@@ -494,17 +493,17 @@ require 'dbConfig.php'; // Include the database configuration file
         		});  
     		}
     		else {
+    		    var edit_err_string = "";
     		    if (Description.length > 500) {
-    		        if (edit_containsTags == false) { // Long Description and tags
-    		            alert("The description can only be a maximum of 500 characters");
-    		        }
-    		        else { // Just tags
-    		            alert("The description can not have both < and > characters\nThe description can only be a maximum of 500 characters");
-    		        }
+    		        edit_err_string += "The description can only be a maximum of 500 characters\n";
     		    }
-    		    else {
-    		        alert("The description can not have both < and > characters");
+    		    if (edit_containsTags == true) {
+    		        edit_err_string += "The description can not have both < and > characters\n";
     		    }
+    		    if (MarkerArray.length > 50000) {
+    		        edit_err_string += "The mapper is at its capacity of displaying 50,000 crimes\n";
+    		    }
+    		    alert(edit_err_string);
     		}
 		
 		});
@@ -1040,7 +1039,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		    add_containsTags = true;
 		}
 		
-		if (Description.length <= 500 && add_containsTags == false) {
+		if (Description.length <= 500 && add_containsTags == false && MarkerArray.length < 50000) {
 		    /* Also send to database */	
     		var formData = $("#add_submit_form").serialize();
     		
@@ -1071,18 +1070,17 @@ require 'dbConfig.php'; // Include the database configuration file
     		});
 		}
 		else {
+		    var add_err_string = "";
 		    if (Description.length > 500) {
-		        if (add_containsTags == false) { // Long Description and tags
-		            alert("The description can only be a maximum of 500 characters");
-		        }
-		        else { // Just tags
-		            alert("The description can not have both < and > characters\nThe description can only be a maximum of 500 characters");
-		        }
+		        add_err_string += "The description can only be a maximum of 500 characters\n";
 		    }
-		    else {
-		        alert("The description can not have both < and > characters");
+		    if (add_containsTags == true) {
+		        add_err_string += "The description can not have both < and > characters\n";
 		    }
-
+		    if (MarkerArray.length > 50000) {
+		        add_err_string += "The mapper is at its capacity of displaying 50,000 crimes\n";
+		    }
+		    alert(add_err_string);
 		}
 
 	});
@@ -1218,12 +1216,11 @@ require 'dbConfig.php'; // Include the database configuration file
 		ShowLoading();
 		
 		if (Cluster_Active == true) { // If active and button was pressed
-		    //$("#btn_marker_cluster").text('Clustering (enable)');
 		    markerCluster.setMap(null); // Hide clusterer
 		    Cluster_Active = false; // Alternate variable
+		    HideLoading();
 		}
 		else {
-		    //$("#btn_marker_cluster").text('Clustering (disable)');
             markerCluster.addMarkers(MarkerArray); // Update markers to cluster
             markerCluster.setMap(map);
             markerCluster.repaint(); // Redraw and show clusterer
@@ -1250,29 +1247,31 @@ require 'dbConfig.php'; // Include the database configuration file
 	    $("#progress_insert_upload").css("width", "0%");
 	});
 	
-	var isFileSelected = false;	
+    var isFileSelected = false;
 	var isCSV = false;
+	
 	$("#Import_Input").on("change", function() {
-	    // Checking CSV extension and presence of file
-	    isFileSelected = true;
+	    isFileSelected = false;
 	    isCSV = false;
 	    
         files = this.files;
         
-        // if files.length == 1
-        // else no file selected, set boolean back
-        // handles unselecting a file
-        
-        var fileName = files[0].name;
-        var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        
-        if(ext == 'csv') {
-            isCSV = true;
+        if (files.length >= 1) { // If input has a file selected
+            isFileSelected = true; // Toggle presence of file
+            var fileName = files[0].name;
+            var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+            
+            if(ext == 'csv') {
+                isCSV = true; // Toggle CSV check
+            }
+            
+            $("#import_lbl").text(fileName); // Change label of input 
         }
-        
-        // Changing label text to files chosen
-        var string = files[0].name; // First
-        $("#import_lbl").text(string);  
+        else {
+            isFileSelected = false;
+            $("#import_lbl").text("Choose file"); 
+        }
+ 
     });
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
@@ -1335,33 +1334,35 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 var validFile = true;
-                var err_str = "FILE IMPORT ERROR";
+                var import_err_str = "FILE IMPORT ERROR";
                 
                 var FileWarning = false;
-                var warning_str = "WARNING";
+                var import_warning_str = "WARNING";
+                
+                var Reached_Limit = false;
                 
                 if (Date_index === -1) {
-                    warning_str = warning_str + "\nMissing 'Date' column in file (the current date will be used)";
+                    import_warning_str = import_warning_str + "\nMissing 'Date' column in file (the current date will be used)";
                     FileWarning = true;
                 }
                 if (Latitude_index === -1) {
-                    err_str = err_str + "\nMissing 'Latitude' column in file";
+                    import_err_str = import_err_str + "\nMissing 'Latitude' column in file";
                     validFile = false;
                 }
                 if (Longitude_index === -1) {
-                    err_str = err_str + "\nMissing 'Longitude' column in file";
+                    import_err_str = import_err_str + "\nMissing 'Longitude' column in file";
                     validFile = false;
                 }
                 if (CrimeType_index === -1) {
-                    warning_str = warning_str + "\nMissing 'Crime Type' column in file (the crime type 'Unknown' will be used)";
+                    import_warning_str = import_warning_str + "\nMissing 'Crime Type' column in file (the crime type 'Unknown' will be used)";
                     FileWarning = true;
                 }
                 if (Description_index === -1) {
-                    warning_str = warning_str + "\nMissing 'Description' column in file (no description will be used)";
+                    import_warning_str = import_warning_str + "\nMissing 'Description' column in file (no description will be used)";
                     FileWarning = true;
                 }
                 if (Time_index === -1) {
-                    warning_str = warning_str + "\nMissing 'Time' column in file (the current time will be used)";
+                    import_warning_str = import_warning_str + "\nMissing 'Time' column in file (the current time will be used)";
                     FileWarning = true;
                 }
                 
@@ -1373,14 +1374,18 @@ require 'dbConfig.php'; // Include the database configuration file
                     validFile = false;
                 }
                 
+                if ((MarkerArray.length + num_records) > 50000) {
+                    ReachedLimit = true;
+                }
+                
                 if (num_records > 7500) {
-                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_records + " records)";
+                    import_err_str = import_err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_records + " records)";
                     validFile = false;
                 }
                 
-                if (validFile == true) {
+                if (validFile == true && Reached_Limit == false) {
                     if (FileWarning == true) {
-                        alert(warning_str);
+                        alert(import_warning_str);
                     }
                     
                     $("#progress_file_upload").css("width", "100%").text("Ready");
@@ -1493,18 +1498,21 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 else {
                     if (num_records <=0) {
-                        err_str += "\nNo records found in the file";
+                        import_err_str += "\nNo records found in the file";
+                    }
+                    if (Reached_Limit == true) {
+                        import_err_str += "\nImporting this file would exceed the limit of 50,000 markers";
                     }
                     
                     if (FileWarning == true) {
-                        alert(err_str + "\n\n" + warning_str);
+                        alert(import_err_str + "\n\n" + import_warning_str);
                     }
                     else {
-                        alert(err_str); 
+                        alert(import_err_str); 
                     }
+                    
                     $('#btn_import_confirm').attr('disabled', false);
                     $('#btn_import_close').attr('disabled', false);
-                    
                 }
                 
             }
@@ -1518,9 +1526,9 @@ require 'dbConfig.php'; // Include the database configuration file
                     alert("The file is not a .csv file");
                 }
             }
+            
             $('#btn_import_confirm').attr('disabled', false);
             $('#btn_import_close').attr('disabled', false);
-            
         }
     });
 		
