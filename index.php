@@ -268,7 +268,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 //
             }
             else{ // If marker already has an InfoWindow
-                if (marker.info.getMap()) { // And it is open
+                if (marker.info.getMap() != null) { // And it is open
                     marker.info.close(); // Close it and make/open new one
                 }
             }
@@ -669,6 +669,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	var markerCluster = new MarkerClusterer(null, MarkerArray, mcOptions);
     markerCluster.setIgnoreHidden(true);
     
+    google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading);
+    google.maps.event.addListener(markerCluster, 'clusteringend', HideLoading);
+    
     /*
 	|-----------------------------------------------------------------------------------------------------------
 	| Filtering Markers
@@ -787,9 +790,14 @@ require 'dbConfig.php'; // Include the database configuration file
 		/* -------- Filtering -------- */
 		
 		function HideMarker(marker) {
-		    marker.setVisible(false); // Marker
-		    if (marker.info.getMap()) { // InfoWindow
-                marker.info.close();
+		    marker.setVisible(false);
+		    if (typeof(marker.info) === "undefined"){
+                //
+            }
+            else{ // If marker has an InfoWindow
+                if (marker.info.getMap() != null) { // And it is open
+                    marker.info.close(); // Close it
+                }
             }
 		}
 		
@@ -876,7 +884,7 @@ require 'dbConfig.php'; // Include the database configuration file
     			
     			if (isMinDate == true) { // If a minimum date was entered
     				if (MarkerDate < minDate) { // And the marker's date is before than that date
-    					HideMarker(MarkerArray[i]); // Hide it
+    					HideMarker(MarkerArray[i]);
     				}
     			}
     			
@@ -1204,8 +1212,8 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 	
 	var Cluster_Active = false; // Clusterer initialised as unactive
-	const analyse_btn = document.getElementById("btn_marker_cluster"); // 'Analyse' button
-	analyse_btn.addEventListener('click', event => {
+	const btn_analyse = document.getElementById("btn_marker_cluster"); // 'Analyse' button
+	btn_analyse.addEventListener('click', event => {
 		hideContextMenu();
 		ShowLoading();
 		
@@ -1221,8 +1229,6 @@ require 'dbConfig.php'; // Include the database configuration file
             markerCluster.repaint(); // Redraw and show clusterer
             Cluster_Active = true;
 		}
-		
-		HideLoading();
 
 	});
 	
@@ -1252,6 +1258,10 @@ require 'dbConfig.php'; // Include the database configuration file
 	    isCSV = false;
 	    
         files = this.files;
+        
+        // if files.length == 1
+        // else no file selected, set boolean back
+        // handles unselecting a file
         
         var fileName = files[0].name;
         var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
@@ -1357,9 +1367,14 @@ require 'dbConfig.php'; // Include the database configuration file
                 
                 // Check number of rows
                 var num_rows = rows.length;
+                var num_records = (rows.length) - 1;
                 
-                if (num_rows > 7500) {
-                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_rows + " records)";
+                if (num_records <= 0) {
+                    validFile = false;
+                }
+                
+                if (num_records > 7500) {
+                    err_str = err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_records + " records)";
                     validFile = false;
                 }
                 
@@ -1477,8 +1492,12 @@ require 'dbConfig.php'; // Include the database configuration file
                 	
                 }
                 else {
+                    if (num_records <=0) {
+                        err_str += "\nNo records found in the file";
+                    }
+                    
                     if (FileWarning == true) {
-                        alert(err_str + "\n" + warning_str);
+                        alert(err_str + "\n\n" + warning_str);
                     }
                     else {
                         alert(err_str); 
