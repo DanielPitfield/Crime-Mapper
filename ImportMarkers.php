@@ -143,7 +143,7 @@ if($_FILES['fileToUpload']['error'] == 0){
                 }
                 
                 // Time
-                $timeToSend = date("h:i");
+                $timeToSend = date("H:i");
                 
                 if ($Time_index != -1) {
                     $timeRead = "";
