@@ -467,7 +467,7 @@ require 'dbConfig.php'; // Include the database configuration file
     		    edit_containsTags = true;
     		}
     
-    		if (Description.length <= 500 && edit_containsTags == false && MarkerArray.length < 50000) {
+    		if (Description.length <= 500 && edit_containsTags == false) {
         		/* Also send to database */	
         		var formData = $("#edit_submit_form").serialize();
         		
@@ -499,9 +499,6 @@ require 'dbConfig.php'; // Include the database configuration file
     		    }
     		    if (edit_containsTags == true) {
     		        edit_err_string += "The description can not have both < and > characters\n";
-    		    }
-    		    if (MarkerArray.length > 50000) {
-    		        edit_err_string += "The mapper is at its capacity of displaying 50,000 crimes\n";
     		    }
     		    alert(edit_err_string);
     		}
@@ -1368,14 +1365,14 @@ require 'dbConfig.php'; // Include the database configuration file
                 
                 // Check number of rows
                 var num_rows = rows.length;
-                var num_records = (rows.length) - 1;
+                var num_records = num_rows - 1;
                 
                 if (num_records <= 0) {
                     validFile = false;
                 }
                 
                 if ((MarkerArray.length + num_records) > 50000) {
-                    ReachedLimit = true;
+                    Reached_Limit = true;
                 }
                 
                 if (num_records > 7500) {
