@@ -28,19 +28,19 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Navigation Bar -->
 <nav class="navbar navbar-dark bg-dark">
     <!-- Filter Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_filter" style="color:white;width:16%;margin-left:0%;">Filter Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_filter" role="button" data-toggle="modal" data-target="#modal_filter" disabled style="color:white;width:16%;margin-left:0%;">Filter Crime</button>
     
     <!-- Import Crime -->
-    <button class="btn btn-outline-primary navbar-btn" role="button" data-toggle="modal" data-target="#modal_import" style="color:white;width:16%;margin-left:0.25%;">Import Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_import" role="button" data-toggle="modal" data-target="#modal_import" disabled style="color:white;width:16%;margin-left:0.25%;">Import Crime</button>
     
     <!-- Location Search Bar -->
-    <input id="pac-input" class="controls" type="text" placeholder="Location Search" style="color:black;width:35%;margin-left:0.25%;margin-right:0.25%;">
+    <input id="pac-input" class="controls" type="text" placeholder="Location Search" disabled style="color:black;width:35%;margin-left:0.25%;margin-right:0.25%;">
 
     <!-- Analyse Crime -->
-    <button class="btn btn-outline-primary navbar-btn" id="btn_marker_cluster" role="button" style="color:white;width:16%;margin-right:0.25%;">Analyse Crime</button>
+    <button class="btn btn-outline-primary navbar-btn" id="btn_analyse" role="button" disabled style="color:white;width:16%;margin-right:0.25%;">Analyse Crime</button>
     
-    <!-- Options -->
-    <button class="btn btn-outline-primary disabled navbar-btn" role="button" style="color:white;width:16%;margin-right:0%;">Predict Crime</button>
+    <!-- Predict Crime -->
+    <button class="btn btn-outline-primary disabled navbar-btn" id="btn_predict" role="button" disabled style="color:white;width:16%;margin-right:0%;">Predict Crime</button>
 </nav>
 
 <!-- Loading Symbol -->
@@ -130,7 +130,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 
 		<label class="control-label " for="Add_Time">Time:</label>
-		<input id="Add_Time" type="time" name="Time" value="00:00" required>
+		<input type="time" id="Add_Time" name="Time" value="00:00" required>
 		</div>
 		
 		<div class="form-group">
@@ -175,7 +175,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
 		
 		<label class="control-label " for="Edit_Time">Time:</label>
-		<input id="Edit_Time" type="time" name="Time" value="00:00" required>
+		<input type="time" id="Edit_Time" name="Time" value="" required>
 		</div>
 		
 		<div class="form-group">
@@ -267,7 +267,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		    if (typeof(marker.info) === "undefined"){
                 //
             }
-            else{ // If marker already has an InfoWindow
+            else { // If marker already has an InfoWindow
                 if (marker.info.getMap() != null) { // And it is open
                     marker.info.close(); // Close it and make/open new one
                 }
@@ -284,13 +284,19 @@ require 'dbConfig.php'; // Include the database configuration file
     			content: '<div id="iw-container">' + '<div class="iw-content">' + 
     					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
     					 '<br><b>Time: </b>' + MarkerTime + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
-    					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
-    					 '<button id="btn_delete" type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>',
+    					 '<br></br> <button type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
+    					 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>',
     		minWidth: 200,
     		maxWidth: 500
     		});
     		
-			marker.info.open(map,marker);
+    		if (typeof(marker.info) === "undefined") {
+    		    //
+    		}
+    		else {
+    		    marker.info.open(map,marker);
+    		}
+
 		});
 	}
 	
@@ -328,10 +334,10 @@ require 'dbConfig.php'; // Include the database configuration file
     }
 	
 	    marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' + 
-					 '<b>ID: </b>' + marker.ID + '<br> <b>Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
-					 '<br><b>Time: </b>' + MarkerTime + //'<br><b>Description: </b>' + marker.Description +
-					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" onclick=EditMarker('+marker.ID+')>Edit</button>' +
-					 '<button id="btn_delete" type="button" class="btn btn-danger" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>');
+    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
+    					 '<br><b>Time: </b>' + MarkerTime + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
+    					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
+    					 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>');
 	}
 	
 	function EditMarker(ID) {
@@ -405,7 +411,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
-		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time);
+		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time.substring(0,5));
 		modal.find('#Edit_Description').val(MarkerToEdit.Description);
 		
 		modal.modal('show');
@@ -628,6 +634,96 @@ require 'dbConfig.php'; // Include the database configuration file
 	//var t1 = performance.now();
 	
 	//console.log("LoadMarkers() duration: " + (t1-t0) + "ms");
+	
+	// Unit Testing //
+	
+	function LoadMarkers_test () {
+	    console.log("/// Load Crime ///");
+		var length_start = MarkerArray.length;
+		var unit_testing_markers_empty = [];
+		
+		for( i = 0; i < unit_testing_markers_empty.length; i++ ) { // Placing the markers stored in the database
+			var ID = unit_testing_markers_empty[i][0];
+			var Crime_Type = unit_testing_markers_empty[i][1];
+			var Crime_Date = unit_testing_markers_empty[i][2];
+			var Crime_Time = unit_testing_markers_empty[i][3];
+			var Description = unit_testing_markers_empty[i][4];
+			var Point = new google.maps.LatLng(unit_testing_markers_empty[i][5], unit_testing_markers_empty[i][6]);
+			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
+		}
+		
+		var length_after_empty = MarkerArray.length;
+		if (length_after_empty == (length_start + unit_testing_markers_empty.length)) {
+		    console.log("0 records: PASS");
+		}
+		else {
+		    console.log("0 records: FAIL");
+		}
+		
+		var unit_testing_markers = [
+		    ['1',"Murder","2020-03-03","12:00:00","Description 1",50.1,1.8],
+		    ['2',"Assualt","2020-04-04","10:00:00","Description 2",50.1,1.85],
+		    ['3',"Violence","2020-05-05","08:00:00","Description 3",50.1,1.9]
+		]; // Change unit testing mockups here
+		
+		for( i = 0; i < unit_testing_markers.length; i++ ) { // Placing the markers stored in the database
+			var ID = unit_testing_markers[i][0];
+			var Crime_Type = unit_testing_markers[i][1];
+			var Crime_Date = unit_testing_markers[i][2];
+			var Crime_Time = unit_testing_markers[i][3];
+			var Description = unit_testing_markers[i][4];
+			var Point = new google.maps.LatLng(unit_testing_markers[i][5], unit_testing_markers[i][6]);
+			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
+		}
+		
+		var length_after = MarkerArray.length;
+		if (length_after == (length_after_empty + unit_testing_markers.length))
+		{
+		    console.log("3 records: PASS");
+		}
+		else {
+		    console.log("3 records: FAIL");
+		}
+		
+		var last_added = (MarkerArray.length-1);
+		var load_matchingValues = true;
+		
+		for( i = 0; i < unit_testing_markers.length; i++ ) {
+		     if (MarkerArray[last_added-i].ID != unit_testing_markers[(unit_testing_markers.length-1) - i][0]) {
+		        load_matchingValues = false;
+		     }
+		     if (MarkerArray[last_added-i].Crime_Type != unit_testing_markers[(unit_testing_markers.length-1) - i][1]) {
+		        load_matchingValues = false;
+		     }
+		     if (MarkerArray[last_added-i].Crime_Date.substring(0,5) != unit_testing_markers[(unit_testing_markers.length-1) - i][2].substring(0,5)) {
+		        load_matchingValues = false;
+		     }
+		     if (MarkerArray[last_added-i].Crime_Time.substring(0,5) != unit_testing_markers[(unit_testing_markers.length-1) - i][3].substring(0,5)) {
+		        load_matchingValues = false;
+		     }
+		     if (MarkerArray[last_added-i].Description != unit_testing_markers[(unit_testing_markers.length-1) - i][4]) {
+		        load_matchingValues = false;
+		     }
+		     
+		     if (MarkerArray[last_added-i].position.lat() != unit_testing_markers[(unit_testing_markers.length-1) - i][5]) {
+		        load_matchingValues = false;
+		     }
+		     
+		     if (MarkerArray[last_added-i].position.lng() != unit_testing_markers[(unit_testing_markers.length-1) - i][6]) {
+		        load_matchingValues = false;
+		     }
+		    
+		}
+		
+		if (load_matchingValues == true) {
+		    console.log("Matching Values: PASS");
+		}
+		else {
+		    console.log("Matching Values: FAIL");
+		}
+		
+	}
+	LoadMarkers_test();
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1054,10 +1150,96 @@ require 'dbConfig.php'; // Include the database configuration file
     			success: function(result)
     			{
     				if (SmallMarkerMoved == true) {
+    				    console.log("/// Add Crime - Adjusted ///");
+    				    var add_moved_length_before = MarkerArray.length;
+    				    
     					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
+    					
+    					 // Unit Testing //
+    					 var add_moved_length_after = MarkerArray.length;
+    					 
+    					 if (add_moved_length_after == (add_moved_length_before + 1)) {
+    					     console.log("Count: PASS")
+    					 }
+    					 else {
+    					     console.log("Count: FAIL");
+    					 }
+    		    
+                		 var add_last_added = (MarkerArray.length-1);
+            		     var add_matchingValues = true;
+            		   
+            		     if (MarkerArray[add_last_added].Crime_Type != Crime_Type) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Description != Description) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].position.lat() != Latitude) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].position.lng() != Longitude) {
+            		        add_matchingValues = false;
+            		     }
+            		
+                		if (add_matchingValues == true) {
+                		    console.log("Matching Values: PASS");
+                		}
+                		else {
+                		    console.log("Matching Values: FAIL");
+                		}
+                		
     				}
     				else {
+    				    console.log("/// Add Crime ///");
+    				    var add_length_before = MarkerArray.length;
+    				    
     					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
+    					
+    					 // Unit Testing //
+    					 var add_length_after = MarkerArray.length;
+    					 
+    					 if (add_length_after == (add_length_before + 1)) {
+    					     console.log("Count: PASS")
+    					 }
+    					 else {
+    					     console.log("Count: FAIL");
+    					 }
+    		
+                		 var add_last_added = (MarkerArray.length-1);
+            		     var add_matchingValues = true;
+            		   
+            		     if (MarkerArray[add_last_added].Crime_Type != Crime_Type) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].Description != Description) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].position.lat() != Latitude) {
+            		        add_matchingValues = false;
+            		     }
+            		     if (MarkerArray[add_last_added].position.lng() != Longitude) {
+            		        add_matchingValues = false;
+            		     }
+            		
+                		if (add_matchingValues == true) {
+                		    console.log("Matching Values: PASS");
+                		}
+                		else {
+                		    console.log("Matching Values: FAIL");
+                		}
+                		
     				}
     				SmallMarkerMoved = false;
     				HideLoading();
@@ -1065,6 +1247,7 @@ require 'dbConfig.php'; // Include the database configuration file
     			}
     			
     		});
+    		
 		}
 		else {
 		    var add_err_string = "";
@@ -1207,7 +1390,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 	
 	var Cluster_Active = false; // Clusterer initialised as unactive
-	const btn_analyse = document.getElementById("btn_marker_cluster"); // 'Analyse' button
+	const btn_analyse = document.getElementById("btn_analyse"); // 'Analyse' button
 	btn_analyse.addEventListener('click', event => {
 		hideContextMenu();
 		ShowLoading();
@@ -1382,7 +1565,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 
                 if (validFile == true && Reached_Limit == false) {
                     if (FileWarning == true) {
-                        alert(import_warning_str);
+                        //alert(import_warning_str);
                     }
                     
                     $("#progress_file_upload").css("width", "100%").text("Ready");
@@ -1474,11 +1657,11 @@ require 'dbConfig.php'; // Include the database configuration file
                                     if (FinishCheckCounter == 5) {
                          	               clearInterval(t);
                          	               
-                         	               //var t3 = performance.now();
-	                                       //console.log("LoadMarkers() duration: " + (t3-t2) + "ms");
+                         	               var t3 = performance.now();
+	                                       console.log("ImportMarkers() duration: " + (t3-t2) + "ms");
                          	               
                     	                   ShowLoading();
-                    	                   location.reload();
+                    	                   //location.reload();
                                     }
      
                                     data_hold = import_percentage;
@@ -1576,6 +1759,19 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- On Page Load -->
 <script>
     $(document).ready(function() {
+        var ua = window.navigator.userAgent;
+        var isIE = /MSIE|Trident/.test(ua);
+        
+        if (isIE) {
+            alert("Internet Explorer is not a supported browser\n\nPlease use any of the following:\nGoogle Chrome\nMozilla Firefox\nMicrosoft Edge");
+        }
+        else {
+            $('#btn_filter').prop('disabled', false);
+            $('#btn_import').prop('disabled', false);
+            $('#pac-input').prop('disabled', false);
+            $('#btn_analyse').prop('disabled', false);
+        }
+        
         ShowLoading();
         
         function AddOptions(select,options) { /* Add parameter options to parameter select */
