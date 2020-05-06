@@ -17,7 +17,6 @@ font-family: Arial;
 }
 
 #description {
-        font-family: Arial;
         font-size: 15px;
         font-weight: 300;
       }
@@ -42,7 +41,6 @@ font-family: Arial;
         outline: none;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         background-color: #fff;
-        font-family: Arial;
       }
 
       #pac-container {
@@ -56,14 +54,12 @@ font-family: Arial;
       }
 
       .pac-controls label {
-        font-family: Arial;
         font-size: 13px;
         font-weight: 300;
       }
 
       #pac-input {
         background-color: #fff;
-        font-family: Arial;
         font-size: 15px;
         font-weight: 300;
         padding: 0 11px 0 13px;
@@ -108,7 +104,6 @@ font-family: Arial;
   cursor: pointer;
   padding: 8px 15px;		
   font-weight:bold;
-  font-family:Arial;
   text-decoration:none;
   color: white;
   font-size: 14px;
@@ -186,7 +181,6 @@ font-family: Arial;
 
 input[type=date], input[type=time] {
  height:35px;
- font-family:Arial;
  font-size:15px;
  padding: 5px;
  color: black;
@@ -210,7 +204,6 @@ input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display
 .form-control {
  background-color:#e6eeff;
  width:93%;
- font-family:Arial;
  font-size:15px;
  color: black;
 }
@@ -219,7 +212,6 @@ input[type="number"] {
  width:50px;
  text-align: center;
  background-color:#e6eeff;
- font-family:Arial;
  font-size:15px;
  color: black;
 }
