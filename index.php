@@ -264,6 +264,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		marker.title = marker.Crime_Type; // Shown on hover
 
 		google.maps.event.addListener(marker, 'click', function() {
+		    console.log("/// View Crime ///");
 		    if (typeof(marker.info) === "undefined"){
                 //
             }
@@ -290,11 +291,27 @@ require 'dbConfig.php'; // Include the database configuration file
     		maxWidth: 500
     		});
     		
-    		if (typeof(marker.info) === "undefined") {
-    		    //
+    		// Integration Testing (View Crime)
+    		
+    		if (typeof(marker.info) === "undefined") { // InfoWindow not created
+    		    //console.error("Show InfoWindow: FAIL");
     		}
     		else {
+    		    //console.log("Show InfoWindow: PASS");
+    		    //var content_before = marker.info.getContent();
+    		    
     		    marker.info.open(map,marker);
+    		    
+    		    /*
+    		    var content_after = marker.info.getContent();
+    		    
+    		    if (content_before == content_after) { // Matching content
+    		        console.log("Content: PASS");
+    		    }
+    		    else {
+    		        console.error("Content: FAIL");
+    		    }
+    		    */
     		}
 
 		});
@@ -492,6 +509,40 @@ require 'dbConfig.php'; // Include the database configuration file
         			{
                         MarkerToEdit.setPosition(MarkerToEdit.position);
                 		UpdateMarkerInfo(MarkerToEdit);
+                		
+                		// Integration Testing (Edit Crime)
+                		
+                		/*
+                		console.log("/// Edit Crime ///");
+                		var edit_matchingValues = true;
+            		   
+            		     if (MarkerToEdit.Crime_Type != Crime_Type) {
+            		        edit_matchingValues = false;
+            		     }
+            		     if (MarkerToEdit.Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
+            		        edit_matchingValues = false;
+            		     }
+            		     if (MarkerToEdit.Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
+            		        edit_matchingValues = false;
+            		     }
+            		     if (MarkerToEdit.Description != Description) {
+            		        edit_matchingValues = false;
+            		     }
+            		     if (MarkerToEdit.position.lat() != Latitude) {
+            		        edit_matchingValues = false;
+            		     }
+            		     if (MarkerToEdit.position.lng() != Longitude) {
+            		        edit_matchingValues = false;
+            		     }
+            		
+                		if (edit_matchingValues == true) {
+                		    console.log("Matching Values: PASS");
+                		}
+                		else {
+                		    console.error("Matching Values: FAIL");
+                		}
+                		*/
+                		
                 		HideLoading();
                 		$("#modal_edit").modal('hide');
         			}
@@ -530,7 +581,23 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		MarkerToDelete.setVisible(false); // Hide marker
 		
+		// Integration Testing (Delete Crime)
+		
+		//var delete_length_before = MarkerArray.length;
+		
 		if (index !== -1) MarkerArray.splice(index, 1); // Remove marker from array
+		
+		/*
+		var delete_length_after = MarkerArray.length;
+		
+		console.log("/// Delete Crime ///")
+		if (delete_length_after == (delete_length_before-1)) {
+		    console.log("Count: PASS");
+		}
+		else {
+		    console.error("COUNT: FAIL");
+		}
+		*/
 			
 		var MarkerID = ID; // Assign to send variable
 		
@@ -635,8 +702,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	
 	//console.log("LoadMarkers() duration: " + (t1-t0) + "ms");
 	
-	// Unit Testing //
+	// Unit Testing (Load Crime) //
 	
+	/*
 	function LoadMarkers_test () {
 	    console.log("/// Load Crime ///");
 		var length_start = MarkerArray.length;
@@ -657,7 +725,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		    console.log("0 records: PASS");
 		}
 		else {
-		    console.log("0 records: FAIL");
+		    console.error("0 records: FAIL");
 		}
 		
 		var unit_testing_markers = [
@@ -719,11 +787,12 @@ require 'dbConfig.php'; // Include the database configuration file
 		    console.log("Matching Values: PASS");
 		}
 		else {
-		    console.log("Matching Values: FAIL");
+		    console.error("Matching Values: FAIL");
 		}
 		
 	}
 	LoadMarkers_test();
+	*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -761,7 +830,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	var markerCluster = new MarkerClusterer(null, MarkerArray, mcOptions);
     markerCluster.setIgnoreHidden(true);
     
-    google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading);
+    google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading );
     google.maps.event.addListener(markerCluster, 'clusteringend', HideLoading);
     
     /*
@@ -1119,20 +1188,33 @@ require 'dbConfig.php'; // Include the database configuration file
 	$("#add_submit_form").submit(function(e) {
 		e.preventDefault();
 		
-		var dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
+		var dropdown = document.getElementById("Add_Crime_Type");
+		var sub_dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
 		
 		/* Take values locally */
 		var Crime_Date = document.getElementById("Add_Date").value;
 		var Crime_Time = document.getElementById("Add_Time").value;
-		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
+		var Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
 		var Description = document.getElementById("Add_Description").value;
 		
+		/* Check for script tags */
 		var add_containsTags = false;
 		if (Description.includes("<") && Description.includes(">")) {
 		    add_containsTags = true;
 		}
 		
-		if (Description.length <= 500 && add_containsTags == false && MarkerArray.length < 50000) {
+		/* Check Crime Type(s) are specified */
+		var Crime_Types_Chosen = false;
+		
+		var Crime_Category = dropdown.options[dropdown.selectedIndex].value;
+		if (Crime_Category == "" || Crime_Type == "") {
+		    Crime_Types_Chosen = false;
+		}
+		else {
+		    Crime_Types_Chosen = true;
+		}
+		
+		if (Description.length <= 500 && add_containsTags == false && MarkerArray.length < 50000 && Crime_Types_Chosen == true) {
 		    /* Also send to database */	
     		var formData = $("#add_submit_form").serialize();
     		
@@ -1150,19 +1232,20 @@ require 'dbConfig.php'; // Include the database configuration file
     			success: function(result)
     			{
     				if (SmallMarkerMoved == true) {
-    				    console.log("/// Add Crime - Adjusted ///");
-    				    var add_moved_length_before = MarkerArray.length;
+    				    //console.log("/// Add Crime - Adjusted ///");
+    				    //var add_moved_length_before = MarkerArray.length;
     				    
     					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
     					
-    					 // Unit Testing //
+    					 /*
+    					 // Unit Testing (Add Crime) //
     					 var add_moved_length_after = MarkerArray.length;
     					 
     					 if (add_moved_length_after == (add_moved_length_before + 1)) {
     					     console.log("Count: PASS")
     					 }
     					 else {
-    					     console.log("Count: FAIL");
+    					     console.error("Count: FAIL");
     					 }
     		    
                 		 var add_last_added = (MarkerArray.length-1);
@@ -1191,24 +1274,26 @@ require 'dbConfig.php'; // Include the database configuration file
                 		    console.log("Matching Values: PASS");
                 		}
                 		else {
-                		    console.log("Matching Values: FAIL");
+                		    console.error("Matching Values: FAIL");
                 		}
+                		*/
                 		
     				}
     				else {
-    				    console.log("/// Add Crime ///");
-    				    var add_length_before = MarkerArray.length;
+    				    //console.log("/// Add Crime ///");
+    				    //var add_length_before = MarkerArray.length;
     				    
     					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
-    					
-    					 // Unit Testing //
+    					 
+    					 /*
+    					 // Unit Testing (Add Crime) //
     					 var add_length_after = MarkerArray.length;
     					 
     					 if (add_length_after == (add_length_before + 1)) {
     					     console.log("Count: PASS")
     					 }
     					 else {
-    					     console.log("Count: FAIL");
+    					     console.error("Count: FAIL");
     					 }
     		
                 		 var add_last_added = (MarkerArray.length-1);
@@ -1237,8 +1322,9 @@ require 'dbConfig.php'; // Include the database configuration file
                 		    console.log("Matching Values: PASS");
                 		}
                 		else {
-                		    console.log("Matching Values: FAIL");
+                		    console.error("Matching Values: FAIL");
                 		}
+                		*/
                 		
     				}
     				SmallMarkerMoved = false;
@@ -1259,6 +1345,14 @@ require 'dbConfig.php'; // Include the database configuration file
 		    }
 		    if (MarkerArray.length > 50000) {
 		        add_err_string += "The mapper is at its capacity of displaying 50,000 crimes\n";
+		    }
+		    if (Crime_Types_Chosen == false) {
+		        if (Crime_Category == "") {
+		            add_err_string += "The 'Crime Type - Main Category' field is a required field\n";
+		        }
+		        if (Crime_Type == "") {
+		            add_err_string += "The 'Crime Type - Subcategory' field is a required field\n";
+		        }
 		    }
 		    alert(add_err_string);
 		}
