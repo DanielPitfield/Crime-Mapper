@@ -56,16 +56,40 @@ require 'dbConfig.php'; // Include the database configuration file
 	<div class="custom_contextmenu_btn add" id="btn_add">Add Crime</div>
 </div>
 
+<!-- Error Alert -->
+<div class="alert alert-danger alert-dismissible fade show" role="alert" id="Alert_Error">
+    <h5 class="alert-heading" style="font-weight: bold;">Error</h5>
+    <div id="Alert_Error_Message" style="font-size: 14px;">
+        Message
+    </div>
+    <button type="button" class="close" id="close_alert_error">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<!-- Warning Alert -->
+<div class="alert alert-warning alert-dismissible fade show" role="alert" id="Alert_Warning">
+    <h5 class="alert-heading" style="font-weight: bold;">Warning</h5>
+    <div id="Alert_Warning_Message" style="font-size: 14px;">
+        Message
+    </div>
+    <button type="button" class="close" id="close_alert_warning">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
 <!-- Filter modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
   <div class="modal-dialog modal-xl" id="modal_filter_dialog">
-    <div class="modal-content">
+    <div class="modal-content" id="modal_filter_content">
       <div class="modal-header">
 		<h5 class="modal-title">Filter</h5>
 		
 		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
 		
-		<button type="button" class="close" data-dismiss="modal">
+		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered Markers</button>
+		
+		<button type="button" class="close" data-dismiss="modal" id="close_filter">
 			<span>&times;</span>
 		</button>
 	   </div>
@@ -114,10 +138,10 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Add crime modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
   <div class="modal-dialog modal-xl" id="modal_add_dialog">
-    <div class="modal-content">
+    <div class="modal-content" id="modal_add_content">
       <div class="modal-header">
 		<h5 class="modal-title">Add Crime</h5>
-		<button type="button" class="close" data-dismiss="modal">
+		<button type="button" class="close" data-dismiss="modal" id="close_add">
 			<span>&times;</span>
 		</button>
 	   </div>
@@ -159,10 +183,10 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Edit crime modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_edit">
   <div class="modal-dialog modal-xl" id="modal_edit_dialog">
-    <div class="modal-content">
+    <div class="modal-content" id="modal_edit_content">
       <div class="modal-header">
 		<h5 class="modal-title">Edit Crime</h5>
-		<button type="button" class="close" data-dismiss="modal">
+		<button type="button" class="close" data-dismiss="modal" id="close_edit">
 			<span>&times;</span>
 		</button>
 	   </div>
@@ -204,13 +228,13 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Import modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_import">
   <div class="modal-dialog modal-xl">
-    <div class="modal-content">
+    <div class="modal-content" id="modal_import_content">
       <div class="modal-header">
 		<h5 class="modal-title">Import</h5>
 		
 		<a href="template.csv" class="btn btn-info" role="button" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Download Template</a>
 		
-		<button type="button" class="close" id="btn_import_close" data-dismiss="modal">
+		<button type="button" class="close" id="close_import" data-dismiss="modal">
 			<span>&times;</span>
 		</button>
 	   </div>
@@ -246,7 +270,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 	
 	var MarkerArray = [];
-	var FilteredMarkerArray = [];
 	
 	function placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,CenterLocation,map) {
 		var marker = new google.maps.Marker({
@@ -264,7 +287,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		marker.title = marker.Crime_Type; // Shown on hover
 
 		google.maps.event.addListener(marker, 'click', function() {
-		    console.log("/// View Crime ///");
+		    //console.log("/// View Crime ///");
 		    if (typeof(marker.info) === "undefined"){
                 //
             }
@@ -324,20 +347,86 @@ require 'dbConfig.php'; // Include the database configuration file
 		LoadingSymbol.style.display = "block";
 	}
 	
-	
-	function ShowLoading() {
-	    LoadingSymbol = document.getElementById("loading_symbol");
-		LoadingSymbol.style.left = "calc(50% - 50px)";
-		LoadingSymbol.style.top = "calc(50% - 50px)";
-		LoadingSymbol.style.display = "block";
-	}
-	
 	function HideLoading() {
 	    LoadingSymbol = document.getElementById("loading_symbol");
 		LoadingSymbol.style.left = "-500px";
 		LoadingSymbol.style.top = "-500px";
 		LoadingSymbol.style.display = "none";
 	}
+	
+	var ErrorAlertOpen = false;
+	function ShowErrorAlert(message) {
+	    Error_Alert = document.getElementById("Alert_Error");
+		$("#Alert_Error_Message").html(message);
+		Error_Alert.style.left = "14%";
+		Error_Alert.style.top = "100px";
+	    Error_Alert.style.display = "block";
+	    ErrorAlertOpen = true;
+	}
+	
+	function HideErrorAlert() {
+	    Error_Alert = document.getElementById("Alert_Error");
+        Error_Alert.style.left = "-500px";
+		Error_Alert.style.top = "-500px";
+	    Error_Alert.style.display = "none";
+	    ErrorAlertOpen = false;
+	}
+	
+	$("#close_alert_error").click(function() {
+        HideErrorAlert();
+	});
+	
+	$("#close_add").click(function() {
+        if (ErrorAlertOpen == true) {
+            HideErrorAlert();
+        }
+	});
+	
+	$("#close_filter").click(function() {
+        if (ErrorAlertOpen == true) {
+            HideErrorAlert();
+        }
+	});
+	
+	$("#close_edit").click(function() {
+        if (ErrorAlertOpen == true) {
+            HideErrorAlert();
+        }
+	});
+	
+	$("#close_import").click(function() {
+        if (ErrorAlertOpen == true) {
+            HideErrorAlert();
+        }
+	});
+	
+	var WarningAlertOpen = false;
+	function ShowWarningAlert(message) {
+	    Warning_Alert = document.getElementById("Alert_Warning");
+		$("#Alert_Warning_Message").html(message);
+		Warning_Alert.style.left = "34%";
+		Warning_Alert.style.top = "500px";
+	    Warning_Alert.style.display = "block";
+	    WarningAlertOpen = true;
+	}
+	
+	function HideWarningAlert() {
+	    Warning_Alert = document.getElementById("Alert_Warning");
+        Warning_Alert.style.left = "-500px";
+		Warning_Alert.style.top = "-500px";
+	    Warning_Alert.style.display = "none";
+	    WarningAlertOpen = false;
+	}
+	
+	$("#close_alert_warning").click(function() {
+        HideWarningAlert();
+	});
+	
+	$("#close_import").click(function() {
+        if (WarningAlertOpen == true) {
+            HideWarningAlert();
+        }
+	});
 
 	function UpdateMarkerInfo(marker) {
 	 
@@ -545,6 +634,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 		
                 		HideLoading();
                 		$("#modal_edit").modal('hide');
+    				    
         			}
         			
         		});  
@@ -552,12 +642,24 @@ require 'dbConfig.php'; // Include the database configuration file
     		else {
     		    var edit_err_string = "";
     		    if (Description.length > 500) {
-    		        edit_err_string += "The description can only be a maximum of 500 characters\n";
+    		        edit_err_string += "The 'Description' field can only be a maximum of 500 characters<br>";
     		    }
     		    if (edit_containsTags == true) {
-    		        edit_err_string += "The description can not have both < and > characters\n";
+    		        edit_err_string += "The 'Description' field can not have both < and > characters<br>";
     		    }
-    		    alert(edit_err_string);
+    		    ShowErrorAlert(edit_err_string);
+    		    
+    		    /* Modal Position */
+                var Edit_Modal_Top = $("#modal_edit_content").offset().top;
+                var Edit_Modal_Left = $("#modal_edit_content").offset().left;
+                var Edit_Modal_Height = $("#modal_edit_content").height();
+                var Edit_Modal_Width = $("#modal_edit_content").width();
+                
+                /* Alert Position (top) */
+                var Edit_Alert_Error_Top = Edit_Modal_Top + Edit_Modal_Height + 50;
+                
+                /* Set position of alert */
+                $("#Alert_Error").css({top: Edit_Alert_Error_Top, left: Edit_Modal_Left, width: Edit_Modal_Width});
     		}
 		
 		});
@@ -579,13 +681,9 @@ require 'dbConfig.php'; // Include the database configuration file
 		    MarkerToDelete.info.close(); // Close it
 		}
 		
-		MarkerToDelete.setVisible(false); // Hide marker
-		
 		// Integration Testing (Delete Crime)
 		
 		//var delete_length_before = MarkerArray.length;
-		
-		if (index !== -1) MarkerArray.splice(index, 1); // Remove marker from array
 		
 		/*
 		var delete_length_after = MarkerArray.length;
@@ -602,12 +700,13 @@ require 'dbConfig.php'; // Include the database configuration file
 		var MarkerID = ID; // Assign to send variable
 		
 			$.ajax({
-				url: 'DeleteMarker.php',  // Remove from database
+				url: 'DeleteMarker.php',  // Database
 				type: 'POST',
 				data: {MarkerID: MarkerID},
 				success: function(data)
 				{
-					//
+				    MarkerToDelete.setVisible(false); // View
+				    if (index !== -1) MarkerArray.splice(index, 1); // Array
 				}
 			});
 			
@@ -840,6 +939,8 @@ require 'dbConfig.php'; // Include the database configuration file
 	*/
 	
 	function FilterMarkers(center_loc, distance) {
+	    var filter_err_string = "";
+	    
 	    if (distance == null) {
 	        distance = "[ALL]";
 	    }
@@ -931,20 +1032,20 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		if (isMinDate == true && isMaxDate == true) {
 		    if (minDate > maxDate) {
-		        alert("The lower date boundary can't be later than the higher date boundary");
+		        filter_err_string += "The 'Minimum Date' field can't be a date after the 'Maximum Date' field<br>";
 		        invalidInput = true;
 		    }
 		}
 		
 		if (isMinTime == true && isMaxTime == true) {
 		    if (minTime > maxTime) {
-		        alert("The lower time boundary can't be after the higher time boundary");
+		        filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
 		        invalidInput = true;
 	    	}
 		}
 	    	
 		if (isMinTime == false && isMaxTime == true || isMaxTime == false && isMinTime == true) {
-		        alert("Enter a value for both time fields");
+		        filter_err_string += "Both the 'Minimum Time' and 'Maximum Time' fields are required<br>";
 		        invalidInput = true;
 		}
 		
@@ -1040,6 +1141,7 @@ require 'dbConfig.php'; // Include the database configuration file
     			                HideMarker(MarkerArray[i]);
     			            } 
     			        }
+    			        //
     			    }
     			}
     			
@@ -1078,6 +1180,21 @@ require 'dbConfig.php'; // Include the database configuration file
 		  }
 		  $("#modal_filter").modal('hide');
 		
+	    }
+	    else {
+	        ShowErrorAlert(filter_err_string);
+	        
+	        /* Modal Position */
+            var Filter_Modal_Top = $("#modal_filter_content").offset().top;
+            var Filter_Modal_Left = $("#modal_filter_content").offset().left;
+            var Filter_Modal_Height = $("#modal_filter_content").height();
+            var Filter_Modal_Width = $("#modal_filter_content").width();
+                
+            /* Alert Position (top) */
+            var Filter_Alert_Error_Top = Filter_Modal_Top + Filter_Modal_Height + 50;
+                
+            /* Set position of alert */
+            $("#Alert_Error").css({top: Filter_Alert_Error_Top, left: Filter_Modal_Left, width: Filter_Modal_Width});
 	    }
 	}
 
@@ -1330,6 +1447,7 @@ require 'dbConfig.php'; // Include the database configuration file
     				SmallMarkerMoved = false;
     				HideLoading();
     				$("#modal_add").modal('hide');
+    				
     			}
     			
     		});
@@ -1338,23 +1456,35 @@ require 'dbConfig.php'; // Include the database configuration file
 		else {
 		    var add_err_string = "";
 		    if (Description.length > 500) {
-		        add_err_string += "The description can only be a maximum of 500 characters\n";
+		        add_err_string += "The 'Description' field can only be a maximum of 500 characters<br>";
 		    }
 		    if (add_containsTags == true) {
-		        add_err_string += "The description can not have both < and > characters\n";
+		        add_err_string += "The 'Description' field can not have both < and > characters<br>";
 		    }
 		    if (MarkerArray.length > 50000) {
-		        add_err_string += "The mapper is at its capacity of displaying 50,000 crimes\n";
+		        add_err_string += "The mapper is at its capacity of displaying 50,000 crimes<br>";
 		    }
 		    if (Crime_Types_Chosen == false) {
 		        if (Crime_Category == "") {
-		            add_err_string += "The 'Crime Type - Main Category' field is a required field\n";
+		            add_err_string += "The 'Crime Type - Main Category' field is a required field<br>";
 		        }
 		        if (Crime_Type == "") {
-		            add_err_string += "The 'Crime Type - Subcategory' field is a required field\n";
+		            add_err_string += "The 'Crime Type - Subcategory' field is a required field<br>";
 		        }
 		    }
-		    alert(add_err_string);
+            ShowErrorAlert(add_err_string);
+            
+            /* Modal Position */
+            var Add_Modal_Top = $("#modal_add_content").offset().top;
+            var Add_Modal_Left = $("#modal_add_content").offset().left;
+            var Add_Modal_Height = $("#modal_add_content").height();
+            var Add_Modal_Width = $("#modal_add_content").width();
+                
+            /* Alert Position (top) */
+            var Add_Alert_Error_Top = Add_Modal_Top + Add_Modal_Height + 50;
+                
+            /* Set position of alert */
+            $("#Alert_Error").css({top: Add_Alert_Error_Top, left: Add_Modal_Left, width: Add_Modal_Width});
 		}
 
 	});
@@ -1550,10 +1680,10 @@ require 'dbConfig.php'; // Include the database configuration file
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
     
-        var t2 = performance.now();
+        //var t2 = performance.now();
     
         $('#btn_import_confirm').attr('disabled', true); // Disable import button
-        $('#btn_import_close').attr('disabled', true); // Disable close button
+        $('#close_import').attr('disabled', true); // Disable close button
         
         if($('#Import_Input').prop('files').length > 0 && (isCSV === true))
         {
@@ -1608,35 +1738,35 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 var validFile = true;
-                var import_err_str = "FILE IMPORT ERROR";
+                var import_err_str = "";
                 
                 var FileWarning = false;
-                var import_warning_str = "WARNING";
+                var import_warning_str = "";
                 
                 var Reached_Limit = false;
                 
                 if (Date_index === -1) {
-                    import_warning_str = import_warning_str + "\nMissing 'Date' column in file (the current date will be used)";
+                    import_warning_str += "Missing 'Date' column in file (the current date will be used)<br>";
                     FileWarning = true;
                 }
                 if (Latitude_index === -1) {
-                    import_err_str = import_err_str + "\nMissing 'Latitude' column in file";
+                    import_err_str += "Missing 'Latitude' column in file<br>";
                     validFile = false;
                 }
                 if (Longitude_index === -1) {
-                    import_err_str = import_err_str + "\nMissing 'Longitude' column in file";
+                    import_err_str += "Missing 'Longitude' column in file<br>";
                     validFile = false;
                 }
                 if (CrimeType_index === -1) {
-                    import_warning_str = import_warning_str + "\nMissing 'Crime Type' column in file (the crime type 'Unknown' will be used)";
+                    import_warning_str += "Missing 'Crime Type' column in file (the crime type 'Unknown' will be used)<br>";
                     FileWarning = true;
                 }
                 if (Description_index === -1) {
-                    import_warning_str = import_warning_str + "\nMissing 'Description' column in file (no description will be used)";
+                    import_warning_str += "Missing 'Description' column in file (no description will be used)<br>";
                     FileWarning = true;
                 }
                 if (Time_index === -1) {
-                    import_warning_str = import_warning_str + "\nMissing 'Time' column in file (the current time will be used)";
+                    import_warning_str += "Missing 'Time' column in file (the current time will be used)<br>";
                     FileWarning = true;
                 }
                 
@@ -1653,13 +1783,25 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 
                 if (num_records > 7500) {
-                    import_err_str = import_err_str + "\nOnly 7500 records can be imported at any one time\n(The selected file has " + num_records + " records)";
+                    import_err_str += "Only 7500 records can be imported at any one time<br>(The selected file has " + num_records + " records)<br>";
                     validFile = false;
                 }
                 
                 if (validFile == true && Reached_Limit == false) {
                     if (FileWarning == true) {
-                        //alert(import_warning_str);
+                        ShowWarningAlert(import_warning_str);
+                        
+                        /* Modal Position */
+                        var Import_Modal_Warning_Only_Top = $("#modal_import_content").offset().top;
+                        var Import_Modal_Warning_Only_Left = $("#modal_import_content").offset().left;
+                        var Import_Modal_Warning_Only_Height = $("#modal_import_content").height();
+                        var Import_Modal_Warning_Only_Width = $("#modal_import_content").width();
+                            
+                        /* Alert Position (top) */
+                        var Import_Alert_Warning_Only_Top = Import_Modal_Warning_Only_Top + Import_Modal_Warning_Only_Height + 50;
+                            
+                        /* Set position of alert */
+                        $("#Alert_Warning").css({top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: IImport_Modal_Warning_Only_Width});
                     }
                     
                     $("#progress_file_upload").css("width", "100%").text("Ready");
@@ -1736,7 +1878,7 @@ require 'dbConfig.php'; // Include the database configuration file
                                     $("#progress_insert_upload").css("width", "100%").text("Import (Failed)");
                                     Timed_Out = 1;
                                     $('#btn_import_confirm').attr('disabled', false);
-                                    $('#btn_import_close').attr('disabled', false);
+                                    $('#close_import').attr('disabled', false);
                                 }
                                 
                                 if (Timed_Out == 0 && import_percentage != 0) {
@@ -1751,11 +1893,11 @@ require 'dbConfig.php'; // Include the database configuration file
                                     if (FinishCheckCounter == 5) {
                          	               clearInterval(t);
                          	               
-                         	               var t3 = performance.now();
-	                                       console.log("ImportMarkers() duration: " + (t3-t2) + "ms");
+                         	               //var t3 = performance.now();
+	                                       //console.log("ImportMarkers() duration: " + (t3-t2) + "ms");
                          	               
                     	                   ShowLoading();
-                    	                   //location.reload();
+                    	                   location.reload();
                                     }
      
                                     data_hold = import_percentage;
@@ -1772,37 +1914,102 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
                 else {
                     if (num_records <=0) {
-                        import_err_str += "\nNo records found in the file";
+                        import_err_str += "No records found in the file<br>";
                     }
                     if (Reached_Limit == true) {
-                        import_err_str += "\nImporting this file would exceed the limit of 50,000 markers";
+                        import_err_str += "Importing this file would exceed the limit of 50,000 markers<br>";
                     }
                     
                     if (FileWarning == true) {
-                        alert(import_err_str + "\n\n" + import_warning_str);
+                        /* Warning */
+                        ShowWarningAlert(import_warning_str);
+                        
+                        /* Modal Position */
+                        var Import_Modal_Top = $("#modal_import_content").offset().top;
+                        var Import_Modal_Left = $("#modal_import_content").offset().left;
+                        var Import_Modal_Height = $("#modal_import_content").height();
+                        var Import_Modal_Width = $("#modal_import_content").width();
+                            
+                        /* Alert Position (top) */
+                        var Import_Alert_Warning_Top = Import_Modal_Top + Import_Modal_Height + 50;
+                            
+                        /* Set position of alert */
+                        $("#Alert_Warning").css({top: Import_Alert_Warning_Top, left: Import_Modal_Left, width: Import_Modal_Width});
+                        
+                        /* Error */
+                        ShowErrorAlert(import_err_str);
+                        
+                        /* Warning Alert Position */
+                        var Warning_Alert_Top = $("#Alert_Warning").offset().top;
+                        var Warning_Alert_Height = $("#Alert_Warning").height();
+                        
+                        /* Alert Position (top) */
+                        var Import_Alert_Error_Top = Warning_Alert_Top + Warning_Alert_Height + 30;
+                            
+                        /* Set position of alert */
+                        $("#Alert_Error").css({top: Import_Alert_Error_Top, left: Import_Modal_Left, width: Import_Modal_Width});
                     }
                     else {
-                        alert(import_err_str); 
+                        ShowErrorAlert(import_err_str);
+                        
+                        /* Modal Position */
+                        var Import_Modal_Error_Only_Top = $("#modal_import_content").offset().top;
+                        var Import_Modal_Error_Only_Left = $("#modal_import_content").offset().left;
+                        var Import_Modal_Error_Only_Height = $("#modal_import_content").height();
+                        var Import_Modal_Error_Only_Width = $("#modal_import_content").width();
+                            
+                        /* Alert Position (top) */
+                        var Import_Alert_Error_Only_Top = Import_Modal_Error_Only_Top + Import_Modal_Error_Only_Height + 50;
+                            
+                        /* Set position of alert */
+                        $("#Alert_Error").css({top: Import_Alert_Error_Only_Top, left: Import_Modal_Error_Only_Left, width: Import_Modal_Error_Only_Width});
                     }
                     
                     $('#btn_import_confirm').attr('disabled', false);
-                    $('#btn_import_close').attr('disabled', false);
+                    $('#close_import').attr('disabled', false);
                 }
                 
             }
         }
         else {
+            selectfile_err_string = "";
             if (isCSV === false) { // File of input is not a .csv file
                 if (isFileSelected === false) { // And no file has been added
-                    alert("No file has been selected for import");
+                    selectfile_err_string += "No file has been selected for import";
+                    ShowErrorAlert(selectfile_err_string);
+                    
+                    /* Modal Position */
+                    var Import_Modal_Select_Top = $("#modal_import_content").offset().top;
+                    var Import_Modal_Select_Left = $("#modal_import_content").offset().left;
+                    var Import_Modal_Select_Height = $("#modal_import_content").height();
+                    var Import_Modal_Select_Width = $("#modal_import_content").width();
+                            
+                    /* Alert Position (top) */
+                    var Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                            
+                    /* Set position of alert */
+                    $("#Alert_Error").css({top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width});
                 }
                 else {
-                    alert("The file is not a .csv file");
+                    selectfile_err_string += "The file is not a .csv file";
+                    ShowErrorAlert(selectfile_err_string);
+                    
+                    /* Modal Position */
+                    var Import_Modal_Select_Top = $("#modal_import_content").offset().top;
+                    var Import_Modal_Select_Left = $("#modal_import_content").offset().left;
+                    var Import_Modal_Select_Height = $("#modal_import_content").height();
+                    var Import_Modal_Select_Width = $("#modal_import_content").width();
+                            
+                    /* Alert Position (top) */
+                    var Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                            
+                    /* Set position of alert */
+                    $("#Alert_Error").css({top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width});
                 }
             }
             
             $('#btn_import_confirm').attr('disabled', false);
-            $('#btn_import_close').attr('disabled', false);
+            $('#close_import').attr('disabled', false);
         }
     });
 		
@@ -1857,7 +2064,7 @@ require 'dbConfig.php'; // Include the database configuration file
         var isIE = /MSIE|Trident/.test(ua);
         
         if (isIE) {
-            alert("Internet Explorer is not a supported browser\n\nPlease use any of the following:\nGoogle Chrome\nMozilla Firefox\nMicrosoft Edge");
+            alert("Internet Explorer is not a supported browser\n\nPlease use any of the following:\nGoogle Chrome\nMozilla Firefox\nMicrosoft Edge"); // Use standard JS alert (IE11 may not support Bootstrap alerts)
         }
         else {
             $('#btn_filter').prop('disabled', false);
