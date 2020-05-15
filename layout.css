@@ -92,6 +92,18 @@ font-family: Arial, Helvetica, sans-serif;
   display: none;
 }
 
+#Alert_Error {
+  position: fixed;
+  display: none;
+  z-index:20001;
+}
+
+#Alert_Warning {
+  position: fixed;
+  display: none;
+  z-index:20001;
+}
+
 .spinner-border {
   display: none;
   position:absolute;
@@ -233,20 +245,22 @@ input[type="number"] {
     float:right;
 }
 
-#modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog { /* 1920 x 1080 pixels or above */
+#modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog { /* All */
     min-width:1700px;
 }
 
-@media (min-width:1200px) and (max-width:1370px) { /* 1366 x 768 pixels */
+@media (min-width:1200px) and (max-width:1370px) { /* e.g 1366 x 768 pixels */
   #modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog {
     left:-160px;
     top:-25px;
   }
+  
 }
 
-@media (max-width:1200px) {
+@media (max-width:1200px) { /* Even smaller resolutions */
   #modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog {
     left:-340px;
     top:-35px;
   }
+  
 }
