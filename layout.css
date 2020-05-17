@@ -92,13 +92,7 @@ font-family: Arial, Helvetica, sans-serif;
   display: none;
 }
 
-#Alert_Error {
-  position: fixed;
-  display: none;
-  z-index:20001;
-}
-
-#Alert_Warning {
+#Alert_Error, #Alert_Warning, #Alert_Progress {
   position: fixed;
   display: none;
   z-index:20001;
