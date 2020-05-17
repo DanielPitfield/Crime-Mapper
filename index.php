@@ -78,6 +78,18 @@ require 'dbConfig.php'; // Include the database configuration file
     </button>
 </div>
 
+<!-- Delete Progress Alert -->
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="Alert_Progress">
+    <h5 class="alert-heading" style="font-weight: bold;">Progress</h5>
+	<div class="progress" style="margin-top:10px;width:100%;">
+        <div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
+        </div>
+    </div>
+    <button type="button" class="close" id="close_alert_progress">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
 <!-- Filter modal -->
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
   <div class="modal-dialog modal-xl" id="modal_filter_dialog">
@@ -87,7 +99,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
 		
-		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered Markers</button>
+		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered Markers (BETA)</button>
 		
 		<button type="button" class="close" data-dismiss="modal" id="close_filter">
 			<span>&times;</span>
@@ -427,6 +439,27 @@ require 'dbConfig.php'; // Include the database configuration file
             HideWarningAlert();
         }
 	});
+	
+	var ProgressAlertOpen = false;
+	function ShowProgressAlert() {
+	    Progress_Alert = document.getElementById("Alert_Progress");
+		Progress_Alert.style.left = "34%";
+		Progress_Alert.style.top = "500px";
+	    Progress_Alert.style.display = "block";
+	    ProgressAlertOpen = true;
+	}
+	
+	function HideProgressAlert() {
+	    Progress_Alert = document.getElementById("Alert_Progress");
+        Progress_Alert.style.left = "-500px";
+		Progress_Alert.style.top = "-500px";
+	    Progress_Alert.style.display = "none";
+	    ProgressAlertOpen = false;
+	}
+	
+	$("#close_alert_progress").click(function() {
+        HideProgressAlert();
+	});
 
 	function UpdateMarkerInfo(marker) {
 	 
@@ -500,7 +533,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	        $('#Edit_Crime_Type').val('Other').change();
 	    }
 	    else {
-	        console.log("Imported Crime Type");
+	        //console.log("Imported Crime Type");
 	        
 	        $('#Edit_Crime_Type').val('Other').change();
 	        
@@ -634,6 +667,10 @@ require 'dbConfig.php'; // Include the database configuration file
                 		
                 		HideLoading();
                 		$("#modal_edit").modal('hide');
+                		
+                		if (ErrorAlertOpen == true) {
+                            HideErrorAlert();
+                        }
     				    
         			}
         			
@@ -677,9 +714,14 @@ require 'dbConfig.php'; // Include the database configuration file
 
 		}
 		
-		if (MarkerToDelete.info.getMap() != null) { // If infowindow is open
-		    MarkerToDelete.info.close(); // Close it
-		}
+		if (typeof(MarkerToDelete.info) === "undefined"){
+                //
+        }
+        else { // If marker has an InfoWindow
+             if (MarkerToDelete.info.getMap() != null) { // And it is open
+                 MarkerToDelete.info.close(); // Close it
+             }
+        }
 		
 		// Integration Testing (Delete Crime)
 		
@@ -713,6 +755,74 @@ require 'dbConfig.php'; // Include the database configuration file
 		HideLoading();
 		
 	}
+	
+	$("#Delete_Filtered_Markers").click(function() {
+        /* Modal Position */
+        var Edit_Modal_Delete_Top = $("#modal_filter_content").offset().top;
+        var Edit_Modal_Delete_Left = $("#modal_filter_content").offset().left;
+        var Edit_Modal_Delete_Height = $("#modal_filter_content").height();
+        var Edit_Modal_Delete_Width = $("#modal_filter_content").width();
+                
+        /* Alert Position (top) */
+        var Edit_Alert_Progress_Top = Edit_Modal_Delete_Top + Edit_Modal_Delete_Height + 50;
+                
+        /* Set position of alert */
+        $("#Alert_Progress").css({top: Edit_Alert_Progress_Top, left: Edit_Modal_Delete_Left, width: Edit_Modal_Delete_Width});
+	    
+	    var Delete_ID_array = [];
+	    for(i = 0; i < MarkerArray.length; i++) {
+	        if (MarkerArray[i].getVisible() == true) {
+	            Delete_ID_array.push(MarkerArray[i].ID); // Collate IDs
+	        }
+	    }
+	    
+	    if (Delete_ID_array.length > 0) { // If markers to delete
+	       ShowProgressAlert();
+	       var t2 = setInterval(CheckDeleteProgressFile,1000);
+	       
+	       $.ajax({
+			    url: 'DeleteMarker.php',
+			    type: 'POST',
+			    data: {Delete_ID_array: Delete_ID_array}, // Send IDs
+			    success: function(data)
+			    {
+				    //
+			    }
+		    });
+	    }
+                                    
+        var delete_data_hold = -10;
+        var Delete_FinishCheckCounter = 0;
+                	
+        function CheckDeleteProgressFile() {
+            $.ajax({
+                url: "/delete_progress.txt",
+                cache: false,
+                async: false,
+                dataType: "text",
+                success: function( data, textStatus, jqXHR ) {
+                    var delete_percentage = data;
+                    
+                    if (delete_percentage == delete_data_hold) {
+                        Delete_FinishCheckCounter += 1;
+                    }
+                    
+                    if (Delete_FinishCheckCounter == 3) {
+                        $("#progress_delete").css("width", "100%").text("Delete (Complete)");
+                        clearInterval(t2); // Stop checking progress
+                        
+                        setTimeout(() => {ShowLoading();location.reload()}, 2000); // After 2 seconds show loading and refresh
+                    }
+                    else {
+                        $("#progress_delete").css("width", Math.round(delete_percentage) + "%").text("Delete (" + Math.round(delete_percentage) + "%)");
+                    }
+                    delete_data_hold = data;
+
+                }
+            });
+        }
+
+	});
 
 	function initMap() {
 		var ContextMenu = null;
@@ -1179,6 +1289,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		    
 		  }
 		  $("#modal_filter").modal('hide');
+		  
+		  if (ErrorAlertOpen == true) {
+                HideErrorAlert();
+          }
 		
 	    }
 	    else {
@@ -1447,6 +1561,10 @@ require 'dbConfig.php'; // Include the database configuration file
     				SmallMarkerMoved = false;
     				HideLoading();
     				$("#modal_add").modal('hide');
+    				
+    				if (ErrorAlertOpen == true) {
+                        HideErrorAlert();
+                    }
     				
     			}
     			
@@ -1801,7 +1919,7 @@ require 'dbConfig.php'; // Include the database configuration file
                         var Import_Alert_Warning_Only_Top = Import_Modal_Warning_Only_Top + Import_Modal_Warning_Only_Height + 50;
                             
                         /* Set position of alert */
-                        $("#Alert_Warning").css({top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: IImport_Modal_Warning_Only_Width});
+                        $("#Alert_Warning").css({top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: Import_Modal_Warning_Only_Width});
                     }
                     
                     $("#progress_file_upload").css("width", "100%").text("Ready");
@@ -2029,7 +2147,7 @@ require 'dbConfig.php'; // Include the database configuration file
         var bounds = new google.maps.LatLngBounds();
         places.forEach(function(place) {
 			if (!place.geometry) {
-				console.log("Returned place contains no geometry");
+				//console.log("Returned place contains no geometry");
 				return;
             }
 
@@ -2202,7 +2320,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 AddOptions(add_sub_select,other_sub_options);
             }
             else {
-                console.log("Unexpected main category chosen (Add)");
+                //console.log("Unexpected main category chosen (Add)");
             }
         });
         
@@ -2262,7 +2380,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 AddOptions(filter_sub_select,all_option);
             }
             else {
-                console.log("Unexpected main category chosen (Filter)");
+                //console.log("Unexpected main category chosen (Filter)");
             }
         });
         
@@ -2307,7 +2425,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 AddOptions(edit_sub_select,other_sub_options);
             }
             else {
-                console.log("Unexpected main category chosen (Edit)");
+                //console.log("Unexpected main category chosen (Edit)");
             }
         });
         
