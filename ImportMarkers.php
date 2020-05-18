@@ -211,12 +211,14 @@ if($_FILES['fileToUpload']['error'] == 0){
                 }
   
             }
-            $lines_total++;
+            $lines_total++; // Could use j - 1 instead
             if ($lines_total % $check_interval == 0) {
                 file_put_contents("counts.txt",($lines_total/($num_rows-1))*100);
             }
             
         }
+        file_put_contents("counts.txt","100");
+        
     }
 }
 else {
