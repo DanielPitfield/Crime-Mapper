@@ -99,7 +99,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
 		
-		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
+		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:250px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
 		
 		<button type="button" class="close" data-dismiss="modal" id="close_filter">
 			<span>&times;</span>
@@ -691,7 +691,10 @@ require 'dbConfig.php'; // Include the database configuration file
                 var Edit_Modal_Width = $("#modal_edit_content").width();
                 
                 /* Alert Position (top) */
-                var Edit_Alert_Error_Top = Edit_Modal_Top + Edit_Modal_Height + 50;
+                var Edit_Alert_Error_Top = 0;
+                if (screen.height >= 1080) {
+                    Edit_Alert_Error_Top = Edit_Modal_Top + Edit_Modal_Height + 50;
+                }
                 
                 /* Set position of alert */
                 $("#Alert_Error").css({top: Edit_Alert_Error_Top, left: Edit_Modal_Left, width: Edit_Modal_Width});
@@ -755,6 +758,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	$("#Delete_Filtered_Markers").click(function() {
+	    if ($('#progress_delete').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
+	        $("#progress_delete").attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+	    }
+	    $("#progress_delete").css("width", "0%");
+	    
 	    var Delete_ID_array = [];
 	    for(i = 0; i < MarkerArray.length; i++) {
 	        if (MarkerArray[i].getVisible() == true) {
@@ -808,7 +816,10 @@ require 'dbConfig.php'; // Include the database configuration file
             var Filter_Modal_Width2 = $("#modal_filter_content").width();
                 
             /* Alert Position (top) */
-            var Filter_Alert_Error_Top2 = Filter_Modal_Top2 + Filter_Modal_Height2 + 50;
+            var Filter_Alert_Error_Top2 = 0;
+            if (screen.height >= 1080) {
+                Filter_Alert_Error_Top2 = Filter_Modal_Top2 + Filter_Modal_Height2 + 50;
+            }
                 
             /* Set position of alert */
             $("#Alert_Error").css({top: Filter_Alert_Error_Top2, left: Filter_Modal_Left2, width: Filter_Modal_Width2});
@@ -844,7 +855,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 success: function( data, textStatus, jqXHR ) {
                     Delete_TimeoutCounter += 1;
                     var delete_percentage = data;
-                    console.log(data);
+                    //console.log(data);
                     
                     if (delete_percentage == 0) {
                         Delete_NoChangeCounter += 1;
@@ -853,9 +864,8 @@ require 'dbConfig.php'; // Include the database configuration file
                         Delete_NoChangeCounter = 0;
                     }
                     
-                    if (delete_percentage == "-1000" || Delete_NoChangeCounter == 10) {
+                    if (Delete_NoChangeCounter == 10) {
                         clearInterval(t2);
-                        // Show full width red progress bar
                         $("#progress_delete").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
                         $("#progress_delete").css("width", "100%").text("Delete (Failed)");
                         Delete_Timed_Out = 1;
@@ -883,7 +893,7 @@ require 'dbConfig.php'; // Include the database configuration file
                                         
                         if (Delete_FinishCheckCounter < delete_counter_value) {
                             if (Delete_TimeoutCounter < 5 && delete_percentage > 90) {
-                                console.log("Progress from previous file")
+                                //console.log("Progress from previous file")
                             }
                             else {
                                 $("#progress_delete").css("width", Math.round(delete_percentage) + "%").text("Delete (" + Math.round(delete_percentage) + "%)");
@@ -1379,7 +1389,10 @@ require 'dbConfig.php'; // Include the database configuration file
             var Filter_Modal_Width = $("#modal_filter_content").width();
                 
             /* Alert Position (top) */
-            var Filter_Alert_Error_Top = Filter_Modal_Top + Filter_Modal_Height + 50;
+            var Filter_Alert_Error_Top = 0;
+            if (screen.height >= 1080) {
+                Filter_Alert_Error_Top = Filter_Modal_Top + Filter_Modal_Height + 50;    
+            }
                 
             /* Set position of alert */
             $("#Alert_Error").css({top: Filter_Alert_Error_Top, left: Filter_Modal_Left, width: Filter_Modal_Width});
@@ -1673,7 +1686,10 @@ require 'dbConfig.php'; // Include the database configuration file
             var Add_Modal_Width = $("#modal_add_content").width();
                 
             /* Alert Position (top) */
-            var Add_Alert_Error_Top = Add_Modal_Top + Add_Modal_Height + 50;
+            var Add_Alert_Error_Top = 0;
+            if (screen.height >= 1080) {
+                Add_Alert_Error_Top = Add_Modal_Top + Add_Modal_Height + 50;
+            }
                 
             /* Set position of alert */
             $("#Alert_Error").css({top: Add_Alert_Error_Top, left: Add_Modal_Left, width: Add_Modal_Width});
@@ -1998,7 +2014,10 @@ require 'dbConfig.php'; // Include the database configuration file
                         var Import_Modal_Warning_Only_Width = $("#modal_import_content").width();
                             
                         /* Alert Position (top) */
-                        var Import_Alert_Warning_Only_Top = Import_Modal_Warning_Only_Top + Import_Modal_Warning_Only_Height + 50;
+                        var Import_Alert_Warning_Only_Top = 0;
+                        if (screen.height >= 1080) {
+                            Import_Alert_Warning_Only_Top = Import_Modal_Warning_Only_Top + Import_Modal_Warning_Only_Height + 50;
+                        }
                             
                         /* Set position of alert */
                         $("#Alert_Warning").css({top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: Import_Modal_Warning_Only_Width});
@@ -2082,7 +2101,7 @@ require 'dbConfig.php'; // Include the database configuration file
                             success: function( data, textStatus, jqXHR ) {
                                 TimeoutCounter += 1;
                                 var import_percentage = data;
-                                console.log(data);
+                                //console.log(data);
                                 
                                 if (import_percentage == 0) {
                                     NoChangeCounter += 1;
@@ -2146,7 +2165,7 @@ require 'dbConfig.php'; // Include the database configuration file
                         import_err_str += "No records found in the file<br>";
                     }
                     if (Reached_Limit == true) {
-                        import_err_str += "Importing this file would exceed the limit of 500,000 markers<br>";
+                        import_err_str += "Importing this file would exceed the limit of 250,000 markers<br>";
                     }
                     
                     if (FileWarning == true) {
@@ -2160,7 +2179,10 @@ require 'dbConfig.php'; // Include the database configuration file
                         var Import_Modal_Width = $("#modal_import_content").width();
                             
                         /* Alert Position (top) */
-                        var Import_Alert_Warning_Top = Import_Modal_Top + Import_Modal_Height + 50;
+                        var Import_Alert_Warning_Top = 0;
+                        if (screen.height >= 1080) {
+                            Import_Alert_Warning_Top = Import_Modal_Top + Import_Modal_Height + 50;
+                        }
                             
                         /* Set position of alert */
                         $("#Alert_Warning").css({top: Import_Alert_Warning_Top, left: Import_Modal_Left, width: Import_Modal_Width});
@@ -2188,7 +2210,10 @@ require 'dbConfig.php'; // Include the database configuration file
                         var Import_Modal_Error_Only_Width = $("#modal_import_content").width();
                             
                         /* Alert Position (top) */
-                        var Import_Alert_Error_Only_Top = Import_Modal_Error_Only_Top + Import_Modal_Error_Only_Height + 50;
+                        var Import_Alert_Error_Only_Top = 0;
+                        if (screen.height >= 1080) {
+                            Import_Alert_Error_Only_Top = Import_Modal_Error_Only_Top + Import_Modal_Error_Only_Height + 50;
+                        }
                             
                         /* Set position of alert */
                         $("#Alert_Error").css({top: Import_Alert_Error_Only_Top, left: Import_Modal_Error_Only_Left, width: Import_Modal_Error_Only_Width});
@@ -2214,7 +2239,10 @@ require 'dbConfig.php'; // Include the database configuration file
                     var Import_Modal_Select_Width = $("#modal_import_content").width();
                             
                     /* Alert Position (top) */
-                    var Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                    var Import_Alert_Error_Select_Top = 0;
+                    if (screen.height >= 1080) {
+                        Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                    }
                             
                     /* Set position of alert */
                     $("#Alert_Error").css({top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width});
@@ -2230,7 +2258,10 @@ require 'dbConfig.php'; // Include the database configuration file
                     var Import_Modal_Select_Width = $("#modal_import_content").width();
                             
                     /* Alert Position (top) */
-                    var Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                    var Import_Alert_Error_Select_Top = 0;
+                    if (screen.height >= 1080) {
+                        Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
+                    }
                             
                     /* Set position of alert */
                     $("#Alert_Error").css({top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width});
