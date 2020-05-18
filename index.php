@@ -81,8 +81,8 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Delete Progress Alert -->
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="Alert_Progress">
     <h5 class="alert-heading" style="font-weight: bold;">Progress</h5>
-	<div class="progress" style="margin-top:10px;width:100%;">
-        <div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
+	<div class="progress" style="margin-top:10px;">
+        <div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;" data-backdrop="static" data-keyboard="false">Progress Bar
         </div>
     </div>
     <button type="button" class="close" id="close_alert_progress">
@@ -99,7 +99,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
 		
-		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered Markers (BETA)</button>
+		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
 		
 		<button type="button" class="close" data-dismiss="modal" id="close_filter">
 			<span>&times;</span>
@@ -440,7 +440,6 @@ require 'dbConfig.php'; // Include the database configuration file
         }
 	});
 	
-	var ProgressAlertOpen = false;
 	function ShowProgressAlert() {
 	    Progress_Alert = document.getElementById("Alert_Progress");
 		Progress_Alert.style.left = "34%";
@@ -454,7 +453,6 @@ require 'dbConfig.php'; // Include the database configuration file
         Progress_Alert.style.left = "-500px";
 		Progress_Alert.style.top = "-500px";
 	    Progress_Alert.style.display = "none";
-	    ProgressAlertOpen = false;
 	}
 	
 	$("#close_alert_progress").click(function() {
@@ -757,18 +755,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	$("#Delete_Filtered_Markers").click(function() {
-        /* Modal Position */
-        var Edit_Modal_Delete_Top = $("#modal_filter_content").offset().top;
-        var Edit_Modal_Delete_Left = $("#modal_filter_content").offset().left;
-        var Edit_Modal_Delete_Height = $("#modal_filter_content").height();
-        var Edit_Modal_Delete_Width = $("#modal_filter_content").width();
-                
-        /* Alert Position (top) */
-        var Edit_Alert_Progress_Top = Edit_Modal_Delete_Top + Edit_Modal_Delete_Height + 50;
-                
-        /* Set position of alert */
-        $("#Alert_Progress").css({top: Edit_Alert_Progress_Top, left: Edit_Modal_Delete_Left, width: Edit_Modal_Delete_Width});
-	    
 	    var Delete_ID_array = [];
 	    for(i = 0; i < MarkerArray.length; i++) {
 	        if (MarkerArray[i].getVisible() == true) {
@@ -776,23 +762,78 @@ require 'dbConfig.php'; // Include the database configuration file
 	        }
 	    }
 	    
-	    if (Delete_ID_array.length > 0) { // If markers to delete
-	       ShowProgressAlert();
-	       var t2 = setInterval(CheckDeleteProgressFile,1000);
+	    var num_markers = Delete_ID_array.length;
+	    if (num_markers > 0 && num_markers < 50000) { // If markers to delete
+	        $("#modal_filter").modal('hide');
+        	ShowProgressAlert();
+        	
+            var Filter_Modal_Delete_Top = $("#modal_filter_content").offset().top;
+            var Filter_Modal_Delete_Left = $("#modal_filter_content").offset().left;
+            var Filter_Modal_Delete_Height = $("#modal_filter_content").height();
+            var Filter_Modal_Delete_Width = $("#modal_filter_content").width();
+                
+            /* Alert Position (top) */
+            var Filter_Alert_Progress_Top = Filter_Modal_Delete_Top + (Filter_Modal_Delete_Height/2);
+                
+            /* Set position of alert */
+            $("#Alert_Progress").css({top: Filter_Alert_Progress_Top, left: Filter_Modal_Delete_Left, width: Filter_Modal_Delete_Width});
+            
+            var t2 = setInterval(CheckDeleteProgressFile,1000);
 	       
-	       $.ajax({
-			    url: 'DeleteMarker.php',
-			    type: 'POST',
-			    data: {Delete_ID_array: Delete_ID_array}, // Send IDs
-			    success: function(data)
-			    {
-				    //
-			    }
+	        $.ajax({
+			     url: 'DeleteMarker.php',
+			     type: 'POST',
+			     data: {Delete_ID_array: Delete_ID_array}, // Send IDs
+			     success: function(data)
+			     {
+				     //
+			     }
 		    });
+	    }
+	    else {
+	        HideProgressAlert();
+	        var filter_delete_string = "";
+	        if (num_markers == 0) {
+	            filter_delete_string = "There are no visible or filtered markers to delete<br>";
+	        }
+	        else {
+	            filter_delete_string = "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
+	        }
+	        ShowErrorAlert(filter_delete_string);
+	        
+	        /* Modal Position */
+            var Filter_Modal_Top2 = $("#modal_filter_content").offset().top;
+            var Filter_Modal_Left2 = $("#modal_filter_content").offset().left;
+            var Filter_Modal_Height2 = $("#modal_filter_content").height();
+            var Filter_Modal_Width2 = $("#modal_filter_content").width();
+                
+            /* Alert Position (top) */
+            var Filter_Alert_Error_Top2 = Filter_Modal_Top2 + Filter_Modal_Height2 + 50;
+                
+            /* Set position of alert */
+            $("#Alert_Error").css({top: Filter_Alert_Error_Top2, left: Filter_Modal_Left2, width: Filter_Modal_Width2});
 	    }
                                     
         var delete_data_hold = -10;
         var Delete_FinishCheckCounter = 0;
+        var Delete_NoChangeCounter = 0;
+        var Delete_TimeoutCounter = 0;
+        var Delete_Timed_Out = 0;
+        
+        var delete_counter_value = 0;
+        console.log("Markers to delete: " + num_markers);
+        if (num_markers < 5000) {
+            delete_counter_value = 3;
+        }
+        else if (num_markers < 10000) {
+            delete_counter_value = 5;
+        }
+        else if (num_markers < 25000) {
+            delete_counter_value = 7;
+        }
+        else {
+            delete_counter_value = 10;
+        }
                 	
         function CheckDeleteProgressFile() {
             $.ajax({
@@ -801,22 +842,55 @@ require 'dbConfig.php'; // Include the database configuration file
                 async: false,
                 dataType: "text",
                 success: function( data, textStatus, jqXHR ) {
+                    Delete_TimeoutCounter += 1;
                     var delete_percentage = data;
+                    console.log(data);
                     
-                    if (delete_percentage == delete_data_hold) {
-                        Delete_FinishCheckCounter += 1;
+                    if (delete_percentage == 0) {
+                        Delete_NoChangeCounter += 1;
+                    }
+                    if (delete_percentage != 0) {
+                        Delete_NoChangeCounter = 0;
                     }
                     
-                    if (Delete_FinishCheckCounter == 3) {
-                        $("#progress_delete").css("width", "100%").text("Delete (Complete)");
-                        clearInterval(t2); // Stop checking progress
+                    if (delete_percentage == "-1000" || Delete_NoChangeCounter == 10) {
+                        clearInterval(t2);
+                        // Show full width red progress bar
+                        $("#progress_delete").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
+                        $("#progress_delete").css("width", "100%").text("Delete (Failed)");
+                        Delete_Timed_Out = 1;
+                    }
+                    
+                    if (Delete_Timed_Out == 0 && delete_percentage != 0) {
+                        if (delete_percentage == 100) {
+                            Delete_FinishCheckCounter += 1;
+                        }
+                        if (delete_percentage != delete_data_hold) {
+                            Delete_FinishCheckCounter = 0;
+                        }
                         
-                        setTimeout(() => {ShowLoading();location.reload()}, 2000); // After 2 seconds show loading and refresh
+                        if (Delete_FinishCheckCounter == delete_counter_value) {
+                            $("#progress_delete").css("width", "100%").text("Delete (Complete)");
+                        }
+                        
+                        if (Delete_FinishCheckCounter == (delete_counter_value+2)) {
+                            clearInterval(t2);
+                            ShowLoading();
+                            location.reload(); 
+                        }
+                                            
+                        delete_data_hold = delete_percentage;
+                                        
+                        if (Delete_FinishCheckCounter < delete_counter_value) {
+                            if (Delete_TimeoutCounter < 5 && delete_percentage > 90) {
+                                console.log("Progress from previous file")
+                            }
+                            else {
+                                $("#progress_delete").css("width", Math.round(delete_percentage) + "%").text("Delete (" + Math.round(delete_percentage) + "%)");
+                                }
+                        }
+                        
                     }
-                    else {
-                        $("#progress_delete").css("width", Math.round(delete_percentage) + "%").text("Delete (" + Math.round(delete_percentage) + "%)");
-                    }
-                    delete_data_hold = data;
 
                 }
             });
@@ -1445,7 +1519,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		    Crime_Types_Chosen = true;
 		}
 		
-		if (Description.length <= 500 && add_containsTags == false && MarkerArray.length < 50000 && Crime_Types_Chosen == true) {
+		if (Description.length <= 500 && add_containsTags == false && MarkerArray.length < 250000 && Crime_Types_Chosen == true) {
 		    /* Also send to database */	
     		var formData = $("#add_submit_form").serialize();
     		
@@ -1579,8 +1653,8 @@ require 'dbConfig.php'; // Include the database configuration file
 		    if (add_containsTags == true) {
 		        add_err_string += "The 'Description' field can not have both < and > characters<br>";
 		    }
-		    if (MarkerArray.length > 50000) {
-		        add_err_string += "The mapper is at its capacity of displaying 50,000 crimes<br>";
+		    if (MarkerArray.length > 250000) {
+		        add_err_string += "The mapper is at its capacity of displaying 250,000 crimes<br>";
 		    }
 		    if (Crime_Types_Chosen == false) {
 		        if (Crime_Category == "") {
@@ -1798,6 +1872,14 @@ require 'dbConfig.php'; // Include the database configuration file
 
     $('#btn_import_confirm').on('click', function() { // Sending selected file to PHP file (to be handled)
     
+        if (ErrorAlertOpen == true) {
+            HideErrorAlert();
+        }
+        
+        if (WarningAlertOpen == true) {
+            HideWarningAlert();
+        }
+    
         //var t2 = performance.now();
     
         $('#btn_import_confirm').attr('disabled', true); // Disable import button
@@ -1896,12 +1978,12 @@ require 'dbConfig.php'; // Include the database configuration file
                     validFile = false;
                 }
                 
-                if ((MarkerArray.length + num_records) > 50000) {
+                if ((MarkerArray.length + num_records) > 250000) {
                     Reached_Limit = true;
                 }
                 
-                if (num_records > 7500) {
-                    import_err_str += "Only 7500 records can be imported at any one time<br>(The selected file has " + num_records + " records)<br>";
+                if (num_records > 50000) {
+                    import_err_str += "Only 50000 records can be imported at any one time<br>(The selected file has " + num_records + " records)<br>";
                     validFile = false;
                 }
                 
@@ -1973,6 +2055,22 @@ require 'dbConfig.php'; // Include the database configuration file
                 	var Timed_Out = 0;
                 	var data_hold = -10;
                 	
+                	var counter_value = 0;
+                	var TimeoutLimit = 0;
+                	
+                	if (num_records < 7500) {
+                	    counter_value = 5
+                	    TimeoutLimit = 60;
+                	}
+                	else if (num_records < 25000) {
+                	    counter_value = 7;
+                	    TimeoutLimit = 180;
+                	}
+                	else {
+                	    counter_value = 9;
+                	    TimeoutLimit = 300;
+                	}
+                	
                 	var t=setInterval(CheckProgressFile,1000); // Run below function every second
                 	
                 	function CheckProgressFile() {
@@ -1984,12 +2082,16 @@ require 'dbConfig.php'; // Include the database configuration file
                             success: function( data, textStatus, jqXHR ) {
                                 TimeoutCounter += 1;
                                 var import_percentage = data;
+                                console.log(data);
                                 
                                 if (import_percentage == 0) {
                                     NoChangeCounter += 1;
                                 }
+                                if (import_percentage != 0) {
+                                    NoChangeCounter = 0;
+                                }
                                 
-                                if (TimeoutCounter == 30 || import_percentage == "-1000" || NoChangeCounter == 5) { // Timeout, file upload error or no update
+                                if (TimeoutCounter == TimeoutLimit || import_percentage == "-1000" || NoChangeCounter == 10) { // Timeout, file upload error or no update
                                     clearInterval(t);
                                     // Show full width red progress bar
                                     $("#progress_insert_upload").attr('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
@@ -2000,15 +2102,18 @@ require 'dbConfig.php'; // Include the database configuration file
                                 }
                                 
                                 if (Timed_Out == 0 && import_percentage != 0) {
-                                    if (import_percentage == data_hold) {
+                                    if (import_percentage == 100) {
                                         FinishCheckCounter += 1;
                                     }
+                                    if (import_percentage != data_hold) {
+                                        FinishCheckCounter = 0;
+                                    }
                                             
-                                    if (FinishCheckCounter == 3) {
+                                    if (FinishCheckCounter == counter_value) {
                                         $("#progress_insert_upload").css("width", "100%").text("Import (Complete)");
                                     }
                                             
-                                    if (FinishCheckCounter == 5) {
+                                    if (FinishCheckCounter == (counter_value+2)) {
                          	               clearInterval(t);
                          	               
                          	               //var t3 = performance.now();
@@ -2020,8 +2125,14 @@ require 'dbConfig.php'; // Include the database configuration file
      
                                     data_hold = import_percentage;
                                         
-                                    if (FinishCheckCounter < 3) {
-                                        $("#progress_insert_upload").css("width", Math.round(import_percentage) + "%").text("Import (" + Math.round(import_percentage) + "%)");
+                                    if (FinishCheckCounter < counter_value) {
+                                        if (TimeoutCounter <= 7 && import_percentage > 90) {
+                                            //console.log("Progress from previous file")
+                                        }
+                                        else {
+                                            $("#progress_insert_upload").css("width", Math.round(import_percentage) + "%").text("Import (" + Math.round(import_percentage) + "%)");
+                                        }
+
                                     }
                                 }
                                     
@@ -2035,7 +2146,7 @@ require 'dbConfig.php'; // Include the database configuration file
                         import_err_str += "No records found in the file<br>";
                     }
                     if (Reached_Limit == true) {
-                        import_err_str += "Importing this file would exceed the limit of 50,000 markers<br>";
+                        import_err_str += "Importing this file would exceed the limit of 500,000 markers<br>";
                     }
                     
                     if (FileWarning == true) {
