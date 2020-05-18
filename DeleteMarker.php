@@ -40,6 +40,10 @@ if(isset($_POST['Delete_ID_array']))
         }
         
     }
+    file_put_contents("delete_progress.txt","100");
 
+}
+else {
+    file_put_contents("delete_progress.txt", "-1000");
 }
 ?>
