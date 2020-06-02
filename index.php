@@ -130,7 +130,7 @@ require 'dbConfig.php'; // Include the database configuration file
         
         <div class="form-group">
             <select class="select form-control" id="Filter_Location" disabled>
-        <option value="[ALL]" selected disabled hidden>Search Radius (km)</option>
+        <option value="[ALL]" selected disabled hidden>Search Radius (miles)</option>
         </select>
         </div> 
             
@@ -555,7 +555,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		var EditMapOptions = {
 			center: MarkerToEdit.position,
-			zoom: 10,
+			zoom: 15,
 			disableDefaultUI: true, // Remove all controls but street view
 			streetViewControl: true,
 		};
