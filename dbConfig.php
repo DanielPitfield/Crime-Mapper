@@ -2,7 +2,7 @@
 // Database configuration 
 $dbHost     = "localhost"; 
 $dbUsername = "hq017496_test"; 
-$dbPassword = "crime_mapper_2019"; 
+$dbPassword = "MOCK INFO"; 
 $dbName     = "hq017496_crime_mapper"; 
  
 // Create database connection 
