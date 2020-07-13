@@ -487,6 +487,9 @@ require 'dbConfig.php'; // Include the database configuration file
 		MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
 		
 		var modal = $('#modal_edit');
+		
+		$('#Edit_Crime_Type').prop('disabled', false);
+	    $('#Edit_Crime_Type_sub').prop('disabled', false);
 
 	    if (violence_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
 	        $('#Edit_Crime_Type').val('Violence against the person').change();
@@ -2309,7 +2312,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDpgBmZOTCzsVewLlzsx77Y5bDUVS_MZg&libraries=geometry,places&callback=initMap" async defer> // API Key, Libraries and map function
+<script src="https://maps.googleapis.com/maps/api/js?key=?&libraries=geometry,places&callback=initMap" async defer> // API Key, Libraries and map function
 </script>
 
 <!-- Bootstrap Scripts -->
