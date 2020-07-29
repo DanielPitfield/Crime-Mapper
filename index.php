@@ -5,13 +5,13 @@ require 'dbConfig.php'; // Include the database configuration file
 <!DOCTYPE html>
 <html lang="en">
 
-<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Crime Mapper</title>
-<link rel="shortcut icon" href="#"> <!-- Website tab icon, change link to ico file -->
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Crime Mapper</title>
+	<link rel="shortcut icon" href="#"> <!-- Website tab icon, change link to ico file -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 </head>
 
 <link rel="stylesheet" href="layout.css">  <!-- External styling -->
@@ -171,6 +171,7 @@ require 'dbConfig.php'; // Include the database configuration file
 				</div>
 			
 				<textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
+			</form>
 			</div>
         
         	<div id="modal_right">
@@ -178,7 +179,6 @@ require 'dbConfig.php'; // Include the database configuration file
 			</div>
 		
 			<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
-			</form>
 	   </div>
     </div>
   </div>
@@ -215,6 +215,7 @@ require 'dbConfig.php'; // Include the database configuration file
 				</div>
 				
 				<textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
+			</form>
 			</div>
 				
 			<div id="modal_right">
@@ -222,7 +223,6 @@ require 'dbConfig.php'; // Include the database configuration file
 			</div>
 			
 			<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
-			</form>
 	   </div>
     </div>
   </div>
