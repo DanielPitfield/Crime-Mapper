@@ -101,30 +101,30 @@ require 'dbConfig.php'; // Include the database configuration file
 	   	<div class="modal-body">
 			<div id="modal_left">
 					<div class="form-group">
-					Date:
-					<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
-					<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
+						Date:
+						<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
+						<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
 					</div>
 					
 					<div class="form-group">
-					Time:
-					<input type="time" id="Filter_minTime" value="">
-					<input type="time" id="Filter_maxTime" value="">
+						Time:
+						<input type="time" id="Filter_minTime" value="">
+						<input type="time" id="Filter_maxTime" value="">
 					</div>
 					
 					<div class="form-group">
-					<select class="select form-control" id="Filter_Crime_Type">
-					<option value="[ALL]" selected disabled hidden>Crime Type - Main Category</option>
-					</select>
-					<select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
-					<option value="[ALL]" selected disabled hidden>Crime Type - Subcategory</option>
-					</select>
+						<select class="select form-control" id="Filter_Crime_Type">
+						<option value="[ALL]" selected disabled hidden>Crime Type - Main Category</option>
+						</select>
+						<select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
+						<option value="[ALL]" selected disabled hidden>Crime Type - Subcategory</option>
+						</select>
 					</div>
 					
 					<div class="form-group">
 						<select class="select form-control" id="Filter_Location" disabled>
-					<option value="[ALL]" selected disabled hidden>Search Radius (miles)</option>
-					</select>
+							<option value="[ALL]" selected disabled hidden>Search Radius (miles)</option>
+						</select>
 					</div> 
             
         	</div>
@@ -155,19 +155,19 @@ require 'dbConfig.php'; // Include the database configuration file
 		 	<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
 		    
 				<div class="form-group">
-				<label class="control-label " for="Add_Date">Date:</label>
-				<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-				<label class="control-label " for="Add_Time">Time:</label>
-				<input type="time" id="Add_Time" name="Time" value="00:00" required>
+					<label class="control-label " for="Add_Date">Date:</label>
+					<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+					<label class="control-label " for="Add_Time">Time:</label>
+					<input type="time" id="Add_Time" name="Time" value="00:00" required>
 				</div>
 				
 				<div class="form-group">
-				<select class="select form-control" id="Add_Crime_Type">
-				<option value="" selected disabled hidden>Crime Type - Main Category</option>
-				</select>
-				<select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
-				<option value="" selected disabled hidden>Crime Type - Subcategory</option>
-				</select>
+					<select class="select form-control" id="Add_Crime_Type">
+						<option value="" selected disabled hidden>Crime Type - Main Category</option>
+					</select>
+					<select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
+						<option value="" selected disabled hidden>Crime Type - Subcategory</option>
+					</select>
 				</div>
 			
 				<textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
@@ -178,7 +178,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			</div>
 		
 			<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
-			</form> <!-- Moved inside containing div, test... -->
+			</form>
 	   </div>
     </div>
   </div>
@@ -199,20 +199,19 @@ require 'dbConfig.php'; // Include the database configuration file
 			<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
 		    
 				<div class="form-group">
-				<label class="control-label " for="Edit_Date">Date:</label>
-				<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-				
-				<label class="control-label " for="Edit_Time">Time:</label>
-				<input type="time" id="Edit_Time" name="Time" value="" required>
+					<label class="control-label " for="Edit_Date">Date:</label>
+					<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+					<label class="control-label " for="Edit_Time">Time:</label>
+					<input type="time" id="Edit_Time" name="Time" value="" required>
 				</div>
 				
 				<div class="form-group">
-				<select class="select form-control" id="Edit_Crime_Type">
-				<option value="" selected disabled hidden>Crime Category</option>
-				</select>
-				<select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
-				<option value="" selected disabled hidden>Crime Type</option>
-				</select>
+					<select class="select form-control" id="Edit_Crime_Type">
+						<option value="" selected disabled hidden>Crime Category</option>
+					</select>
+					<select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
+						<option value="" selected disabled hidden>Crime Type</option>
+					</select>
 				</div>
 				
 				<textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
@@ -1942,8 +1941,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=?&libraries=geometry,places&callback=initMap" async defer> // API Key, Libraries and map function
-</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=?&libraries=geometry,places&callback=initMap" async defer></script> <!-- API Key, Libraries and map function -->
 
 <!-- Bootstrap Scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
