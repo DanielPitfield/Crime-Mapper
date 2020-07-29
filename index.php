@@ -18,27 +18,23 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
-<!-- 1st - 0% left
-     2nd - 0.25% left
-     3rd - 0.25% left and right
-     4th - 0.25% right
-     5th - 0% right
+<!-- Filter Crime - 0% left (16% width)
+     Import Crime - 0.25% left (16% width)
+     Location Search - 0.25% left and right (35% width)
+     Analyse Crime - 0.25% right (16% width)
+     Predict Crime - 0% right (16% width)
 -->
 
 <!-- Navigation Bar -->
 <nav class="navbar navbar-dark bg-dark">
     <!-- Filter Crime -->
     <button class="btn btn-outline-primary navbar-btn" id="btn_filter" role="button" data-toggle="modal" data-target="#modal_filter" disabled style="color:white;width:16%;margin-left:0%;">Filter Crime</button>
-    
     <!-- Import Crime -->
     <button class="btn btn-outline-primary navbar-btn" id="btn_import" role="button" data-toggle="modal" data-target="#modal_import" disabled style="color:white;width:16%;margin-left:0.25%;">Import Crime</button>
-    
     <!-- Location Search Bar -->
     <input id="pac-input" class="controls" type="text" placeholder="Location Search" disabled style="color:black;width:35%;margin-left:0.25%;margin-right:0.25%;">
-
     <!-- Analyse Crime -->
     <button class="btn btn-outline-primary navbar-btn" id="btn_analyse" role="button" disabled style="color:white;width:16%;margin-right:0.25%;">Analyse Crime</button>
-    
     <!-- Predict Crime -->
     <button class="btn btn-outline-primary disabled navbar-btn" id="btn_predict" role="button" disabled style="color:white;width:16%;margin-right:0%;">Predict Crime</button>
 </nav>
@@ -59,7 +55,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Error Alert -->
 <div class="alert alert-danger alert-dismissible fade show" role="alert" id="Alert_Error">
     <h5 class="alert-heading" style="font-weight: bold;">Error</h5>
-    <div id="Alert_Error_Message" style="font-size: 14px;">
+    <div id="Alert_Error_Message" style="font-size:14px;">
         Message
     </div>
     <button type="button" class="close" id="close_alert_error">
@@ -70,7 +66,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <!-- Warning Alert -->
 <div class="alert alert-warning alert-dismissible fade show" role="alert" id="Alert_Warning">
     <h5 class="alert-heading" style="font-weight: bold;">Warning</h5>
-    <div id="Alert_Warning_Message" style="font-size: 14px;">
+    <div id="Alert_Warning_Message" style="font-size:14px;">
         Message
     </div>
     <button type="button" class="close" id="close_alert_warning">
@@ -80,7 +76,7 @@ require 'dbConfig.php'; // Include the database configuration file
 
 <!-- Delete Progress Alert -->
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="Alert_Progress">
-    <h5 class="alert-heading" style="font-weight: bold;">Progress</h5>
+    <h5 class="alert-heading" style="font-weight:bold;">Progress</h5>
 	<div class="progress" style="margin-top:10px;">
         <div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;" data-backdrop="static" data-keyboard="false">Progress Bar
         </div>
@@ -94,53 +90,50 @@ require 'dbConfig.php'; // Include the database configuration file
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_filter">
   <div class="modal-dialog modal-xl" id="modal_filter_dialog">
     <div class="modal-content" id="modal_filter_content">
-      <div class="modal-header">
-		<h5 class="modal-title">Filter</h5>
-		
-		<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
-		
-		<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:250px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
-		
-		<button type="button" class="close" data-dismiss="modal" id="close_filter">
-			<span>&times;</span>
-		</button>
-	   </div>
-	   <div class="modal-body">
-	   <div id="modal_left">
-	   <div class="form-group">
-	    Date:
-		<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
-		<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
+      	<div class="modal-header">
+			<h5 class="modal-title">Filter</h5>
+			<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
+			<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:250px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
+			<button type="button" class="close" data-dismiss="modal" id="close_filter">
+				<span>&times;</span>
+			</button>
 		</div>
-		
-		<div class="form-group">
-		Time:
-		<input type="time" id="Filter_minTime" value="">
-		<input type="time" id="Filter_maxTime" value="">
-		</div>
-		
-		<div class="form-group">
-        <select class="select form-control" id="Filter_Crime_Type">
-        <option value="[ALL]" selected disabled hidden>Crime Type - Main Category</option>
-        </select>
-        <select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
-        <option value="[ALL]" selected disabled hidden>Crime Type - Subcategory</option>
-        </select>
-        </div>
-        
-        <div class="form-group">
-            <select class="select form-control" id="Filter_Location" disabled>
-        <option value="[ALL]" selected disabled hidden>Search Radius (miles)</option>
-        </select>
-        </div> 
+	   	<div class="modal-body">
+			<div id="modal_left">
+					<div class="form-group">
+					Date:
+					<input type="date" id="Filter_minDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
+					<input type="date" id="Filter_maxDate" min="1970-01-01" value="" max="<?php echo date("Y-m-d"); ?>">
+					</div>
+					
+					<div class="form-group">
+					Time:
+					<input type="time" id="Filter_minTime" value="">
+					<input type="time" id="Filter_maxTime" value="">
+					</div>
+					
+					<div class="form-group">
+					<select class="select form-control" id="Filter_Crime_Type">
+					<option value="[ALL]" selected disabled hidden>Crime Type - Main Category</option>
+					</select>
+					<select class="select form-control" id="Filter_Crime_Type_sub" name="Crime_Type">
+					<option value="[ALL]" selected disabled hidden>Crime Type - Subcategory</option>
+					</select>
+					</div>
+					
+					<div class="form-group">
+						<select class="select form-control" id="Filter_Location" disabled>
+					<option value="[ALL]" selected disabled hidden>Search Radius (miles)</option>
+					</select>
+					</div> 
             
-        </div>
+        	</div>
         
-        <div id="modal_right">
-		<div id="map4"></div>
-		</div>
+        	<div id="modal_right">
+				<div id="map4"></div>
+			</div>
 		
-		<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
+			<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
 
 	   </div>
     </div>
@@ -151,42 +144,41 @@ require 'dbConfig.php'; // Include the database configuration file
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_add">
   <div class="modal-dialog modal-xl" id="modal_add_dialog">
     <div class="modal-content" id="modal_add_content">
-      <div class="modal-header">
-		<h5 class="modal-title">Add Crime</h5>
-		<button type="button" class="close" data-dismiss="modal" id="close_add">
-			<span>&times;</span>
-		</button>
-	   </div>
-	   <div class="modal-body">
-	   <div id="modal_left">
-		<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
+      	<div class="modal-header">
+			<h5 class="modal-title">Add Crime</h5>
+			<button type="button" class="close" data-dismiss="modal" id="close_add">
+				<span>&times;</span>
+			</button>
+	    </div>
+	    <div class="modal-body">
+	    	<div id="modal_left">
+		 	<form name="add_submit_form" id="add_submit_form" action="SaveMarkers.php" method="post">
 		    
-		<div class="form-group">
-		<label class="control-label " for="Add_Date">Date:</label>
-		<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-
-		<label class="control-label " for="Add_Time">Time:</label>
-		<input type="time" id="Add_Time" name="Time" value="00:00" required>
-		</div>
-		
-		<div class="form-group">
-        <select class="select form-control" id="Add_Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Main Category</option>
-        </select>
-        <select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type - Subcategory</option>
-        </select>
-        </div>
-	
-        <textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
-        </div>
+				<div class="form-group">
+				<label class="control-label " for="Add_Date">Date:</label>
+				<input id="Add_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+				<label class="control-label " for="Add_Time">Time:</label>
+				<input type="time" id="Add_Time" name="Time" value="00:00" required>
+				</div>
+				
+				<div class="form-group">
+				<select class="select form-control" id="Add_Crime_Type">
+				<option value="" selected disabled hidden>Crime Type - Main Category</option>
+				</select>
+				<select class="select form-control" id="Add_Crime_Type_sub" name="Crime_Type">
+				<option value="" selected disabled hidden>Crime Type - Subcategory</option>
+				</select>
+				</div>
+			
+				<textarea class="form-control" id="Add_Description" name="Description" rows="3" placeholder="Description"></textarea>
+			</div>
         
-        <div id="modal_right">
-		<div id="map2"></div>
-		</div>
+        	<div id="modal_right">
+				<div id="map2"></div>
+			</div>
 		
-		<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
-		</form>
+			<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
+			</form> <!-- Moved inside containing div, test... -->
 	   </div>
     </div>
   </div>
@@ -196,42 +188,42 @@ require 'dbConfig.php'; // Include the database configuration file
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_edit">
   <div class="modal-dialog modal-xl" id="modal_edit_dialog">
     <div class="modal-content" id="modal_edit_content">
-      <div class="modal-header">
-		<h5 class="modal-title">Edit Crime</h5>
-		<button type="button" class="close" data-dismiss="modal" id="close_edit">
+      	<div class="modal-header">
+			<h5 class="modal-title">Edit Crime</h5>
+			<button type="button" class="close" data-dismiss="modal" id="close_edit">
 			<span>&times;</span>
-		</button>
-	   </div>
-	   <div class="modal-body">
-	   <div id="modal_left">
-		<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
+			</button>
+	    </div>
+	    <div class="modal-body">
+	    	<div id="modal_left">
+			<form name="edit_submit_form" id="edit_submit_form" action="EditMarkers.php" method="post">
 		    
-		<div class="form-group">
-		<label class="control-label " for="Edit_Date">Date:</label>
-		<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
-		
-		<label class="control-label " for="Edit_Time">Time:</label>
-		<input type="time" id="Edit_Time" name="Time" value="" required>
-		</div>
-		
-		<div class="form-group">
-        <select class="select form-control" id="Edit_Crime_Type">
-        <option value="" selected disabled hidden>Crime Category</option>
-        </select>
-        <select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
-        <option value="" selected disabled hidden>Crime Type</option>
-        </select>
-        </div>
-		
-        <textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
-        </div>
-		
-		<div id="modal_right">
-		<div id="map3"></div>
-		</div>
-		
-		<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
-		</form>
+				<div class="form-group">
+				<label class="control-label " for="Edit_Date">Date:</label>
+				<input id="Edit_Date" type="date" name="Date" min="1970-01-01" value="<?php echo date("Y-m-d"); ?>" max="<?php echo date("Y-m-d"); ?>" required>
+				
+				<label class="control-label " for="Edit_Time">Time:</label>
+				<input type="time" id="Edit_Time" name="Time" value="" required>
+				</div>
+				
+				<div class="form-group">
+				<select class="select form-control" id="Edit_Crime_Type">
+				<option value="" selected disabled hidden>Crime Category</option>
+				</select>
+				<select class="select form-control" id="Edit_Crime_Type_sub" name="Crime_Type">
+				<option value="" selected disabled hidden>Crime Type</option>
+				</select>
+				</div>
+				
+				<textarea class="form-control" id="Edit_Description" name="Description" rows="3" placeholder="Description"></textarea>
+			</div>
+				
+			<div id="modal_right">
+				<div id="map3"></div>
+			</div>
+			
+			<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
+			</form>
 	   </div>
     </div>
   </div>
@@ -241,33 +233,32 @@ require 'dbConfig.php'; // Include the database configuration file
 <div class="modal fade bd-example-modal-xl" data-backdrop="false" tabindex="-1" role="dialog" id="modal_import">
   <div class="modal-dialog modal-xl">
     <div class="modal-content" id="modal_import_content">
-      <div class="modal-header">
-		<h5 class="modal-title">Import</h5>
+      	<div class="modal-header">
+			<h5 class="modal-title">Import</h5>
+			<a href="template.csv" class="btn btn-info" role="button" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Download Template</a>
 		
-		<a href="template.csv" class="btn btn-info" role="button" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Download Template</a>
-		
-		<button type="button" class="close" id="close_import" data-dismiss="modal">
-			<span>&times;</span>
-		</button>
+			<button type="button" class="close" id="close_import" data-dismiss="modal">
+				<span>&times;</span>
+			</button>
 	   </div>
-	   <div class="modal-body">
-	       
-        <div class="custom-file mb-3">
-        <input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
-        <label class="custom-file-label" id="import_lbl" for="customFile" style="display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Choose file</label>
-        <button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
-        <div class="progress" style="margin-top:8px;">
-            <div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
-            </div>
-        </div>
-        <div class="progress" style="margin-top:8px;">
-            <div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar
-            </div>
-        </div>
+
+	   <div class="modal-body">	       
+       		<div class="custom-file mb-3">
+        		<input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
+        		<label class="custom-file-label" id="import_lbl" for="customFile" style="display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Choose file</label>
+			</div>
+
+        	<button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
+
+        	<div class="progress" style="margin-top:8px;">
+            	<div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar</div>
+        	</div>
+
+        	<div class="progress" style="margin-top:8px;">
+            	<div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar</div>
+        	</div>
         
         </div>
-        </div>
-	   </div>
     </div>
   </div>
 </div>
@@ -299,7 +290,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		marker.title = marker.Crime_Type; // Shown on hover
 
 		google.maps.event.addListener(marker, 'click', function() {
-		    //console.log("/// View Crime ///");
 		    if (typeof(marker.info) === "undefined"){
                 //
             }
@@ -326,27 +316,11 @@ require 'dbConfig.php'; // Include the database configuration file
     		maxWidth: 500
     		});
     		
-    		// Integration Testing (View Crime)
-    		
     		if (typeof(marker.info) === "undefined") { // InfoWindow not created
-    		    //console.error("Show InfoWindow: FAIL");
+    		    console.error("Show InfoWindow: FAIL");
     		}
-    		else {
-    		    //console.log("Show InfoWindow: PASS");
-    		    //var content_before = marker.info.getContent();
-    		    
+    		else {   		    
     		    marker.info.open(map,marker);
-    		    
-    		    /*
-    		    var content_after = marker.info.getContent();
-    		    
-    		    if (content_before == content_after) { // Matching content
-    		        console.log("Content: PASS");
-    		    }
-    		    else {
-    		        console.error("Content: FAIL");
-    		    }
-    		    */
     		}
 
 		});
@@ -459,16 +433,15 @@ require 'dbConfig.php'; // Include the database configuration file
         HideProgressAlert();
 	});
 
-	function UpdateMarkerInfo(marker) {
-	 
-	marker.title = marker.Crime_Type; // Shown on hover
-		
-	var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+	function UpdateMarkerInfo(marker) {	 
+		marker.title = marker.Crime_Type; // Shown on hover
+			
+		var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
 
-    var MarkerTime = marker.Crime_Time;
-    if (MarkerTime.length == 8) { // If time is retrieved form database which includes seconds
-        MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
-    }
+		var MarkerTime = marker.Crime_Time;
+		if (MarkerTime.length == 8) { // If time is retrieved form database which includes seconds
+			MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+		}
 	
 	    marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' + 
     					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
@@ -478,7 +451,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	}
 	
 	function EditMarker(ID) {
-		for(i = 0; i < MarkerArray.length; i++){
+		for (i = 0; i < MarkerArray.length; i++) {
 			if (MarkerArray[i].ID == ID)
 				var MarkerToEdit = MarkerArray[i]; // Get actual marker
 				var index = i; // Position in MarkerArray
@@ -489,53 +462,31 @@ require 'dbConfig.php'; // Include the database configuration file
 		var modal = $('#modal_edit');
 		
 		$('#Edit_Crime_Type').prop('disabled', false);
-	    $('#Edit_Crime_Type_sub').prop('disabled', false);
+		$('#Edit_Crime_Type_sub').prop('disabled', false);
 
-	    if (violence_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Violence against the person').change();
-	    }
-	    else if (public_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Public Order').change();
-	    }
-	    else if (drug_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Drug offences').change();
-	    }
-	    else if (vehicle_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Vehicle offences').change();
-	    }
-	    else if (sexual_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Sexual offences').change();
-	    }
-	    else if (drug_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Drug offences').change();
-	    }
-	    else if (arson_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Arson and criminal damage').change();
-	    }
-	    else if (weapons_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Possession of weapons').change();
-	    }
-	    else if (theft_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Theft').change();
-	    }
-	    else if (burglary_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Burglary').change();
-	    }
-	    else if (robbery_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Robbery').change();
-	    }
-	    else if (robbery_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Robbery').change();
-	    }
-	    else if (misc_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Miscellaneous crimes against society').change();
-	    }
-	    else if (other_sub_options.includes(MarkerToEdit.Crime_Type) === true) {
-	        $('#Edit_Crime_Type').val('Other').change();
-	    }
-	    else {
-	        //console.log("Imported Crime Type");
-	        
+		/* Setting input fields to current crime properties */
+		
+		const crimeTypeMappings = [
+			{ options: violence_sub_options, value: "Violence against the person" },
+			{ options: public_sub_options, value: "Public Order" },
+			{ options: drug_sub_options, value: "Drug offences" },
+			{ options: vehicle_sub_options, value: "Vehicle offences" },
+			{ options: sexual_sub_options, value: "Sexual offences" },
+			{ options: arson_sub_options, value: "Arson and criminal damage" },
+			{ options: weapons_sub_options, value: "Possession of weapons" },
+			{ options: theft_sub_options, value: "Theft" },
+			{ options: burglary_sub_options, value: "Burglary" },
+			{ options: robbery_sub_options, value: "Robbery" },
+			{ options: misc_sub_options, value: "Miscellaneous crimes against society" },
+			{ options: other_sub_options, value: "Other" }
+		];
+
+		const foundMapping = crimeTypeMappings.find(x => x.options.includes(MarkerToEdit.Crime_Type));
+
+		if (foundMapping) {
+			$('#Edit_Crime_Type').val(foundMapping.value).change();
+		}
+		else { // Imported crime type  
 	        $('#Edit_Crime_Type').val('Other').change();
 	        
     	    var opt = MarkerToEdit.Crime_Type;
@@ -547,12 +498,14 @@ require 'dbConfig.php'; // Include the database configuration file
 	        
 	        $('#Edit_Crime_Type').prop('disabled', true);
 	        $('#Edit_Crime_Type_sub').prop('disabled', true);
-	    }
+		}
 		
 		$('#Edit_Crime_Type_sub').val(MarkerToEdit.Crime_Type).change();
 		modal.find('#Edit_Date').val(MarkerToEdit.Crime_Date);
 		modal.find('#Edit_Time').val(MarkerToEdit.Crime_Time.substring(0,5));
 		modal.find('#Edit_Description').val(MarkerToEdit.Description);
+
+		/* Showing and setting up edit modal */
 		
 		modal.modal('show');
 		
@@ -576,21 +529,22 @@ require 'dbConfig.php'; // Include the database configuration file
 		var Latitude = FirstLocation.lat();
 		var Longitude = FirstLocation.lng();
 		
-		/* ----------- */
-		
 		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
 			SecondLocation = evt.latLng;
 			Latitude = SecondLocation.lat(); // Information to be sent
 			Longitude = SecondLocation.lng();
 			Edit_SmallMarkerMoved = true;
 		});
+
+		/* Edit modal confirmation */
 		
 		$("#edit_submit_form").submit(function(e) {
     		e.preventDefault();
     					
     		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
     		
-    		/* Update values locally */
+			/* Update values locally */ 
+			/* This should only be done when the relevant changes in the database are known to have been successful */
     		var Crime_Date = document.getElementById("Edit_Date").value;
     		MarkerToEdit.Crime_Date = Crime_Date;
     		
@@ -631,41 +585,7 @@ require 'dbConfig.php'; // Include the database configuration file
         			success: function(result)
         			{
                         MarkerToEdit.setPosition(MarkerToEdit.position);
-                		UpdateMarkerInfo(MarkerToEdit);
-                		
-                		// Integration Testing (Edit Crime)
-                		
-                		/*
-                		console.log("/// Edit Crime ///");
-                		var edit_matchingValues = true;
-            		   
-            		     if (MarkerToEdit.Crime_Type != Crime_Type) {
-            		        edit_matchingValues = false;
-            		     }
-            		     if (MarkerToEdit.Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
-            		        edit_matchingValues = false;
-            		     }
-            		     if (MarkerToEdit.Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
-            		        edit_matchingValues = false;
-            		     }
-            		     if (MarkerToEdit.Description != Description) {
-            		        edit_matchingValues = false;
-            		     }
-            		     if (MarkerToEdit.position.lat() != Latitude) {
-            		        edit_matchingValues = false;
-            		     }
-            		     if (MarkerToEdit.position.lng() != Longitude) {
-            		        edit_matchingValues = false;
-            		     }
-            		
-                		if (edit_matchingValues == true) {
-                		    console.log("Matching Values: PASS");
-                		}
-                		else {
-                		    console.error("Matching Values: FAIL");
-                		}
-                		*/
-                		
+                		UpdateMarkerInfo(MarkerToEdit);                		
                 		HideLoading();
                 		$("#modal_edit").modal('hide');
                 		
@@ -710,12 +630,11 @@ require 'dbConfig.php'; // Include the database configuration file
 	function DeleteMarker(ID) { // Refactor to use marker not marker.ID (saves looping through entire marker array to get marker from ID)
 	    ShowLoading();
 		
-		for(i = 0; i < MarkerArray.length; i++){
+		for (i = 0; i < MarkerArray.length; i++) {
 			if (MarkerArray[i].ID == ID) {
 			    var MarkerToDelete = MarkerArray[i]; // Get actual marker
 				var index = i; // Position in MarkerArray
 			}
-
 		}
 		
 		if (typeof(MarkerToDelete.info) === "undefined"){
@@ -726,22 +645,6 @@ require 'dbConfig.php'; // Include the database configuration file
                  MarkerToDelete.info.close(); // Close it
              }
         }
-		
-		// Integration Testing (Delete Crime)
-		
-		//var delete_length_before = MarkerArray.length;
-		
-		/*
-		var delete_length_after = MarkerArray.length;
-		
-		console.log("/// Delete Crime ///")
-		if (delete_length_after == (delete_length_before-1)) {
-		    console.log("Count: PASS");
-		}
-		else {
-		    console.error("COUNT: FAIL");
-		}
-		*/
 			
 		var MarkerID = ID; // Assign to send variable
 		
@@ -767,7 +670,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	    $("#progress_delete").css("width", "0%");
 	    
 	    var Delete_ID_array = [];
-	    for(i = 0; i < MarkerArray.length; i++) {
+	    for (i = 0; i < MarkerArray.length; i++) {
 	        if (MarkerArray[i].getVisible() == true) {
 	            Delete_ID_array.push(MarkerArray[i].ID); // Collate IDs
 	        }
@@ -979,7 +882,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			?>
 		];
 
-		for( i = 0; i < markers.length; i++ ) { // Placing the markers stored in the database
+		for (i = 0; i < markers.length; i++) { // Placing the markers stored in the database
 			var ID = markers[i][0];
 			var Crime_Type = markers[i][1];
 			var Crime_Date = markers[i][2];
@@ -992,103 +895,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 	}
 	
-	// t0 = performance.now();
 	LoadMarkers();
-	//var t1 = performance.now();
-	
-	//console.log("LoadMarkers() duration: " + (t1-t0) + "ms");
-	
-	// Unit Testing (Load Crime) //
-	
-	/*
-	function LoadMarkers_test () {
-	    console.log("/// Load Crime ///");
-		var length_start = MarkerArray.length;
-		var unit_testing_markers_empty = [];
-		
-		for( i = 0; i < unit_testing_markers_empty.length; i++ ) { // Placing the markers stored in the database
-			var ID = unit_testing_markers_empty[i][0];
-			var Crime_Type = unit_testing_markers_empty[i][1];
-			var Crime_Date = unit_testing_markers_empty[i][2];
-			var Crime_Time = unit_testing_markers_empty[i][3];
-			var Description = unit_testing_markers_empty[i][4];
-			var Point = new google.maps.LatLng(unit_testing_markers_empty[i][5], unit_testing_markers_empty[i][6]);
-			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
-		}
-		
-		var length_after_empty = MarkerArray.length;
-		if (length_after_empty == (length_start + unit_testing_markers_empty.length)) {
-		    console.log("0 records: PASS");
-		}
-		else {
-		    console.error("0 records: FAIL");
-		}
-		
-		var unit_testing_markers = [
-		    ['1',"Murder","2020-03-03","12:00:00","Description 1",50.1,1.8],
-		    ['2',"Assualt","2020-04-04","10:00:00","Description 2",50.1,1.85],
-		    ['3',"Violence","2020-05-05","08:00:00","Description 3",50.1,1.9]
-		]; // Change unit testing mockups here
-		
-		for( i = 0; i < unit_testing_markers.length; i++ ) { // Placing the markers stored in the database
-			var ID = unit_testing_markers[i][0];
-			var Crime_Type = unit_testing_markers[i][1];
-			var Crime_Date = unit_testing_markers[i][2];
-			var Crime_Time = unit_testing_markers[i][3];
-			var Description = unit_testing_markers[i][4];
-			var Point = new google.maps.LatLng(unit_testing_markers[i][5], unit_testing_markers[i][6]);
-			placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,Point,map);		
-		}
-		
-		var length_after = MarkerArray.length;
-		if (length_after == (length_after_empty + unit_testing_markers.length))
-		{
-		    console.log("3 records: PASS");
-		}
-		else {
-		    console.log("3 records: FAIL");
-		}
-		
-		var last_added = (MarkerArray.length-1);
-		var load_matchingValues = true;
-		
-		for( i = 0; i < unit_testing_markers.length; i++ ) {
-		     if (MarkerArray[last_added-i].ID != unit_testing_markers[(unit_testing_markers.length-1) - i][0]) {
-		        load_matchingValues = false;
-		     }
-		     if (MarkerArray[last_added-i].Crime_Type != unit_testing_markers[(unit_testing_markers.length-1) - i][1]) {
-		        load_matchingValues = false;
-		     }
-		     if (MarkerArray[last_added-i].Crime_Date.substring(0,5) != unit_testing_markers[(unit_testing_markers.length-1) - i][2].substring(0,5)) {
-		        load_matchingValues = false;
-		     }
-		     if (MarkerArray[last_added-i].Crime_Time.substring(0,5) != unit_testing_markers[(unit_testing_markers.length-1) - i][3].substring(0,5)) {
-		        load_matchingValues = false;
-		     }
-		     if (MarkerArray[last_added-i].Description != unit_testing_markers[(unit_testing_markers.length-1) - i][4]) {
-		        load_matchingValues = false;
-		     }
-		     
-		     if (MarkerArray[last_added-i].position.lat() != unit_testing_markers[(unit_testing_markers.length-1) - i][5]) {
-		        load_matchingValues = false;
-		     }
-		     
-		     if (MarkerArray[last_added-i].position.lng() != unit_testing_markers[(unit_testing_markers.length-1) - i][6]) {
-		        load_matchingValues = false;
-		     }
-		    
-		}
-		
-		if (load_matchingValues == true) {
-		    console.log("Matching Values: PASS");
-		}
-		else {
-		    console.error("Matching Values: FAIL");
-		}
-		
-	}
-	LoadMarkers_test();
-	*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -1262,7 +1069,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		/* ---- Remove any previous filters ---- */
 		if (invalidInput == false) {
-		    for (i = 0; i < MarkerArray.length; i++){
+		    for (i = 0; i < MarkerArray.length; i++) {
 			    MarkerArray[i].setVisible(true);
 			    
 			    /* ---- Convert date into comparable object ---- */
@@ -1552,102 +1359,13 @@ require 'dbConfig.php'; // Include the database configuration file
     			data: data,
     			success: function(result)
     			{
-    				if (SmallMarkerMoved == true) {
-    				    //console.log("/// Add Crime - Adjusted ///");
-    				    //var add_moved_length_before = MarkerArray.length;
-    				    
-    					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
-    					
-    					 /*
-    					 // Unit Testing (Add Crime) //
-    					 var add_moved_length_after = MarkerArray.length;
-    					 
-    					 if (add_moved_length_after == (add_moved_length_before + 1)) {
-    					     console.log("Count: PASS")
-    					 }
-    					 else {
-    					     console.error("Count: FAIL");
-    					 }
-    		    
-                		 var add_last_added = (MarkerArray.length-1);
-            		     var add_matchingValues = true;
-            		   
-            		     if (MarkerArray[add_last_added].Crime_Type != Crime_Type) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Description != Description) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].position.lat() != Latitude) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].position.lng() != Longitude) {
-            		        add_matchingValues = false;
-            		     }
-            		
-                		if (add_matchingValues == true) {
-                		    console.log("Matching Values: PASS");
-                		}
-                		else {
-                		    console.error("Matching Values: FAIL");
-                		}
-                		*/
-                		
+    				if (SmallMarkerMoved == false) {    
+						placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map				    
     				}
     				else {
-    				    //console.log("/// Add Crime ///");
-    				    //var add_length_before = MarkerArray.length;
-    				    
-    					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,FirstLocation,map); // Place a static marker on the main map
-    					 
-    					 /*
-    					 // Unit Testing (Add Crime) //
-    					 var add_length_after = MarkerArray.length;
-    					 
-    					 if (add_length_after == (add_length_before + 1)) {
-    					     console.log("Count: PASS")
-    					 }
-    					 else {
-    					     console.error("Count: FAIL");
-    					 }
-    		
-                		 var add_last_added = (MarkerArray.length-1);
-            		     var add_matchingValues = true;
-            		   
-            		     if (MarkerArray[add_last_added].Crime_Type != Crime_Type) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Crime_Date.substring(0,5) != Crime_Date.substring(0,5)) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Crime_Time.substring(0,5) != Crime_Time.substring(0,5)) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].Description != Description) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].position.lat() != Latitude) {
-            		        add_matchingValues = false;
-            		     }
-            		     if (MarkerArray[add_last_added].position.lng() != Longitude) {
-            		        add_matchingValues = false;
-            		     }
-            		
-                		if (add_matchingValues == true) {
-                		    console.log("Matching Values: PASS");
-                		}
-                		else {
-                		    console.error("Matching Values: FAIL");
-                		}
-                		*/
-                		
-    				}
+    					placeMarker(result,Crime_Type,Crime_Date,Crime_Time,Description,SecondLocation,map); // Place a static marker on the main map
+					 }
+					 
     				SmallMarkerMoved = false;
     				HideLoading();
     				$("#modal_add").modal('hide');
@@ -2339,7 +2057,7 @@ require 'dbConfig.php'; // Include the database configuration file
         ShowLoading();
         
         function AddOptions(select,options) { /* Add parameter options to parameter select */
-            for(var i = 0; i < options.length; i++) {
+            for (var i = 0; i < options.length; i++) {
                     var opt = options[i];
                     var el = document.createElement("option");
                     el.textContent = opt;
@@ -2348,8 +2066,8 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
         }
         
-        function AddLocationOptions(select,options) { /* Add parameter options to parameter select */
-            for(var i = 0; i < options.length; i++) {
+        function AddLocationOptions(select,options) { /* Add parameter options to search radius selection */
+            for (var i = 0; i < options.length; i++) {
                     var opt = options[i];
                     var el = document.createElement("option");
                     el.textContent = "Within " + opt + " miles";
@@ -2358,8 +2076,7 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
         }
         
-        var filter_loc = document.getElementById("Filter_Location");
-        
+        var filter_loc = document.getElementById("Filter_Location");        
         var loc_options = ["1","3","5","10","15","20","30","40","50","100","250"];
         
         /* Main category select elements */ 
@@ -2401,177 +2118,71 @@ require 'dbConfig.php'; // Include the database configuration file
         AddOptions(edit_select,main_options);
         
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
-        
-        public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];
-        
+        public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];     
         drug_sub_options = ["Trafficking in controlled drugs","Posession of controlled drugs (Cannabis)","Posession of controlled drugs (excluding Cannabis)","Other drug offences"];
-        
         vehicle_sub_options = ["Aggravated vehicle taking","Theft from vehicle","Theft or unauthorised taking of motor vehicle"];
-        
         sexual_sub_options = ["Sexual Assualt","Rape","Causing sexual activity without consent","Sexual activity with minor","Sexual activity with a vulnerable person","Sexual exploitation","Abuse of a position of trust of a sexual nature","Sexual grooming","Exposure and voyeurism","Unnatural sexual offences","Other miscellaneous sexual offences"];
-        
         arson_sub_options = ["Arson endangering life","Arson not endangering life","Criminal damage to a dwelling","Criminal damage to a building other than a dwelling","Criminal damage to a vehicle","Other criminal damage"];
-        
         weapons_sub_options = ["Possession of firearms with intent","Possession of firearms offences","Possession of other weapons","Possession of article with blade or point","Other firearms offences","Other knives offences"];
-        
         theft_sub_options = ["Blackmail","Theft from the person","Theft in a dwelling other than from an automatic machine or meter","Theft by an employee","Theft of mail","Dishonest use of electricity","Theft or unauthorised taking of a pedal cycle","Shoplifting","Theft from an automatic machine or meter","Making off without payment","Other theft"];
-        
         burglary_sub_options = ["Burglary - Residential","Attempted burglary - Residential","Distraction burglary - Residential","Attempted distraction burglary - Residential","Aggravated burglary in a dwelling","Burglary - Business and Community","Attempted burglary - Business and Community","Aggravated burglary - Business and Community"];
-        
         robbery_sub_options = ["Robbery of business property","Robbery of personal property"];
-        
         misc_sub_options = ["Concealing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"];
-        
-        other_sub_options = ["Unspecified Crime", "Other crime"];
+		other_sub_options = ["Unspecified Crime", "Other crime"];
+		
+		const crimeTypeMappings = [
+			{ options: violence_sub_options, value: "Violence against the person" },
+			{ options: public_sub_options, value: "Public Order" },
+			{ options: drug_sub_options, value: "Drug offences" },
+			{ options: vehicle_sub_options, value: "Vehicle offences" },
+			{ options: sexual_sub_options, value: "Sexual offences" },
+			{ options: arson_sub_options, value: "Arson and criminal damage" },
+			{ options: weapons_sub_options, value: "Possession of weapons" },
+			{ options: theft_sub_options, value: "Theft" },
+			{ options: burglary_sub_options, value: "Burglary" },
+			{ options: robbery_sub_options, value: "Robbery" },
+			{ options: misc_sub_options, value: "Miscellaneous crimes against society" },
+			{ options: other_sub_options, value: "Other" }
+		];
         
         $("#Add_Crime_Type").change(function() { // When main category selected
             $('#Add_Crime_Type_sub option:not(:first)').remove(); // Remove all but the default hidden value
-            var el = $(this);
-            
-            if(el.val() === "Violence against the person") { // Check which main category was chosen
-                AddOptions(add_sub_select,violence_sub_options);
-            }
-            else if (el.val() === "Public Order") {
-                AddOptions(add_sub_select,public_sub_options);
-            }
-            else if (el.val() === "Drug offences") {
-                AddOptions(add_sub_select,drug_sub_options);
-            }
-            else if (el.val() === "Vehicle offences") {
-                AddOptions(add_sub_select,vehicle_sub_options);
-            }
-            else if (el.val() === "Sexual offences") {
-                AddOptions(add_sub_select,sexual_sub_options);
-            }
-            else if (el.val() === "Arson and criminal damage") {
-                AddOptions(add_sub_select,arson_sub_options);
-            }
-            else if (el.val() === "Possession of weapons") {
-                AddOptions(add_sub_select,weapons_sub_options);
-            }
-            else if (el.val() === "Theft") {
-                AddOptions(add_sub_select,theft_sub_options);
-            }
-            else if (el.val() === "Burglary") {
-                AddOptions(add_sub_select,burglary_sub_options);
-            }
-            else if (el.val() === "Robbery") {
-                AddOptions(add_sub_select,robbery_sub_options);
-            }
-            else if (el.val() === "Miscellaneous crimes against society") {
-                AddOptions(add_sub_select,misc_sub_options);
-            }
-            else if (el.val() === "Other") {
-                AddOptions(add_sub_select,other_sub_options);
-            }
-            else {
-                //console.log("Unexpected main category chosen (Add)");
-            }
+			var el = $(this);
+			
+			const foundMappingAdd = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingAdd) {
+				AddOptions(add_sub_select,foundMappingAdd.options);
+			}
+			else {
+				console.error("Unexpected main category chosen (Add)");
+			}
         });
         
         $("#Filter_Crime_Type").change(function() {
             $('#Filter_Crime_Type_sub option:not(:first)').remove();
-            var el = $(this);
-            
-            if(el.val() === "Violence against the person") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,violence_sub_options);
-            }
-            else if (el.val() === "Public Order") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,public_sub_options);
-            }
-            else if (el.val() === "Drug offences") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,drug_sub_options);
-            }
-            else if (el.val() === "Vehicle offences") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,vehicle_sub_options);
-            }
-            else if (el.val() === "Sexual offences") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,sexual_sub_options);
-            }
-            else if (el.val() === "Arson and criminal damage") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,arson_sub_options);
-            }
-            else if (el.val() === "Possession of weapons") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,weapons_sub_options);
-            }
-            else if (el.val() === "Theft") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,theft_sub_options);
-            }
-            else if (el.val() === "Burglary") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,burglary_sub_options);
-            }
-            else if (el.val() === "Robbery") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,robbery_sub_options);
-            }
-            else if (el.val() === "Miscellaneous crimes against society") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,misc_sub_options);
-            }
-            else if (el.val() === "Other") {
-                AddOptions(filter_sub_select,all_option);
-                AddOptions(filter_sub_select,other_sub_options);
-            }
-            else if (el.val() === "[ALL]") {
-                AddOptions(filter_sub_select,all_option);
-            }
-            else {
-                //console.log("Unexpected main category chosen (Filter)");
-            }
+			var el = $(this);
+			AddOptions(filter_sub_select,all_option);
+			
+			const foundMappingFilter = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingFilter) {
+				AddOptions(filter_sub_select,foundMappingFilter.options);
+			}
+			else {
+				console.error("Unexpected main category chosen (Filter)");
+			}         
         });
         
         $("#Edit_Crime_Type").change(function() {
             $('#Edit_Crime_Type_sub option:not(:first)').remove();
-            var el = $(this);
-            
-            if(el.val() === "Violence against the person") {
-                AddOptions(edit_sub_select,violence_sub_options);
-            }
-            else if (el.val() === "Public Order") {
-                AddOptions(edit_sub_select,public_sub_options);
-            }
-            else if (el.val() === "Drug offences") {
-                AddOptions(edit_sub_select,drug_sub_options);
-            }
-            else if (el.val() === "Vehicle offences") {
-                AddOptions(edit_sub_select,vehicle_sub_options);
-            }
-            else if (el.val() === "Sexual offences") {
-                AddOptions(edit_sub_select,sexual_sub_options);
-            }
-            else if (el.val() === "Arson and criminal damage") {
-                AddOptions(edit_sub_select,arson_sub_options);
-            }
-            else if (el.val() === "Possession of weapons") {
-                AddOptions(edit_sub_select,weapons_sub_options);
-            }
-            else if (el.val() === "Theft") {
-                AddOptions(edit_sub_select,theft_sub_options);
-            }
-            else if (el.val() === "Burglary") {
-                AddOptions(edit_sub_select,burglary_sub_options);
-            }
-            else if (el.val() === "Robbery") {
-                AddOptions(edit_sub_select,robbery_sub_options);
-            }
-            else if (el.val() === "Miscellaneous crimes against society") {
-                AddOptions(edit_sub_select,misc_sub_options);
-            }
-            else if (el.val() === "Other") {
-                AddOptions(edit_sub_select,other_sub_options);
-            }
-            else {
-                //console.log("Unexpected main category chosen (Edit)");
-            }
+			var el = $(this);
+			
+			const foundMappingEdit = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingEdit) {
+				AddOptions(edit_sub_select,foundMappingEdit.options);
+			}
+			else {
+				console.error("Unexpected main category chosen (Edit)");
+			}
         });
         
     })
