@@ -14,7 +14,7 @@ require 'dbConfig.php'; // Include the database configuration file
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 </head>
 
-<link rel="stylesheet" href="layout.css">  <!-- Everything else -->
+<link rel="stylesheet" href="layout.css">  <!-- External styling -->
 
 <body oncontextmenu="return false;">  <!-- Disable the default right click context menu for the body of the page -->
 
@@ -130,7 +130,7 @@ require 'dbConfig.php'; // Include the database configuration file
         	</div>
         
         	<div id="modal_right">
-				<div id="map4"></div>
+				<div id="filter_map"></div>
 			</div>
 		
 			<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
@@ -174,7 +174,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			</div>
         
         	<div id="modal_right">
-				<div id="map2"></div>
+				<div id="add_map"></div>
 			</div>
 		
 			<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
@@ -219,7 +219,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			</div>
 				
 			<div id="modal_right">
-				<div id="map3"></div>
+				<div id="edit_map"></div>
 			</div>
 			
 			<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
@@ -271,7 +271,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	| Map functions, variables and elements
 	|-----------------------------------------------------------------------------------------------------------
 	*/
-	
 	var MarkerArray = [];
 	
 	function placeMarker(ID,Crime_Type,Crime_Date,Crime_Time,Description,CenterLocation,map) {
@@ -289,6 +288,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		
 		marker.title = marker.Crime_Type; // Shown on hover
 
+		/* Marker is clicked */		
 		google.maps.event.addListener(marker, 'click', function() {
 		    if (typeof(marker.info) === "undefined"){
                 //
@@ -299,17 +299,17 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
             }
 		    
-		    var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+		    var MarkerDate_display = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
 
-            var MarkerTime = marker.Crime_Time;
-            if (MarkerTime.length == 8) { // If time is retirved form database which includes seconds
-                MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+            var MarkerTime_display = marker.Crime_Time;
+            if (MarkerTime_display.length == 8) { // If time is retrieved form database which includes seconds
+                MarkerTime_display = MarkerTime_display.substring(0, MarkerTime_display.length - 3); // Remove the seconds for display purposes
             }
     		
     		marker.info = new google.maps.InfoWindow({
     			content: '<div id="iw-container">' + '<div class="iw-content">' + 
-    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
-    					 '<br><b>Time: </b>' + MarkerTime + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
+    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate_display +
+    					 '<br><b>Time: </b>' + MarkerTime_display + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
     					 '<br></br> <button type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
     					 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>',
     		minWidth: 200,
@@ -317,10 +317,10 @@ require 'dbConfig.php'; // Include the database configuration file
     		});
     		
     		if (typeof(marker.info) === "undefined") { // InfoWindow not created
-    		    console.error("Show InfoWindow: FAIL");
+    		    console.error("Display InfoWindow: FAILED");
     		}
     		else {   		    
-    		    marker.info.open(map,marker);
+    		    marker.info.open(map,marker); // Open InfoWindow
     		}
 
 		});
@@ -436,16 +436,16 @@ require 'dbConfig.php'; // Include the database configuration file
 	function UpdateMarkerInfo(marker) {	 
 		marker.title = marker.Crime_Type; // Shown on hover
 			
-		var MarkerDate = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
+		var MarkerDate_update = moment(marker.Crime_Date).format("DD-MM-YYYY"); // Convert to UK format
 
-		var MarkerTime = marker.Crime_Time;
-		if (MarkerTime.length == 8) { // If time is retrieved form database which includes seconds
-			MarkerTime = MarkerTime.substring(0, MarkerTime.length - 3); // Remove the seconds for display purposes
+		var MarkerTime_update = marker.Crime_Time;
+		if (MarkerTime_update.length == 8) { // If time is retrieved form database which includes seconds
+			MarkerTime_update = MarkerTime_update.substring(0, MarkerTime_update.length - 3); // Remove the seconds for display purposes
 		}
 	
 	    marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' + 
-    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate +
-    					 '<br><b>Time: </b>' + MarkerTime + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
+    					 '<b>ID: </b>' + marker.ID + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.Crime_Type +'<br> <b>Date: </b>' + MarkerDate_update +
+    					 '<br><b>Time: </b>' + MarkerTime_update + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.Description + '</i>' +
     					 '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker('+marker.ID+')>Edit</button>' +
     					 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker('+marker.ID+')>Delete</button>' + '</div>' + '</div>');
 	}
@@ -465,7 +465,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		$('#Edit_Crime_Type_sub').prop('disabled', false);
 
 		/* Setting input fields to current crime properties */
-		
 		const crimeTypeMappings = [
 			{ options: violence_sub_options, value: "Violence against the person" },
 			{ options: public_sub_options, value: "Public Order" },
@@ -480,11 +479,11 @@ require 'dbConfig.php'; // Include the database configuration file
 			{ options: misc_sub_options, value: "Miscellaneous crimes against society" },
 			{ options: other_sub_options, value: "Other" }
 		];
+		
+		const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(MarkerToEdit.Crime_Type));
 
-		const foundMapping = crimeTypeMappings.find(x => x.options.includes(MarkerToEdit.Crime_Type));
-
-		if (foundMapping) {
-			$('#Edit_Crime_Type').val(foundMapping.value).change();
+		if (foundMappingEdit) {
+			$('#Edit_Crime_Type').val(foundMappingEdit.value).change();
 		}
 		else { // Imported crime type  
 	        $('#Edit_Crime_Type').val('Other').change();
@@ -516,12 +515,12 @@ require 'dbConfig.php'; // Include the database configuration file
 			streetViewControl: true,
 		};
 
-		var map3 = new google.maps.Map(document.getElementById("map3"), EditMapOptions); // Show smaller map
+		var edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions); // Show smaller map
 
-		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
+		var Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
 		position: MarkerToEdit.position,
 		draggable: true,
-		map: map3
+		map: edit_map
 		});
 		
 		var Edit_SmallMarkerMoved = false;
@@ -529,7 +528,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		var Latitude = FirstLocation.lat();
 		var Longitude = FirstLocation.lng();
 		
-		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
+		google.maps.event.addListener(Draggable_marker_edit, 'dragend', function (evt) {
 			SecondLocation = evt.latLng;
 			Latitude = SecondLocation.lat(); // Information to be sent
 			Longitude = SecondLocation.lng();
@@ -544,23 +543,10 @@ require 'dbConfig.php'; // Include the database configuration file
     		var dropdown = document.getElementById("Edit_Crime_Type_sub"); // Initial step of getting crime type
     		
 			/* Update values locally */ 
-			/* This should only be done when the relevant changes in the database are known to have been successful */
-    		var Crime_Date = document.getElementById("Edit_Date").value;
-    		MarkerToEdit.Crime_Date = Crime_Date;
-    		
-    		var Crime_Time = document.getElementById("Edit_Time").value;
-    		MarkerToEdit.Crime_Time = Crime_Time;
-    		
-    		var Crime_Type = dropdown.options[dropdown.selectedIndex].value;
-    		MarkerToEdit.Crime_Type = Crime_Type;
-    		
-    		var Description = document.getElementById("Edit_Description").value;
-    		MarkerToEdit.Description = Description;
-    		
-    		if (Edit_SmallMarkerMoved == true) {
-    			MarkerToEdit.position = SecondLocation;
-    			Edit_SmallMarkerMoved = false;
-    		}
+    		var Crime_Date_edit = document.getElementById("Edit_Date").value;  		
+    		var Crime_Time_edit = document.getElementById("Edit_Time").value;
+			var Crime_Type_edit = dropdown.options[dropdown.selectedIndex].value;   		
+    		var Description_edit = document.getElementById("Edit_Description").value;
     		
     		var edit_containsTags = false;
     		if (Description.includes("<") && Description.includes(">")) {
@@ -584,6 +570,17 @@ require 'dbConfig.php'; // Include the database configuration file
         			data: data,
         			success: function(result)
         			{
+						/* Update values locally (the marker's properties) */
+						MarkerToEdit.Crime_Date = Crime_Date_edit;
+						MarkerToEdit.Crime_Time = Crime_Time_edit;
+						MarkerToEdit.Crime_Type = Crime_Type_edit;
+						MarkerToEdit.Description = Description_edit;
+
+						if (Edit_SmallMarkerMoved == true) {
+							MarkerToEdit.position = SecondLocation;
+							Edit_SmallMarkerMoved = false;
+						}
+
                         MarkerToEdit.setPosition(MarkerToEdit.position);
                 		UpdateMarkerInfo(MarkerToEdit);                		
                 		HideLoading();
@@ -761,7 +758,6 @@ require 'dbConfig.php'; // Include the database configuration file
                 success: function( data, textStatus, jqXHR ) {
                     Delete_TimeoutCounter += 1;
                     var delete_percentage = data;
-                    //console.log(data);
                     
                     if (delete_percentage == 0) {
                         Delete_NoChangeCounter += 1;
@@ -824,44 +820,10 @@ require 'dbConfig.php'; // Include the database configuration file
 		var initial_location = {lat: 51.454266, lng: -0.978130};
 		var map = new google.maps.Map(document.getElementById("map"), {zoom: 8, center: initial_location});
 		
-		/*
-		var styles = {
-            default: null,
-            hide: [
-              {
-                featureType: 'poi',
-                stylers: [{visibility: 'off'}]
-              },
-              {
-                featureType: 'poi.park',
-                stylers: [{visibility: 'off'}]
-              },
-              {
-                featureType: 'poi.business',
-                stylers: [{visibility: 'off'}]
-              },
-              {
-                featureType: 'administrative',
-                stylers: [{visibility: 'off'}]
-              },
-              {
-                featureType: 'transit',
-                elementType: 'labels.icon',
-                stylers: [{visibility: 'off'}]
-              }
-            ]
-        };
-        map.setOptions({styles: styles['hide']}); */
-		
 		// Create the search box and link it to the UI element.
 		var input = document.getElementById('pac-input');
 		var searchBox = new google.maps.places.SearchBox(input);
 		//map.controls[google.maps.ControlPosition.LEFT].push(input);
-
-		// Bias the SearchBox results towards current map's viewport.
-		/*map.addListener('bounds_changed', function() {
-			searchBox.setBounds(map.getBounds());
-		});*/
 	
 	/*
 	|-----------------------------------------------------------------------------------------------------------
@@ -893,8 +855,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 		setTimeout(() => {HideLoading();}, 500);
 		
-	}
-	
+	}	
 	LoadMarkers();
 	
 	/*
@@ -1030,7 +991,6 @@ require 'dbConfig.php'; // Include the database configuration file
 		}
 		
 		// Also by ID or last x/10/100 crimes?
-		// Also by date (after date or range of dates)
 		
 		/* -------- Input validation -------- */
 		
@@ -1067,6 +1027,21 @@ require 'dbConfig.php'; // Include the database configuration file
             }
 		}
 		
+		const crimeTypeMappings = [
+			{ options: violence_sub_options, value: "Violence against the person" },
+			{ options: public_sub_options, value: "Public Order" },
+			{ options: drug_sub_options, value: "Drug offences" },
+			{ options: vehicle_sub_options, value: "Vehicle offences" },
+			{ options: sexual_sub_options, value: "Sexual offences" },
+			{ options: arson_sub_options, value: "Arson and criminal damage" },
+			{ options: weapons_sub_options, value: "Possession of weapons" },
+			{ options: theft_sub_options, value: "Theft" },
+			{ options: burglary_sub_options, value: "Burglary" },
+			{ options: robbery_sub_options, value: "Robbery" },
+			{ options: misc_sub_options, value: "Miscellaneous crimes against society" },
+			{ options: other_sub_options, value: "Other" }
+		];
+
 		/* ---- Remove any previous filters ---- */
 		if (invalidInput == false) {
 		    for (i = 0; i < MarkerArray.length; i++) {
@@ -1076,7 +1051,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			    var MarkerDate = moment(MarkerArray[i].Crime_Date).format("YYYY-MM-DD"); // Convert date
 			    MarkerDate = new Date(MarkerDate);
 			
-			    var MarkerTime = MarkerArray[i].Crime_Time;
+				var MarkerTime = MarkerArray[i].Crime_Time;		
 
     			if (AllMainSelected == false) {
     			    if (AllSubSelected == false) { // One specific crime
@@ -1084,68 +1059,13 @@ require 'dbConfig.php'; // Include the database configuration file
     			            HideMarker(MarkerArray[i]);
     			        }
     			    }
-    			    if (AllSubSelected == true) { // One main category of crime
-    			        if (Main_Crime_Type == "Violence against the person") {
-    			            if (violence_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            }
-    			        }
-    			        if (Main_Crime_Type == "Public Order") {
-    			            if (public_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Drug offences") {
-    			            if (drug_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Vehicle offences") {
-    			            if (vehicle_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Sexual offences") {
-    			            if (sexual_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Arson and criminal damage") {
-    			            if (arson_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Posession of weapons") {
-    			            if (weapons_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Theft") {
-    			            if (theft_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Burglary") {
-    			            if (burglary_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Robbery") {
-    			            if (robbery_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Miscellaneous crimes against society") {
-    			            if (misc_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        if (Main_Crime_Type == "Other") {
-    			            if (other_sub_options.includes(MarkerArray[i].Crime_Type) === false) {
-    			                HideMarker(MarkerArray[i]);
-    			            } 
-    			        }
-    			        //
+					if (AllSubSelected == true) { // One main category of crime						
+						const foundMappingFilter = crimeTypeMappings.find(x => Main_Crime_Type == x.value);
+						if (foundMappingFilter) {
+							if (foundMappingFilter.options.includes(MarkerArray[i].Crime_Type) === false) {
+								HideMarker(MarkerArray[i]);
+							}
+						}						
     			    }
     			}
     			
@@ -1288,22 +1208,22 @@ require 'dbConfig.php'; // Include the database configuration file
 		var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
 		var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
 		
-		var SmallMapOptions = {
+		var AddMapOptions = {
 			center: FirstLocation,
 			zoom: RefinedZoom,
 			disableDefaultUI: true, // Remove all controls but street view
 			streetViewControl: true,
 		};
 
-		var map2 = new google.maps.Map(document.getElementById("map2"), SmallMapOptions); // Show smaller map
+		var add_map = new google.maps.Map(document.getElementById("add_map"), AddMapOptions); // Show smaller map
 
-		var Draggable_marker = new google.maps.Marker({ // Add a single draggable marker to smaller map
+		var Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
 		position: FirstLocation,
 		draggable: true,
-		map: map2
+		map: add_map
 		});
 		
-		google.maps.event.addListener(Draggable_marker, 'dragend', function (evt) {
+		google.maps.event.addListener(Draggable_marker_add, 'dragend', function (evt) {
 			SecondLocation = evt.latLng; // To be used to place static marker on main map
 			Latitude = SecondLocation.lat(); // Information to be sent
 			Longitude = SecondLocation.lng();
@@ -1449,22 +1369,22 @@ require 'dbConfig.php'; // Include the database configuration file
 	    $("#Filter_Location").prop("selectedIndex", 0);
 	    $('#Filter_Location').prop('disabled', 'disabled');
 	    
-        var MapOptions = {
+        var FilterMapOptions = {
 			center: UK_center,
 			zoom: 6,
 			disableDefaultUI: true, // Remove all controls but street view
 			streetViewControl: true,
 		};
 
-		var map4 = new google.maps.Map(document.getElementById("map4"), MapOptions); // Show smaller map
+		var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions); // Show smaller map
 		
 		var marker_placed = false;
         
-        google.maps.event.addListener(map4, 'click', function(event) {
+        google.maps.event.addListener(filter_map, 'click', function(event) {
 		    if (marker_placed == false) {
 		        var filter_marker = new google.maps.Marker({
                 position: event.latLng, 
-                map: map4
+                map: filter_map
                 });
                 filter_marker_hold[0] = filter_marker;
                 
@@ -1499,14 +1419,14 @@ require 'dbConfig.php'; // Include the database configuration file
             else 
             {
                 if (circle_hidden == true) {
-                    circle_hold[0].setMap(map4);
+                    circle_hold[0].setMap(filter_map);
                 }
                 
                 var f_marker = filter_marker_hold[0];
             
                 if (circle_placed == false) {
                     var circle = new google.maps.Circle({
-                    map: map4,
+                    map: filter_map,
                     radius: 1,    // 10 miles in metres
                     fillColor: '#AA0000'
                     });
@@ -1617,8 +1537,6 @@ require 'dbConfig.php'; // Include the database configuration file
             HideWarningAlert();
         }
     
-        //var t2 = performance.now();
-    
         $('#btn_import_confirm').attr('disabled', true); // Disable import button
         $('#close_import').attr('disabled', true); // Disable close button
         
@@ -1653,7 +1571,6 @@ require 'dbConfig.php'; // Include the database configuration file
             
                 for (var i = 0; i < headers.length; i++) {
                     headers[i] = $.trim(headers[i].replace(/[\t\n]+/g,' ')); // Remove any whitespace (e.g before first header or after last header)
-                    //console.log(headers[i]);
                     if (Accepted_Date_headers.indexOf(headers[i]) !== -1) {
                         Date_index = i;
                     }
@@ -1822,7 +1739,6 @@ require 'dbConfig.php'; // Include the database configuration file
                             success: function( data, textStatus, jqXHR ) {
                                 TimeoutCounter += 1;
                                 var import_percentage = data;
-                                //console.log(data);
                                 
                                 if (import_percentage == 0) {
                                     NoChangeCounter += 1;
@@ -1854,11 +1770,7 @@ require 'dbConfig.php'; // Include the database configuration file
                                     }
                                             
                                     if (FinishCheckCounter == (counter_value+2)) {
-                         	               clearInterval(t);
-                         	               
-                         	               //var t3 = performance.now();
-	                                       //console.log("ImportMarkers() duration: " + (t3-t2) + "ms");
-                         	               
+                         	               clearInterval(t);                        	               
                     	                   ShowLoading();
                     	                   location.reload();
                                     }
@@ -2066,57 +1978,52 @@ require 'dbConfig.php'; // Include the database configuration file
                 }
         }
         
-        function AddLocationOptions(select,options) { /* Add parameter options to search radius selection */
+		function AddLocationOptions(options) { /* Add parameter options to search radius selection */
+			var filter_loc = document.getElementById("Filter_Location");  
             for (var i = 0; i < options.length; i++) {
-                    var opt = options[i];
+                    var opt = options[i].text;
                     var el = document.createElement("option");
                     el.textContent = "Within " + opt + " miles";
-                    el.value = opt;
-                    select.appendChild(el);
+                    el.value = options[i].value;
+                    filter_loc.appendChild(el);
                 }
         }
-        
-        var filter_loc = document.getElementById("Filter_Location");        
-        var loc_options = ["1","3","5","10","15","20","30","40","50","100","250"];
         
         /* Main category select elements */ 
         var add_select = document.getElementById("Add_Crime_Type");
         var filter_select = document.getElementById("Filter_Crime_Type");
-        var edit_select = document.getElementById("Edit_Crime_Type");
-        
-        /* Subcategory select elements */ 
-        var add_sub_select = document.getElementById("Add_Crime_Type_sub");
-        var filter_sub_select = document.getElementById("Filter_Crime_Type_sub");
-        var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
-        
+		var edit_select = document.getElementById("Edit_Crime_Type");
+		
+		var filter_loc = document.getElementById("Filter_Location");  
+               
         var main_options = ["Violence against the person","Public Order","Drug offences","Vehicle offences","Sexual offences","Arson and criminal damage","Possession of weapons","Theft","Burglary","Robbery","Miscellaneous crimes against society","Other"]; 
-        
-        AddOptions(add_select,main_options);
-        
-        all_option = ["[ALL]"];
-        
-        AddOptions(filter_loc,all_option); // All at top
-        
-        var opt = "1/4";
-        var el = document.createElement("option");
-        el.textContent = "Within " + opt + " miles";
-        el.value = 0.25;
-        filter_loc.appendChild(el);
-                    
-        var opt = "1/2";
-        var el = document.createElement("option");
-        el.textContent = "Within " + opt + " miles";
-        el.value = 0.5;
-        filter_loc.appendChild(el);
-        // Add 1/4 and 1/2 manually becuase their values are different
+		
+		all_option = ["[ALL]"];        
+		AddOptions(filter_loc,all_option);
+		AddOptions(filter_select,all_option);
 
-        AddLocationOptions(filter_loc,loc_options); // Rest of the options
-        
-        AddOptions(filter_select,all_option);
-        AddOptions(filter_select,main_options);
-        
+		AddOptions(add_select,main_options);
+		AddOptions(filter_select,main_options);        
         AddOptions(edit_select,main_options);
-        
+        		
+		const locMappings = [
+			{ text: "1/4", value: 0.25 },
+			{ text: "1/2", value: 0.5 },
+			{ text: "1", value: 1 },
+			{ text: "3", value: 3 },
+			{ text: "5", value: 5 },
+			{ text: "10", value: 10 },
+			{ text: "15", value: 15 },
+			{ text: "20", value: 20 },
+			{ text: "30", value: 30 },
+			{ text: "40", value: 40 },
+			{ text: "50", value: 50 },
+			{ text: "100", value: 100 },
+			{ text: "250", value: 250 }
+		];
+
+        AddLocationOptions(locMappings);    
+
         violence_sub_options = ["Murder","Attempted Murder","Manslaughter","Conspiracy to murder","Threats to kill","Causing death or serious injury by dangerous driving", "Causing death by careless driving under the influence of drink or drugs","Causing death by careless or inconsiderate driving","Causing death or serious injury by driving (unlicensed driver)","Causing death by aggrevated vehicle taking","Corporate manslaughter","Assualt (with intent to cause serious harm)","Endangering life","Harassment","Racially or religiously aggravated harassment","Racially or religiously aggravated assualt with injury","Racially or religiously aggravated assualt without injury","Assualt with injury","Assualt without injury","Assualt with injury on a constable","Assualt without injury on a constable","Stalking","Maliciuos communications","Cruelty to Children/Young Persons","Child abduction","Procuring illegal abortion","Kidnapping","Modern Slavery"];
         public_sub_options = ["Public fear, harm or distress","Racially or religiously aggravated public fear, alarm or distress","Violent disorder","Other offences against the state or public order"];     
         drug_sub_options = ["Trafficking in controlled drugs","Posession of controlled drugs (Cannabis)","Posession of controlled drugs (excluding Cannabis)","Other drug offences"];
@@ -2129,7 +2036,7 @@ require 'dbConfig.php'; // Include the database configuration file
         robbery_sub_options = ["Robbery of business property","Robbery of personal property"];
         misc_sub_options = ["Concealing an infant death close to birth","Exploitation of prostitution","Bigamy","Soliciting for the purpose of prostitution","Going equipped for stealing","Making, supplying or possessing articles for use in fraud","Profiting from or concealing knowledge of the proceeds of crime","Handling stolen goods","Threat or possession with intent to commit criminal damage","Forgery or use of false drug prescription","Fraud or forgery associated with vehicle or driver records","Other forgery","Possession of false documents","Perjury","Offender Management Act","Aiding suicide","Perverting the course of justice","Absconding from lawful custody","Bail offences","Obscene publications","Disclosure, obstruction, false or misleading statements","Wildlife crime","Dangerous driving","Other notifiable offences"];
 		other_sub_options = ["Unspecified Crime", "Other crime"];
-		
+
 		const crimeTypeMappings = [
 			{ options: violence_sub_options, value: "Violence against the person" },
 			{ options: public_sub_options, value: "Public Order" },
@@ -2144,17 +2051,22 @@ require 'dbConfig.php'; // Include the database configuration file
 			{ options: misc_sub_options, value: "Miscellaneous crimes against society" },
 			{ options: other_sub_options, value: "Other" }
 		];
+
+		/* Subcategory select elements */ 
+		var add_sub_select = document.getElementById("Add_Crime_Type_sub");
+        var filter_sub_select = document.getElementById("Filter_Crime_Type_sub");
+        var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
         
         $("#Add_Crime_Type").change(function() { // When main category selected
             $('#Add_Crime_Type_sub option:not(:first)').remove(); // Remove all but the default hidden value
 			var el = $(this);
 			
-			const foundMappingAdd = crimeTypeMappings.find(x => x.value == el.val());
-			if (foundMappingAdd) {
-				AddOptions(add_sub_select,foundMappingAdd.options);
+			const foundMappingAddChange = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingAddChange) {
+				AddOptions(add_sub_select,foundMappingAddChange.options);
 			}
 			else {
-				console.error("Unexpected main category chosen (Add)");
+				console.error("Add (Main Category change): FAILED");
 			}
         });
         
@@ -2163,12 +2075,12 @@ require 'dbConfig.php'; // Include the database configuration file
 			var el = $(this);
 			AddOptions(filter_sub_select,all_option);
 			
-			const foundMappingFilter = crimeTypeMappings.find(x => x.value == el.val());
-			if (foundMappingFilter) {
-				AddOptions(filter_sub_select,foundMappingFilter.options);
+			const foundMappingFilterChange = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingFilterChange) {
+				AddOptions(filter_sub_select,foundMappingFilterChange.options);
 			}
 			else {
-				console.error("Unexpected main category chosen (Filter)");
+				console.error("Filter (Main Category change): FAILED");
 			}         
         });
         
@@ -2176,12 +2088,12 @@ require 'dbConfig.php'; // Include the database configuration file
             $('#Edit_Crime_Type_sub option:not(:first)').remove();
 			var el = $(this);
 			
-			const foundMappingEdit = crimeTypeMappings.find(x => x.value == el.val());
-			if (foundMappingEdit) {
-				AddOptions(edit_sub_select,foundMappingEdit.options);
+			const foundMappingEditChange = crimeTypeMappings.find(x => x.value == el.val());
+			if (foundMappingEditChange) {
+				AddOptions(edit_sub_select,foundMappingEditChange.options);
 			}
 			else {
-				console.error("Unexpected main category chosen (Edit)");
+				console.error("Edit (Main Category change): FAILED");
 			}
         });
         
