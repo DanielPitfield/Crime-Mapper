@@ -163,22 +163,6 @@ function EditMarker(id) {
     document.getElementById('Edit_Crime_Type').removeAttribute('disabled');
     document.getElementById('Edit_Crime_Type_sub').removeAttribute('disabled');
 
-    /* Setting input fields to current crime properties */
-    const crimeTypeMappings = [
-        { options: violence_sub_options, value: "Violence against the person" },
-        { options: public_sub_options, value: "Public Order" },
-        { options: drug_sub_options, value: "Drug offences" },
-        { options: vehicle_sub_options, value: "Vehicle offences" },
-        { options: sexual_sub_options, value: "Sexual offences" },
-        { options: arson_sub_options, value: "Arson and criminal damage" },
-        { options: weapons_sub_options, value: "Possession of weapons" },
-        { options: theft_sub_options, value: "Theft" },
-        { options: burglary_sub_options, value: "Burglary" },
-        { options: robbery_sub_options, value: "Robbery" },
-        { options: misc_sub_options, value: "Miscellaneous crimes against society" },
-        { options: other_sub_options, value: "Other" }
-    ];
-
     const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(MarkerToEdit.crimeType));
 
     if (foundMappingEdit) {
@@ -527,19 +511,19 @@ function initMap() {
     var clusterStyles = [
         {
             textColor: 'white',
-            url: 'SmallCluster.png',
+            url: '/cluster_images/SmallCluster.png',
             height: 53,
             width: 53
         },
         {
             textColor: 'white',
-            url: 'MediumCluster.png',
+            url: '/cluster_images/MediumCluster.png',
             height: 56,
             width: 56
         },
         {
             textColor: 'white',
-            url: 'LargeCluster.png',
+            url: '/cluster_images/LargeCluster.png',
             height: 66,
             width: 66
         }
@@ -674,21 +658,6 @@ function initMap() {
                 }
             }
         }
-
-        const crimeTypeMappings = [
-            { options: violence_sub_options, value: "Violence against the person" },
-            { options: public_sub_options, value: "Public Order" },
-            { options: drug_sub_options, value: "Drug offences" },
-            { options: vehicle_sub_options, value: "Vehicle offences" },
-            { options: sexual_sub_options, value: "Sexual offences" },
-            { options: arson_sub_options, value: "Arson and criminal damage" },
-            { options: weapons_sub_options, value: "Possession of weapons" },
-            { options: theft_sub_options, value: "Theft" },
-            { options: burglary_sub_options, value: "Burglary" },
-            { options: robbery_sub_options, value: "Robbery" },
-            { options: misc_sub_options, value: "Miscellaneous crimes against society" },
-            { options: other_sub_options, value: "Other" }
-        ];
 
         /* ---- Remove any previous filters ---- */
         if (invalidInput == false) {
@@ -982,7 +951,7 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    $("#Filter_Clear").click(function () {
+    document.getElementById('Filter_Clear').addEventListener("click", () => {
        document.getElementById('Filter_minDate').value = "";
        document.getElementById('Filter_maxDate').value = "";
        document.getElementById('Filter_minTime').value = "";

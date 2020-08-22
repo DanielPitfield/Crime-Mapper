@@ -14,7 +14,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
 </head>
 
-<link rel="stylesheet" href="layout.css"> <!-- External styling -->
+<link rel="stylesheet" href="/css/layout.css"> <!-- External styling -->
 
 <body oncontextmenu="return false;">
 	<!-- Disable the default right click context menu for the body of the page -->
@@ -265,7 +265,7 @@ require 'dbConfig.php'; // Include the database configuration file
 		</div>
 	</div>
 
-	<script src="moment.js"></script> <!-- Moment.js library -->
+	<script src="/resources/moment.js"></script> <!-- Moment.js library -->
 
 	<script>
 		var markers = [
@@ -286,9 +286,9 @@ require 'dbConfig.php'; // Include the database configuration file
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-	<script src="data.js"></script>
-	<script src="setup.js"></script>
-	<script src="map.js"></script>
+	<script src="/js/data.js"></script>
+	<script src="/js/setup.js"></script>
+	<script src="/js/map.js"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
 
