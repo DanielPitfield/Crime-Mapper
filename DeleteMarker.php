@@ -14,10 +14,10 @@ if(isset($_POST['MarkerID']))
     }
 }
 
-if(isset($_POST['Delete_ID_array']))
+if(isset($_POST['visibleMarkers_IDs']))
 {
     file_put_contents("delete_progress.txt", "0");
-    $Marker_Array = $_POST['Delete_ID_array'];
+    $Marker_Array = $_POST['visibleMarkers_IDs'];
     $MarkerID_m = -1;
     
     $num_markers = count($Marker_Array);

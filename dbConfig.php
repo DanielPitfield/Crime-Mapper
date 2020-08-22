@@ -1,9 +1,9 @@
 <?php 
 // Database configuration 
 $dbHost     = "localhost"; 
-$dbUsername = "hq017496_test"; 
-$dbPassword = "MOCK INFO"; 
-$dbName     = "hq017496_crime_mapper"; 
+$dbUsername = "test"; 
+$dbPassword = "test_crime_2019"; 
+$dbName     = "crime_mapper"; 
  
 // Create database connection 
 $db = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName); 
