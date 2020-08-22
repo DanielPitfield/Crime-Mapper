@@ -1,8 +1,6 @@
 # Crime Mapper
 A web-based crime mapping, visualisation and analysis solution developed using HTML, CSS, JavaScript, PHP, SQL and the Google Maps JavaScript API.
 
-URL: https://hq017496.webs.act.reading.ac.uk
-
 ![Main](images/Main.PNG)
 
 ### Known Issues ###  
