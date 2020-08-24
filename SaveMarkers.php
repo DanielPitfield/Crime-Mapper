@@ -22,7 +22,7 @@ if(isset($_POST['Time']))
     $time = $_POST['Time'];
 }
 
-// From ajax call
+// From AJAX call
 if(isset($_POST['Latitude']))
 {
     $latitude = $_POST['Latitude'];
@@ -39,8 +39,11 @@ $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, D
 
 $stmt->bind_param('ssssdd', $crime_type, $date, $time, $description, $latitude, $longitude);
 
-$stmt->execute();
-
-$id = mysqli_insert_id($db);
-echo $id;	
+if($stmt->execute()) {
+    $id = mysqli_insert_id($db);
+    echo $id;
+} 
+else {
+    echo $stmt->error;
+}
 ?>

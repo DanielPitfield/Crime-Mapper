@@ -36,10 +36,6 @@ function AddOptions(select, options) { /* Add parameter options to parameter sel
     })
 }
 
-/**
- * Add parameter options to search radius selection.
- * @param {*} options Text and value of search radius options. 
- */
 function AddLocationOptions(options) {
     const filter_loc = document.getElementById("Filter_Location");
     options.forEach(option => {

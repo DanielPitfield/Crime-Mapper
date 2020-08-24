@@ -272,9 +272,10 @@ require 'dbConfig.php'; // Include the database configuration file
 			<?php
 			$result = $db->query("SELECT * FROM markers");
 			if ($result->num_rows > 0) {
-				while ($row = $result->fetch_assoc()) { // TODO: HTML Encoding
-					echo "{ id: {$row['ID']}, crimeType: '{$row['Crime_Type']}', crimeDate: '{$row['Crime_Date']}', crimeTime: '{$row['Crime_Time']}',
-					description: '" . htmlspecialchars($row['Description']) . "', latitude: '{$row['Latitude']}', longitude: '{$row['Longitude']}'},";
+				while ($row = $result->fetch_assoc()) {
+					echo "{ id: {$row['ID']}, crimeType: '" . htmlspecialchars($row['Crime_Type']) . "', crimeDate: '" . htmlspecialchars($row['Crime_Date']) . "',
+					crimeTime: '" . htmlspecialchars($row['Crime_Time']) . "', description: '" . htmlspecialchars($row['Description']) . "',
+					latitude: '{$row['Latitude']}', longitude: '{$row['Longitude']}'},"; // HTML encode the strings for security
 				}
 			}
 			?>

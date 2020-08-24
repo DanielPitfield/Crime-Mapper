@@ -92,7 +92,21 @@ html, body {
   display: none;
 }
 
-#Alert_Error, #Alert_Warning, #Alert_Progress {
+body > #Alert_Error, body > #Alert_Warning { /* When alerts are constructed initially */
+  display: none;
+}
+
+#Alert_Error, #Alert_Warning { /* When alerts are moved inside the various modals */
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#Alert_Progress {
   position: fixed;
   display: none;
   z-index:20001;

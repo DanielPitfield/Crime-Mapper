@@ -1,19 +1,18 @@
 <?php
 require 'dbConfig.php';
 
-if(isset($_POST['MarkerID']))
+// Single marker
+if(isset($_POST['id']))
 {
-    $MarkerID = $_POST['MarkerID'];
+    $id = $_POST['id'];
+
     $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
-    $stmt->bind_param('i', $MarkerID);
-    if($stmt->execute()) {
-        //
-    }
-    else {
-        echo "Error deleting a single marker";
-    }
+    $stmt->bind_param('i', $id);
+
+    if(!$stmt->execute()) echo $stmt->error;
 }
 
+// Multiple markers
 if(isset($_POST['visibleMarkers_IDs']))
 {
     file_put_contents("delete_progress.txt", "0");
@@ -26,21 +25,16 @@ if(isset($_POST['visibleMarkers_IDs']))
 
     for ($i = 0; $i < count($Marker_Array); $i++) {
         $MarkerID_m = $Marker_Array[$i];
+
         $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
         $stmt->bind_param('i', $MarkerID_m);
-        if($stmt->execute()) {
-            //
-        }
-        else {
-            echo "Error deleting a marker from multiple";
-        }
+
+        if(!$stmt->execute()) echo $stmt->error;
         
         if ($i % $check_interval == 0) {
             file_put_contents("delete_progress.txt",(($i/$num_markers)*100));
-        }
-        
+        }        
     }
     file_put_contents("delete_progress.txt","100");
-
 }
 ?>

@@ -61,80 +61,36 @@ function placeMarker(marker, position, map) {
 |-----------------------------------------------------------------------------------------------------------
 */
 
-var ErrorAlertOpen = false;
-function ShowErrorAlert(message) {
-    Error_Alert = document.getElementById("Alert_Error");
+function ShowErrorAlert(message, anchor) {
+    // Get the body associated with the specified modal content (anchor)
+    const body = anchor.querySelector(".modal-body");
+
+    const error_alert = document.getElementById("Alert_Error");
+    error_alert.classList.remove("hidden");
     document.getElementById('Alert_Error_Message').innerHTML = message;
-    Error_Alert.style.left = "14%";
-    Error_Alert.style.top = "100px";
-    Error_Alert.style.display = "block";
-    ErrorAlertOpen = true;
+
+    // Move the error alert inside the body of the modal
+    body.insertAdjacentElement("beforeend", document.getElementById("Alert_Error"));
 }
 
 function HideErrorAlert() {
-    Error_Alert = document.getElementById("Alert_Error");
-    Error_Alert.style.left = "-500px";
-    Error_Alert.style.top = "-500px";
-    Error_Alert.style.display = "none";
-    ErrorAlertOpen = false;
+    const error_alert = document.getElementById("Alert_Error");
+    error_alert.classList.add("hidden");
 }
 
-/* Change to use class and querySelectorAll */
-document.getElementById('close_alert_error').addEventListener("click", () => {
-    HideErrorAlert();
-});
-
-document.getElementById('close_add').addEventListener("click", () => {
-    if (ErrorAlertOpen == true) {
-        HideErrorAlert();
-    }
-});
-
-document.getElementById('close_filter').addEventListener("click", () => {
-    if (ErrorAlertOpen == true) {
-        HideErrorAlert();
-    }
-});
-
-document.getElementById('close_edit').addEventListener("click", () => {
-    if (ErrorAlertOpen == true) {
-        HideErrorAlert();
-    }
-});
-
-document.getElementById('close_import').addEventListener("click", () => {
-    if (ErrorAlertOpen == true) {
-        HideErrorAlert();
-    }
-});
-
-var WarningAlertOpen = false;
-function ShowWarningAlert(message) {
-    Warning_Alert = document.getElementById("Alert_Warning");
+function ShowWarningAlert(message, anchor) {
+    const body = anchor.querySelector(".modal-body");
+    const warning_alert = document.getElementById("Alert_Warning");
+    warning_alert.classList.remove("hidden");
     document.getElementById('Alert_Warning_Message').innerHTML = message;
-    Warning_Alert.style.left = "34%";
-    Warning_Alert.style.top = "500px";
-    Warning_Alert.style.display = "block";
-    WarningAlertOpen = true;
+
+    body.insertAdjacentElement("beforeend", document.getElementById("Alert_Warning"));
 }
 
 function HideWarningAlert() {
-    Warning_Alert = document.getElementById("Alert_Warning");
-    Warning_Alert.style.left = "-500px";
-    Warning_Alert.style.top = "-500px";
-    Warning_Alert.style.display = "none";
-    WarningAlertOpen = false;
+    const warning_alert = document.getElementById("Alert_Warning");
+    warning_alert.classList.add("hidden");
 }
-
-document.getElementById('close_alert_warning').addEventListener("click", () => {
-    HideWarningAlert();
-});
-
-document.getElementById('close_import').addEventListener("click", () => {
-    if (WarningAlertOpen == true) {
-        HideWarningAlert();
-    }
-});
 
 function ShowProgressAlert() {
     Progress_Alert = document.getElementById("Alert_Progress");
@@ -150,6 +106,12 @@ function HideProgressAlert() {
     Progress_Alert.style.top = "-500px";
     Progress_Alert.style.display = "none";
 }
+
+document.querySelectorAll('#close_alert_error, #close_add, #close_filter, #close_edit, #close_import')
+    .forEach(el => el.addEventListener("click", () => HideErrorAlert()));
+
+document.querySelectorAll('#close_import, #close_alert_warning')
+    .forEach(el => el.addEventListener("click", () => HideWarningAlert()));
 
 document.getElementById('close_alert_progress').addEventListener("click", () => {
     HideProgressAlert();
@@ -216,7 +178,7 @@ function EditMarker(id) {
     // Set up smaller map in 'Edit Crime' window
     var EditMapOptions = {
         center: MarkerToEdit.position,
-        zoom: 15,
+        zoom: 12,
         disableDefaultUI: true, // Remove all controls but street view
         streetViewControl: true,
     };
@@ -245,7 +207,7 @@ function EditMarker(id) {
     document.getElementById('edit_submit_form').addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const description_edit = document.getElementById("Edit_Description").value;
+        const description_edit = document.getElementById('Edit_Description').value;
         const validDescription = description_edit.length <= 500;
 
         if (validDescription) {
@@ -264,13 +226,13 @@ function EditMarker(id) {
                 type: 'POST',
                 data: data,
                 success: function (result) {
-                    var dropdown = document.getElementById("Edit_Crime_Type_sub");
+                    var dropdown = document.getElementById('Edit_Crime_Type_sub');
 
                     // Update values locally (the marker's properties)
-                    MarkerToEdit.crimeDate = document.getElementById("Edit_Date").value;
-                    MarkerToEdit.crimeTime = document.getElementById("Edit_Time").value;
+                    MarkerToEdit.crimeDate = document.getElementById('Edit_Date').value;
+                    MarkerToEdit.crimeTime = document.getElementById('Edit_Time').value;
                     MarkerToEdit.crimeType = dropdown.options[dropdown.selectedIndex].value;
-                    MarkerToEdit.description = document.getElementById("Edit_Description").value;
+                    MarkerToEdit.description = document.getElementById('Edit_Description').value;
 
                     if (Edit_SmallMarkerMoved == true) { // If adjustment made on smaller map
                         MarkerToEdit.position = SecondLocation;
@@ -281,35 +243,14 @@ function EditMarker(id) {
                     UpdateMarkerInfo(MarkerToEdit);
                     HideLoading();
                     $('#modal_edit').modal('hide');
-
-                    if (ErrorAlertOpen == true) {
-                        HideErrorAlert();
-                    }
-
+                    HideErrorAlert();
                 }
-
             });
         }
         else {
             const edit_err_string = "The 'Description' field can only be a maximum of 500 characters<br>";
-            ShowErrorAlert(edit_err_string);
 
-            // TODO Create function for positioning the various modals/alerts
-
-            /* Modal Position */
-            var Edit_Modal_Top = document.getElementById('modal_edit_content').offsetTop;
-            var Edit_Modal_Left = document.getElementById('modal_edit_content').offsetLeft;
-            var Edit_Modal_Height = document.getElementById('modal_edit_content').height;
-            var Edit_Modal_Width = document.getElementById('modal_edit_content').width;
-
-            /* Alert Position (top) */
-            var Edit_Alert_Error_Top = 0;
-            if (screen.height >= 1080) {
-                Edit_Alert_Error_Top = Edit_Modal_Top + Edit_Modal_Height + 50;
-            }
-
-            /* Set position of alert */
-            $("#Alert_Error").css({ top: Edit_Alert_Error_Top, left: Edit_Modal_Left, width: Edit_Modal_Width });
+            ShowErrorAlert(edit_err_string, document.getElementById('modal_edit_content'));
         }
 
     });
@@ -336,12 +277,10 @@ function DeleteMarker(id) {
         }
     }
 
-    var MarkerID = id; // Assign to send variable
-
     $.ajax({
         url: 'DeleteMarker.php',  // Database
         type: 'POST',
-        data: { MarkerID: MarkerID },
+        data: { id: id },
         success: function (data) {
             MarkerToDelete.setVisible(false); // View
             if (MarkerToDelete_index) {
@@ -361,6 +300,8 @@ function DeleteMarker(id) {
 | Deleting multiple markers
 |-----------------------------------------------------------------------------------------------------------
 */
+
+// TODO Refactor this module to handle multi-user interaction
 
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
     if ($('#progress_delete').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
@@ -409,22 +350,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
         else {
             filter_delete_string = "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
         }
-        ShowErrorAlert(filter_delete_string);
-
-        /* Modal Position */
-        var Filter_Modal_Top2 = document.getElementById('modal_filter_content').offsetTop;
-        var Filter_Modal_Left2 = document.getElementById('modal_filter_content').offsetLeft;
-        var Filter_Modal_Height2 = document.getElementById('modal_filter_content').height;
-        var Filter_Modal_Width2 = document.getElementById('modal_filter_content').width;
-
-        /* Alert Position (top) */
-        var Filter_Alert_Error_Top2 = 0;
-        if (screen.height >= 1080) {
-            Filter_Alert_Error_Top2 = Filter_Modal_Top2 + Filter_Modal_Height2 + 50;
-        }
-
-        /* Set position of alert */
-        $("#Alert_Error").css({ top: Filter_Alert_Error_Top2, left: Filter_Modal_Left2, width: Filter_Modal_Width2 });
+        ShowErrorAlert(filter_delete_string, document.getElementById('modal_filter_content'));
     }
 
     var delete_data_hold = -10;
@@ -708,7 +634,8 @@ function initMap() {
             maxTime = maxTime + ":00"; // MarkerTime has seconds, not an issue for minTime but will hide on boundary of maxTime
         }
 
-        // Also by id or last x/10/100 crimes?
+        // TODO Filter by ID
+        // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
 
         /* -------- Input validation -------- */
 
@@ -731,7 +658,7 @@ function initMap() {
             invalidInput = true;
         }
 
-        /* -------- Filtering -------- */
+        /* -------- Showing/Hiding Markers -------- */
 
         function HideMarker(marker) {
             marker.setVisible(false);
@@ -804,29 +731,10 @@ function initMap() {
 
             }
             $('#modal_filter').modal('hide');
-
-            if (ErrorAlertOpen == true) {
-                HideErrorAlert();
-            }
-
+            HideErrorAlert();
         }
         else {
-            ShowErrorAlert(filter_err_string);
-
-            /* Modal Position */
-            var Filter_Modal_Top = document.getElementById('modal_filter_content').offsetTop;
-            var Filter_Modal_Left = document.getElementById('modal_filter_content').offsetLeft;
-            var Filter_Modal_Height = document.getElementById('modal_filter_content').height;
-            var Filter_Modal_Width = document.getElementById('modal_filter_content').width;
-
-            /* Alert Position (top) */
-            var Filter_Alert_Error_Top = 0;
-            if (screen.height >= 1080) {
-                Filter_Alert_Error_Top = Filter_Modal_Top + Filter_Modal_Height + 50;
-            }
-
-            /* Set position of alert */
-            $("#Alert_Error").css({ top: Filter_Alert_Error_Top, left: Filter_Modal_Left, width: Filter_Modal_Width });
+            ShowErrorAlert(filter_err_string, document.getElementById('modal_filter_content'));
         }
     }
 
@@ -982,11 +890,7 @@ function initMap() {
                     SmallMarkerMoved = false;
                     HideLoading();
                     $('#modal_add').modal('hide');
-
-                    if (ErrorAlertOpen == true) {
-                        HideErrorAlert();
-                    }
-
+                    HideErrorAlert();
                 },
                 fail: function () {
                     HideLoading();
@@ -1009,31 +913,18 @@ function initMap() {
                     add_err_string += "The 'Crime Type - Subcategory' field is a required field<br>";
                 }
             }
-            ShowErrorAlert(add_err_string);
-
-            /* Modal Position */
-            var Add_Modal_Top = document.getElementById('modal_add_content').offsetTop;
-            var Add_Modal_Left = document.getElementById('modal_add_content').offsetLeft;
-            var Add_Modal_Height = document.getElementById('modal_add_content').height;
-            var Add_Modal_Width = document.getElementById('modal_add_content').width;
-
-            /* Alert Position (top) */
-            var Add_Alert_Error_Top = 0;
-            if (screen.height >= 1080) {
-                Add_Alert_Error_Top = Add_Modal_Top + Add_Modal_Height + 50;
-            }
-
-            /* Set position of alert */
-            $("#Alert_Error").css({ top: Add_Alert_Error_Top, left: Add_Modal_Left, width: Add_Modal_Width });
+            ShowErrorAlert(add_err_string, document.getElementById('modal_add_content'));
         }
 
     });
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Filtering crimes
+    | Filtering crimes by location
     |-----------------------------------------------------------------------------------------------------------
     */
+
+    // TODO Move this to the other module for filtering crimes
 
     document.getElementById('Filter_Clear').addEventListener("click", () => {
         document.getElementById('Filter_minDate').value = "";
@@ -1191,14 +1082,8 @@ function initMap() {
     });
 
     document.getElementById('btn_import_confirm').addEventListener('click', () => { // Sending selected file to PHP file (to be handled)
-
-        if (ErrorAlertOpen == true) {
-            HideErrorAlert();
-        }
-
-        if (WarningAlertOpen == true) {
-            HideWarningAlert();
-        }
+        HideErrorAlert();
+        HideWarningAlert();
 
         document.getElementById('btn_import_confirm').setAttribute('disabled', true); // Disable import button
         document.getElementById('close_import').setAttribute('disabled', true); // Disable close button
@@ -1305,22 +1190,7 @@ function initMap() {
 
                 if (validFile == true && Reached_Limit == false) {
                     if (FileWarning == true) {
-                        ShowWarningAlert(import_warning_str);
-
-                        /* Modal Position */
-                        var Import_Modal_Warning_Only_Top = document.getElementById('modal_import_content').offsetTop;
-                        var Import_Modal_Warning_Only_Left = document.getElementById('modal_import_content').offsetLeft;
-                        var Import_Modal_Warning_Only_Height = document.getElementById('modal_import_content').height;
-                        var Import_Modal_Warning_Only_Width = document.getElementById('modal_import_content').width;
-
-                        /* Alert Position (top) */
-                        var Import_Alert_Warning_Only_Top = 0;
-                        if (screen.height >= 1080) {
-                            Import_Alert_Warning_Only_Top = Import_Modal_Warning_Only_Top + Import_Modal_Warning_Only_Height + 50;
-                        }
-
-                        /* Set position of alert */
-                        $("#Alert_Warning").css({ top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: Import_Modal_Warning_Only_Width });
+                        ShowWarningAlert(import_warning_str, document.getElementById('modal_import_content'));
                     }
 
                     var progress_file_upload = document.getElementById('progress_file_upload');
@@ -1394,6 +1264,8 @@ function initMap() {
                         counter_value = 9;
                         TimeoutLimit = 300;
                     }
+
+                    // TODO Refactor this module to handle multi-user interaction
 
                     var t = setInterval(CheckProgressFile, 1000); // Run below function every second
 
@@ -1473,54 +1345,11 @@ function initMap() {
                     }
 
                     if (FileWarning == true) {
-                        /* Warning */
-                        ShowWarningAlert(import_warning_str);
-
-                        /* Modal Position */
-                        var Import_Modal_Top = document.getElementById('modal_import_content').offsetTop;
-                        var Import_Modal_Left = document.getElementById('modal_import_content').offsetLeft;
-                        var Import_Modal_Height = document.getElementById('modal_import_content').height;
-                        var Import_Modal_Width = document.getElementById('modal_import_content').width;
-
-                        /* Alert Position (top) */
-                        var Import_Alert_Warning_Top = 0;
-                        if (screen.height >= 1080) {
-                            Import_Alert_Warning_Top = Import_Modal_Top + Import_Modal_Height + 50;
-                        }
-
-                        /* Set position of alert */
-                        $("#Alert_Warning").css({ top: Import_Alert_Warning_Top, left: Import_Modal_Left, width: Import_Modal_Width });
-
-                        /* Error */
-                        ShowErrorAlert(import_err_str);
-
-                        /* Warning Alert Position */
-                        var Warning_Alert_Top = document.getElementById('Alert_Warning').offsetTop;
-                        var Warning_Alert_Height = document.getElementById('Alert_Warning').height;
-
-                        /* Alert Position (top) */
-                        var Import_Alert_Error_Top = Warning_Alert_Top + Warning_Alert_Height + 30;
-
-                        /* Set position of alert */
-                        $("#Alert_Error").css({ top: Import_Alert_Error_Top, left: Import_Modal_Left, width: Import_Modal_Width });
+                        ShowWarningAlert(import_warning_str, document.getElementById('modal_import_content'));
+                        ShowErrorAlert(import_err_str, document.getElementById('Alert_Warning'));
                     }
                     else {
-                        ShowErrorAlert(import_err_str);
-
-                        /* Modal Position */
-                        var Import_Modal_Error_Only_Top = document.getElementById('modal_import_content').offsetTop;
-                        var Import_Modal_Error_Only_Left = document.getElementById('modal_import_content').offsetLeft;
-                        var Import_Modal_Error_Only_Height = document.getElementById('modal_import_content').height;
-                        var Import_Modal_Error_Only_Width = document.getElementById('modal_import_content').width;
-
-                        /* Alert Position (top) */
-                        var Import_Alert_Error_Only_Top = 0;
-                        if (screen.height >= 1080) {
-                            Import_Alert_Error_Only_Top = Import_Modal_Error_Only_Top + Import_Modal_Error_Only_Height + 50;
-                        }
-
-                        /* Set position of alert */
-                        $("#Alert_Error").css({ top: Import_Alert_Error_Only_Top, left: Import_Modal_Error_Only_Left, width: Import_Modal_Error_Only_Width });
+                        ShowErrorAlert(import_err_str, document.getElementById('modal_import_content'));
                     }
 
                     document.getElementById('btn_import_confirm').removeAttribute('disabled');
@@ -1534,41 +1363,11 @@ function initMap() {
             if (isCSV === false) { // File of input is not a .csv file
                 if (isFileSelected === false) { // And no file has been added
                     selectfile_err_string += "No file has been selected for import";
-                    ShowErrorAlert(selectfile_err_string);
-
-                    /* Modal Position */
-                    var Import_Modal_Select_Top = document.getElementById('modal_import_content').offsetTop;
-                    var Import_Modal_Select_Left = document.getElementById('modal_import_content').offsetLeft;
-                    var Import_Modal_Select_Height = document.getElementById('modal_import_content').height;
-                    var Import_Modal_Select_Width = document.getElementById('modal_import_content').width;
-
-                    /* Alert Position (top) */
-                    var Import_Alert_Error_Select_Top = 0;
-                    if (screen.height >= 1080) {
-                        Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
-                    }
-
-                    /* Set position of alert */
-                    $("#Alert_Error").css({ top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width });
+                    ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
                 }
                 else {
                     selectfile_err_string += "The file is not a .csv file";
-                    ShowErrorAlert(selectfile_err_string);
-
-                    /* Modal Position */
-                    var Import_Modal_Select_Top = document.getElementById('modal_import_content').offsetTop;
-                    var Import_Modal_Select_Left = document.getElementById('modal_import_content').offsetLeft;
-                    var Import_Modal_Select_Height = document.getElementById('modal_import_content').height;
-                    var Import_Modal_Select_Width = document.getElementById('modal_import_content').width;
-
-                    /* Alert Position (top) */
-                    var Import_Alert_Error_Select_Top = 0;
-                    if (screen.height >= 1080) {
-                        Import_Alert_Error_Select_Top = Import_Modal_Select_Top + Import_Modal_Select_Height + 50;
-                    }
-
-                    /* Set position of alert */
-                    $("#Alert_Error").css({ top: Import_Alert_Error_Select_Top, left: Import_Modal_Select_Left, width: Import_Modal_Select_Width });
+                    ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
                 }
             }
 
