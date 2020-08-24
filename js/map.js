@@ -738,6 +738,117 @@ function initMap() {
         }
     }
 
+    /* By location */
+    document.getElementById('Filter_Clear').addEventListener("click", () => {
+        document.getElementById('Filter_minDate').value = "";
+        document.getElementById('Filter_maxDate').value = "";
+        document.getElementById('Filter_minTime').value = "";
+        document.getElementById('Filter_maxTime').value = "";
+        document.getElementById('Filter_Crime_Type').value = "[ALL]";
+        document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
+        document.getElementById('Filter_Crime_Type_sub').value = "[ALL]";
+        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
+        document.getElementById('Filter_Location').setAttribute('disabled', true);
+    });
+
+    var filter_marker_hold = [];
+    var UK_center = new google.maps.LatLng(52.636879, -1.139759);
+
+    var filter_marker = new google.maps.Marker({
+        position: UK_center,
+        map: null
+    });
+    filter_marker_hold.push(filter_marker);
+
+    $('#modal_filter').on('shown.bs.modal', function () {
+        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
+        document.getElementById('Filter_Location').setAttribute('disabled', true);
+
+        var FilterMapOptions = {
+            center: UK_center,
+            zoom: 6,
+            disableDefaultUI: true, // Remove all controls but street view
+            streetViewControl: true,
+        };
+
+        var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions); // Show smaller map
+
+        var marker_placed = false;
+
+        google.maps.event.addListener(filter_map, 'click', function (event) {
+            if (marker_placed == false) {
+                var filter_marker = new google.maps.Marker({
+                    position: event.latLng,
+                    map: filter_map
+                });
+                filter_marker_hold[0] = filter_marker;
+
+                marker_placed = true;
+                document.getElementById('Filter_Location').removeAttribute('disabled');
+            }
+            else {
+                filter_marker_hold[0].setPosition(event.latLng);
+            }
+        });
+
+        var circle_placed = false;
+        var circle_hidden = false;
+        var circle_hold = [];
+        var distance_val;
+
+        document.getElementById('Filter_Location').addEventListener("change", (event) => {
+            distance_val = event.target.value;
+
+            if (distance_val == "[ALL]") {
+                document.getElementById('Filter_Location').setAttribute('disabled', true);
+                if (circle_placed == true) {
+                    circle_hold[0].setMap(null);
+                    circle_hidden = true;
+                }
+                if (marker_placed == true) {
+                    filter_marker_hold[0].setMap(null);
+                    marker_placed = false;
+                }
+            }
+            else {
+                if (circle_hidden == true) {
+                    circle_hold[0].setMap(filter_map);
+                }
+
+                var f_marker = filter_marker_hold[0];
+
+                if (circle_placed == false) {
+                    var circle = new google.maps.Circle({
+                        map: filter_map,
+                        radius: 1,    // 10 miles in metres
+                        fillColor: '#AA0000'
+                    });
+
+                    circle_hold.push(circle);
+                    circle_placed = true;
+                }
+
+                circle_hold[0].bindTo('center', f_marker, 'position');
+                circle_hold[0].setRadius(distance_val * 1609); // Convert miles to metres
+            }
+
+
+        });
+
+        document.getElementById('btn_filter_confirm').addEventListener("click", () => {
+            ShowLoading();
+
+            var f_marker = filter_marker_hold[0];
+            var center_lat = f_marker.getPosition().lat();
+            var center_lng = f_marker.getPosition().lng();
+            var center_loc = new google.maps.LatLng(center_lat, center_lng);
+
+            FilterMarkers(center_loc, distance_val);
+            HideLoading();
+        });
+
+    });
+
     /*
     |-----------------------------------------------------------------------------------------------------------
     | Custom right click context menu
@@ -917,124 +1028,6 @@ function initMap() {
         }
 
     });
-
-    /*
-    |-----------------------------------------------------------------------------------------------------------
-    | Filtering crimes by location
-    |-----------------------------------------------------------------------------------------------------------
-    */
-
-    // TODO Move this to the other module for filtering crimes
-
-    document.getElementById('Filter_Clear').addEventListener("click", () => {
-        document.getElementById('Filter_minDate').value = "";
-        document.getElementById('Filter_maxDate').value = "";
-        document.getElementById('Filter_minTime').value = "";
-        document.getElementById('Filter_maxTime').value = "";
-        document.getElementById('Filter_Crime_Type').value = "[ALL]";
-        document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
-        document.getElementById('Filter_Crime_Type_sub').value = "[ALL]";
-        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
-        document.getElementById('Filter_Location').setAttribute('disabled', true);
-    });
-
-    var filter_marker_hold = [];
-    var UK_center = new google.maps.LatLng(52.636879, -1.139759);
-
-    var filter_marker = new google.maps.Marker({
-        position: UK_center,
-        map: null
-    });
-    filter_marker_hold.push(filter_marker);
-
-    $('#modal_filter').on('shown.bs.modal', function () {
-        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
-        document.getElementById('Filter_Location').setAttribute('disabled', true);
-
-        var FilterMapOptions = {
-            center: UK_center,
-            zoom: 6,
-            disableDefaultUI: true, // Remove all controls but street view
-            streetViewControl: true,
-        };
-
-        var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions); // Show smaller map
-
-        var marker_placed = false;
-
-        google.maps.event.addListener(filter_map, 'click', function (event) {
-            if (marker_placed == false) {
-                var filter_marker = new google.maps.Marker({
-                    position: event.latLng,
-                    map: filter_map
-                });
-                filter_marker_hold[0] = filter_marker;
-
-                marker_placed = true;
-                document.getElementById('Filter_Location').removeAttribute('disabled');
-            }
-            else {
-                filter_marker_hold[0].setPosition(event.latLng);
-            }
-        });
-
-        var circle_placed = false;
-        var circle_hidden = false;
-        var circle_hold = [];
-        var distance_val;
-
-        document.getElementById('Filter_Location').addEventListener("change", (event) => {
-            distance_val = event.target.value;
-
-            if (distance_val == "[ALL]") {
-                document.getElementById('Filter_Location').setAttribute('disabled', true);
-                if (circle_placed == true) {
-                    circle_hold[0].setMap(null);
-                    circle_hidden = true;
-                }
-                if (marker_placed == true) {
-                    filter_marker_hold[0].setMap(null);
-                    marker_placed = false;
-                }
-            }
-            else {
-                if (circle_hidden == true) {
-                    circle_hold[0].setMap(filter_map);
-                }
-
-                var f_marker = filter_marker_hold[0];
-
-                if (circle_placed == false) {
-                    var circle = new google.maps.Circle({
-                        map: filter_map,
-                        radius: 1,    // 10 miles in metres
-                        fillColor: '#AA0000'
-                    });
-
-                    circle_hold.push(circle);
-                    circle_placed = true;
-                }
-
-                circle_hold[0].bindTo('center', f_marker, 'position');
-                circle_hold[0].setRadius(distance_val * 1609); // Convert miles to metres
-            }
-
-
-        });
-
-        document.getElementById('btn_filter_confirm').addEventListener("click", () => {
-            ShowLoading();
-
-            var f_marker = filter_marker_hold[0];
-            var center_lat = f_marker.getPosition().lat();
-            var center_lng = f_marker.getPosition().lng();
-            var center_loc = new google.maps.LatLng(center_lat, center_lng);
-
-            FilterMarkers(center_loc, distance_val);
-            HideLoading();
-        });
-
-    })
 
     /*
     |-----------------------------------------------------------------------------------------------------------
