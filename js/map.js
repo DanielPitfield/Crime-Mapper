@@ -1,4 +1,23 @@
-var MarkerArray = [];
+var MarkerArray = []; // Local array of marker objects
+
+function convert_crimeTime(crimeTime) {
+    if (crimeTime.length == 8) {
+        return crimeTime.substring(0, crimeTime.length - 3);
+    }
+    else {
+        return crimeTime;
+    }
+}
+
+function convert_crimeDate(crimeDate) {
+    return moment(crimeDate).format("DD-MM-YYYY");
+}
+
+/*
+|-----------------------------------------------------------------------------------------------------------
+| Adding a marker to the map
+|-----------------------------------------------------------------------------------------------------------
+*/
 
 function placeMarker(marker, position, map) {
     const googleMapsMarker = new google.maps.Marker({
@@ -18,18 +37,11 @@ function placeMarker(marker, position, map) {
             }
         }
 
-        var MarkerDate_display = moment(googleMapsMarker.crimeDate).format("DD-MM-YYYY"); // Convert to UK format
-
-        var MarkerTime_display = googleMapsMarker.crimeTime;
-        if (MarkerTime_display.length == 8) { // If time is retrieved form database which includes seconds
-            MarkerTime_display = MarkerTime_display.substring(0, MarkerTime_display.length - 3); // Remove the seconds for display purposes
-        }
-
         /* Make a new InfoWindow */
         googleMapsMarker.info = new google.maps.InfoWindow({
             content: '<div id="iw-container">' + '<div class="iw-content">' +
-                '<b>id: </b>' + googleMapsMarker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + googleMapsMarker.crimeType + '<br> <b>Date: </b>' + MarkerDate_display +
-                '<br><b>Time: </b>' + MarkerTime_display + '<br></br>' + '<i style="word-wrap: break-word;">' + googleMapsMarker.description + '</i>' +
+                '<b>id: </b>' + googleMapsMarker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + googleMapsMarker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(googleMapsMarker.crimeDate) +
+                '<br><b>Time: </b>' + convert_crimeTime(googleMapsMarker.crimeTime) + '<br></br>' + '<i style="word-wrap: break-word;">' + googleMapsMarker.description + '</i>' +
                 '<br></br> <button type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker(' + googleMapsMarker.id + ')>Edit</button>' +
                 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker(' + googleMapsMarker.id + ')>Delete</button>' + '</div>' + '</div>',
             minWidth: 200,
@@ -42,6 +54,12 @@ function placeMarker(marker, position, map) {
 
     });
 }
+
+/*
+|-----------------------------------------------------------------------------------------------------------
+| UI Functionality
+|-----------------------------------------------------------------------------------------------------------
+*/
 
 var ErrorAlertOpen = false;
 function ShowErrorAlert(message) {
@@ -61,6 +79,7 @@ function HideErrorAlert() {
     ErrorAlertOpen = false;
 }
 
+/* Change to use class and querySelectorAll */
 document.getElementById('close_alert_error').addEventListener("click", () => {
     HideErrorAlert();
 });
@@ -136,63 +155,65 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
     HideProgressAlert();
 });
 
+/*
+|-----------------------------------------------------------------------------------------------------------
+| Editing a marker
+|-----------------------------------------------------------------------------------------------------------
+*/
+
 function UpdateMarkerInfo(marker) {
     marker.title = marker.crimeType; // Shown on hover
 
-    var MarkerDate_update = moment(marker.crimeDate).format("DD-MM-YYYY"); // Convert to UK format
-
-    var MarkerTime_update = marker.crimeTime;
-    if (MarkerTime_update.length == 8) { // If time is retrieved form database which includes seconds
-        MarkerTime_update = MarkerTime_update.substring(0, MarkerTime_update.length - 3); // Remove the seconds for display purposes
-    }
-
     marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' +
-        '<b>id: </b>' + marker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.crimeType + '<br> <b>Date: </b>' + MarkerDate_update +
-        '<br><b>Time: </b>' + MarkerTime_update + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.description + '</i>' +
+        '<b>id: </b>' + marker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(marker.crimeDate) +
+        '<br><b>Time: </b>' + convert_crimeTime(marker.crimeTime) + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.description + '</i>' +
         '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker(' + marker.id + ')>Edit</button>' +
         '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker(' + marker.id + ')>Delete</button>' + '</div>' + '</div>');
 }
 
-function EditMarker(id) {
-    const MarkerToEdit = MarkerArray.find(marker => marker.id === id);
+function LoadCurrentValues(marker) {
+    // Find which main category of crime that marker.crimeTime belongs to
+    const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
 
-    MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
+    if (foundMappingEdit) { // Selected crime type from dropdowns
+        // Enable dropdown fields
+        document.getElementById('Edit_Crime_Type').removeAttribute('disabled');
+        document.getElementById('Edit_Crime_Type_sub').removeAttribute('disabled');
 
-    var modal = $('#modal_edit');
-
-    document.getElementById('Edit_Crime_Type').removeAttribute('disabled');
-    document.getElementById('Edit_Crime_Type_sub').removeAttribute('disabled');
-
-    const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(MarkerToEdit.crimeType));
-
-    if (foundMappingEdit) {
+        // Set main category of crime dropdown to found value
         document.getElementById('Edit_Crime_Type').value = foundMappingEdit.value;
+        // Invoke event so that the dropdown for the subcategory updates (updates when value is changed not just when set)
         var event = new Event('change');
         document.getElementById('Edit_Crime_Type').dispatchEvent(event);
     }
-    else { // Imported crime type  
+    else { // Imported crime type
         document.getElementById('Edit_Crime_Type').value = 'Other';
+        // Add option which hasn't been added as a default option for the 'Other' category
+        AddOptions(edit_sub_select, [MarkerToEdit.crimeType]);
 
-        var opt = MarkerToEdit.crimeType;
-        var el = document.createElement("option");
-        el.textContent = opt;
-        el.value = opt;
-        var edit_sub_select = document.getElementById("Edit_Crime_Type_sub");
-        edit_sub_select.appendChild(el);
-
+        // Disable both dropdown fields to prevent the imported type being lost
         document.getElementById('Edit_Crime_Type').setAttribute('disabled', true);
         document.getElementById('Edit_Crime_Type_sub').setAttribute('disabled', true);
     }
 
-    document.getElementById('Edit_Crime_Type_sub').value = MarkerToEdit.crimeType;
-    modal.find('#Edit_Date').val(MarkerToEdit.crimeDate);
-    modal.find('#Edit_Time').val(MarkerToEdit.crimeTime.substring(0, 5));
-    modal.find('#Edit_Description').val(MarkerToEdit.description);
+    document.getElementById('Edit_Crime_Type_sub').value = marker.crimeType;
+    document.getElementById('Edit_Date').value = marker.crimeDate;
+    document.getElementById('Edit_Time').value = convert_crimeTime(marker.crimeTime);
+    document.getElementById('Edit_Description').value = marker.description;
+}
 
-    /* Showing and setting up edit modal */
+function EditMarker(id) {
+    const MarkerToEdit = MarkerArray.find(marker => marker.id === id); // Find marker to edit by ID
+    MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
+    var modal = $('#modal_edit');
 
+    // Determine and display the current values for the marker
+    LoadCurrentValues(MarkerToEdit);
+
+    // Now show the modal with this information
     modal.modal('show');
 
+    // Set up smaller map in 'Edit Crime' window
     var EditMapOptions = {
         center: MarkerToEdit.position,
         zoom: 15,
@@ -200,7 +221,7 @@ function EditMarker(id) {
         streetViewControl: true,
     };
 
-    var edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions); // Show smaller map
+    var edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions);
 
     var Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
         position: MarkerToEdit.position,
@@ -220,20 +241,15 @@ function EditMarker(id) {
         Edit_SmallMarkerMoved = true;
     });
 
-    /* Edit modal confirmation */
-
+    // Edit modal confirmation
     document.getElementById('edit_submit_form').addEventListener("submit", function (e) {
         e.preventDefault();
 
-        var edit_err_string = "";
-        var description_edit = document.getElementById("Edit_Description").value;
+        const description_edit = document.getElementById("Edit_Description").value;
+        const validDescription = description_edit.length <= 500;
 
-        if (description_edit.length > 500) {
-            edit_err_string += "The 'description' field can only be a maximum of 500 characters<br>";
-        }
-
-        if (description_edit.length <= 500) {
-            /* Also send to database */
+        if (validDescription) {
+            // Also send to database
             var formData = $('#edit_submit_form').serialize();
 
             var Vars = { id: id, Latitude: Latitude, Longitude: Longitude };
@@ -250,13 +266,13 @@ function EditMarker(id) {
                 success: function (result) {
                     var dropdown = document.getElementById("Edit_Crime_Type_sub");
 
-                    /* Update values locally (the marker's properties) */
+                    // Update values locally (the marker's properties)
                     MarkerToEdit.crimeDate = document.getElementById("Edit_Date").value;
                     MarkerToEdit.crimeTime = document.getElementById("Edit_Time").value;
                     MarkerToEdit.crimeType = dropdown.options[dropdown.selectedIndex].value;
                     MarkerToEdit.description = document.getElementById("Edit_Description").value;
 
-                    if (Edit_SmallMarkerMoved == true) {
+                    if (Edit_SmallMarkerMoved == true) { // If adjustment made on smaller map
                         MarkerToEdit.position = SecondLocation;
                         Edit_SmallMarkerMoved = false;
                     }
@@ -264,7 +280,7 @@ function EditMarker(id) {
                     MarkerToEdit.setPosition(MarkerToEdit.position);
                     UpdateMarkerInfo(MarkerToEdit);
                     HideLoading();
-                   $('#modal_edit').modal('hide');
+                    $('#modal_edit').modal('hide');
 
                     if (ErrorAlertOpen == true) {
                         HideErrorAlert();
@@ -275,7 +291,10 @@ function EditMarker(id) {
             });
         }
         else {
+            const edit_err_string = "The 'Description' field can only be a maximum of 500 characters<br>";
             ShowErrorAlert(edit_err_string);
+
+            // TODO Create function for positioning the various modals/alerts
 
             /* Modal Position */
             var Edit_Modal_Top = document.getElementById('modal_edit_content').offsetTop;
@@ -297,16 +316,23 @@ function EditMarker(id) {
 
 }
 
-/* Delete single marker */
+/*
+|-----------------------------------------------------------------------------------------------------------
+| Deleting a single marker
+|-----------------------------------------------------------------------------------------------------------
+*/
+
 function DeleteMarker(id) {
     ShowLoading();
 
     const MarkerToDelete = MarkerArray.find(marker => marker.id === id);
     const MarkerToDelete_index = MarkerArray.findIndex(marker => marker.id === id);
 
-    if (typeof (MarkerToDelete.info) !== "undefined") {
-        if (MarkerToDelete.info.getMap() != null) { // And it is open
-            MarkerToDelete.info.close(); // Close it
+    if (MarkerToDelete) { // Object found
+        if (typeof (MarkerToDelete.info) !== "undefined") {
+            if (MarkerToDelete.info.getMap() != null) {
+                MarkerToDelete.info.close();
+            }
         }
     }
 
@@ -318,20 +344,29 @@ function DeleteMarker(id) {
         data: { MarkerID: MarkerID },
         success: function (data) {
             MarkerToDelete.setVisible(false); // View
-            if (MarkerToDelete_index !== -1) MarkerArray.splice(MarkerToDelete_index, 1); // Array
+            if (MarkerToDelete_index) {
+                if (MarkerToDelete_index !== -1) { // Index found
+                    MarkerArray.splice(MarkerToDelete_index, 1); // Array
+                }
+
+            }
         }
     });
 
     HideLoading();
-
 }
 
-/* Delete multiple marker */
+/*
+|-----------------------------------------------------------------------------------------------------------
+| Deleting multiple markers
+|-----------------------------------------------------------------------------------------------------------
+*/
+
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
     if ($('#progress_delete').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
-        $("#progress_delete").attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+        document.getElementById('progress_delete').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
     }
-    $("#progress_delete").css("width", "0%");
+    document.getElementById('progress_delete').style.width = "0%";
 
     const visibleMarkers = MarkerArray.filter(marker => marker.getVisible()); // Array of visible markers
     const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of ids for these visible markers
@@ -339,7 +374,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
     var num_markers = visibleMarkers_IDs.length;
     var within_marker_capacity = num_markers > 0 && num_markers < 50000;
 
-    if (within_marker_capacity) { // If markers to delete
+    if (within_marker_capacity) { // If manageable amount of markers to delete
         $('#modal_filter').modal('hide');
         ShowProgressAlert();
 
@@ -457,11 +492,11 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                     delete_data_hold = delete_percentage;
 
                     if (Delete_FinishCheckCounter < delete_counter_value) {
-                        if (Delete_TimeoutCounter < 5 && delete_percentage > 90) {
-                            //console.log("Progress from previous file")
-                        }
-                        else {
-                            $("#progress_delete").css("width", Math.round(delete_percentage) + "%").text("Delete (" + Math.round(delete_percentage) + "%)");
+                        const progressPrevious = Delete_TimeoutCounter < 5 && delete_percentage > 90;
+                        if (!progressPrevious) {
+                            const progress_delete = document.getElementById('progress_delete');
+                            progress_delete.style.width = Math.round(delete_percentage) + "%";
+                            progress_delete.innerHTML = "Delete (" + Math.round(delete_percentage) + "%)";
                         }
                     }
 
@@ -473,6 +508,12 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 
 });
 
+/*
+|-----------------------------------------------------------------------------------------------------------
+| Google Map Setup
+|-----------------------------------------------------------------------------------------------------------
+*/
+
 function initMap() {
     var ContextMenu = null;
     var menuDisplayed = false;
@@ -482,15 +523,36 @@ function initMap() {
     var initial_location = { lat: 51.454266, lng: -0.978130 };
     var map = new google.maps.Map(document.getElementById("map"), { zoom: 8, center: initial_location });
 
-    // Create a text input and link it to search bar element
-    var input = document.getElementById('pac-input');
-    var searchBox = new google.maps.places.SearchBox(input);
-
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Retrieving and placing database markers
+    | Location Search Bar Implementation
     |-----------------------------------------------------------------------------------------------------------
     */
+
+    var input = document.getElementById('pac-input'); // Create a text input
+    var searchBox = new google.maps.places.SearchBox(input); // Link it to search bar element
+
+    searchBox.addListener('places_changed', function () { // Selecting a prediction from the list
+        var places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
+
+        if (places.length == 0) {
+            return;
+        }
+
+        var bounds = new google.maps.LatLngBounds();
+        places.forEach(function (place) {
+            if (!place.geometry) {
+                return;
+            }
+
+            if (place.geometry.viewport) {
+                bounds.union(place.geometry.viewport); // Only geocodes have viewport.
+            } else {
+                bounds.extend(place.geometry.location);
+            }
+        });
+        map.fitBounds(bounds); // Move map to place location
+    });
 
     function LoadMarkers() {
         markers.forEach(marker =>
@@ -500,7 +562,7 @@ function initMap() {
     }
 
     LoadMarkers();
-    HideLoading();
+    HideLoading(); // Matching HideLoading() for ShowLoading() in setup.js
 
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -508,6 +570,7 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
+    /* Setup */
     var clusterStyles = [
         {
             textColor: 'white',
@@ -540,6 +603,27 @@ function initMap() {
 
     google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading);
     google.maps.event.addListener(markerCluster, 'clusteringend', HideLoading);
+
+    /* Invocation */
+    var Cluster_Active = false; // Clusterer flagged as off to begin with
+    const btn_analyse = document.getElementById("btn_analyse");
+    btn_analyse.addEventListener('click', event => {
+        hideContextMenu();
+        ShowLoading();
+
+        if (Cluster_Active == true) { // If already active and 'Analyse Crime' button was pressed
+            markerCluster.setMap(null); // Turn off clustering
+            Cluster_Active = false;
+        }
+        else { // Turn on clustering
+            markerCluster.addMarkers(MarkerArray); // Update markers to cluster
+            markerCluster.setMap(map);
+            markerCluster.repaint(); // Redraw and show clusterer
+            Cluster_Active = true;
+        }
+
+        HideLoading();
+    });
 
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -799,7 +883,7 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | 'Add crime' input window
+    | Adding a crime/marker
     |-----------------------------------------------------------------------------------------------------------
     */
 
@@ -846,7 +930,7 @@ function initMap() {
             SmallMarkerMoved = true;
         });
 
-        // 3D View (adding markers in street view)
+        // TODO Implement 3D View (adding markers in street view)
     });
 
     document.getElementById('add_submit_form').addEventListener("submit", function (e) {
@@ -855,7 +939,7 @@ function initMap() {
         var dropdown = document.getElementById("Add_Crime_Type");
         var sub_dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
 
-        /* Take values locally */
+        // Take values locally
         var crimeDate = document.getElementById("Add_Date").value;
         var crimeTime = document.getElementById("Add_Time").value;
         var crimeType = sub_dropdown.options[sub_dropdown.selectedIndex].value;
@@ -952,15 +1036,15 @@ function initMap() {
     */
 
     document.getElementById('Filter_Clear').addEventListener("click", () => {
-       document.getElementById('Filter_minDate').value = "";
-       document.getElementById('Filter_maxDate').value = "";
-       document.getElementById('Filter_minTime').value = "";
-       document.getElementById('Filter_maxTime').value = "";
-       document.getElementById('Filter_Crime_Type').value = "[ALL]";
-       document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
-       document.getElementById('Filter_Crime_Type_sub').value = "[ALL]";
-       document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
-       document.getElementById('Filter_Location').setAttribute('disabled', true);
+        document.getElementById('Filter_minDate').value = "";
+        document.getElementById('Filter_maxDate').value = "";
+        document.getElementById('Filter_minTime').value = "";
+        document.getElementById('Filter_maxTime').value = "";
+        document.getElementById('Filter_Crime_Type').value = "[ALL]";
+        document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
+        document.getElementById('Filter_Crime_Type_sub').value = "[ALL]";
+        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
+        document.getElementById('Filter_Location').setAttribute('disabled', true);
     });
 
     var filter_marker_hold = [];
@@ -1063,32 +1147,6 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | 'Analyse' - Crime Analysis Techniques
-    |-----------------------------------------------------------------------------------------------------------
-    */
-
-    var Cluster_Active = false; // Clusterer initialised as unactive
-    const btn_analyse = document.getElementById("btn_analyse"); // 'Analyse' button
-    btn_analyse.addEventListener('click', event => {
-        hideContextMenu();
-        ShowLoading();
-
-        if (Cluster_Active == true) { // If active and button was pressed
-            markerCluster.setMap(null); // Hide clusterer
-            Cluster_Active = false; // Alternate variable
-        }
-        else {
-            markerCluster.addMarkers(MarkerArray); // Update markers to cluster
-            markerCluster.setMap(map);
-            markerCluster.repaint(); // Redraw and show clusterer
-            Cluster_Active = true;
-        }
-
-        HideLoading();
-    });
-
-    /*
-    |-----------------------------------------------------------------------------------------------------------
     | Importing crimes
     |-----------------------------------------------------------------------------------------------------------
     */
@@ -1097,12 +1155,12 @@ function initMap() {
         if ($('#progress_file_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) { // If class was to changed to class used for showing errors
             document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change it back to default
         }
-        $("#progress_file_upload").css("width", "0%");
+        document.getElementById('progress_file_upload').style.width = "0%";
 
         if ($('#progress_insert_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
             document.getElementById('progress_insert_upload').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
         }
-        $("#progress_insert_upload").css("width", "0%");
+        document.getElementById('progress_insert_upload').style.width = "0%";
     });
 
     var isFileSelected = false;
@@ -1156,7 +1214,7 @@ function initMap() {
                 var Latitude_index = -1;
                 var Longitude_index = -1;
                 var CrimeType_index = -1;
-                var description_index = -1;
+                var Description_index = -1;
                 var Time_index = -1;
 
                 var Accepted_Date_headers = ["Date", "date", "Month", "month"];
@@ -1188,7 +1246,7 @@ function initMap() {
                         CrimeType_index = i;
                     }
                     if (Accepted_description_headers.indexOf(headers[i]) !== -1) {
-                        description_index = i;
+                        Description_index = i;
                     }
                     if (Accepted_Time_headers.indexOf(headers[i]) !== -1) {
                         Time_index = i;
@@ -1219,8 +1277,8 @@ function initMap() {
                     import_warning_str += "Missing 'Crime Type' column in file (the crime type 'Unknown' will be used)<br>";
                     FileWarning = true;
                 }
-                if (description_index === -1) {
-                    import_warning_str += "Missing 'description' column in file (no description will be used)<br>";
+                if (Description_index === -1) {
+                    import_warning_str += "Missing 'Description' column in file (no description will be used)<br>";
                     FileWarning = true;
                 }
                 if (Time_index === -1) {
@@ -1265,7 +1323,9 @@ function initMap() {
                         $("#Alert_Warning").css({ top: Import_Alert_Warning_Only_Top, left: Import_Modal_Warning_Only_Left, width: Import_Modal_Warning_Only_Width });
                     }
 
-                    $("#progress_file_upload").css("width", "100%").text("Ready");
+                    var progress_file_upload = document.getElementById('progress_file_upload');
+                    progress_file_upload.style.width = "100%";
+                    progress_file_upload.innerHTML = "Ready";
                     formdata = new FormData();
                     formdata.append("fileToUpload", file);
 
@@ -1277,11 +1337,14 @@ function initMap() {
                                 if (evt.lengthComputable) {
                                     var percentComplete = evt.loaded / evt.total;
                                     var upload_percentage = percentComplete * 100;
+                                    var progress_file_upload = document.getElementById('progress_file_upload');
                                     if (upload_percentage = 100) {
-                                        $("#progress_file_upload").css("width", "100%").text("File Upload (Processing)");
+                                        progress_file_upload.style.width = "100%";
+                                        progress_file_upload.innerHTML = "File Upload (Processing)";
                                     }
                                     else {
-                                        $("#progress_file_upload").css("width", Math.round(upload_percentage) + "%").text("File Upload (" + upload_percentage + "%)");
+                                        progress_file_upload.style.width = Math.round(upload_percentage) + "%";
+                                        progress_file_upload.innerHTML = "File Upload (" + upload_percentage + "%)";
                                     }
 
                                 }
@@ -1295,15 +1358,18 @@ function initMap() {
                         processData: false,
                         contentType: false,
                         success: function () {
-                            $("#progress_file_upload").css("width", "100%").text("File Upload (Complete)");
+                            progress_file_upload.style.width = "100%";
+                            progress_file_upload.innerHTML = "File Upload (Complete)";
                         },
                         fail: function () {
                             document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                            $("#progress_file_upload").css("width", "100%").text("File Upload (Failed)");
+                            progress_file_upload.style.width = "100%";
+                            progress_file_upload.innerHTML = "File Upload (Failed)";
                         },
                         error: function () {
                             document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                            $("#progress_file_upload").css("width", "100%").text("File Upload (Error)");
+                            progress_file_upload.style.width = "100%";
+                            progress_file_upload.innerHTML = "File Upload (Error)";
                         }
                     });
 
@@ -1352,7 +1418,12 @@ function initMap() {
                                     clearInterval(t);
                                     // Show full width red progress bar
                                     document.getElementById('progress_insert_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                                    $("#progress_insert_upload").css("width", "100%").text("Import (Failed)");
+
+                                    const progress_insert_upload = docuemt.getElementById('progress_insert_upload');
+
+                                    progress_insert_upload.style.width = "100%";
+                                    progress_insert_upload.innerHTML = "Import (Failed)";
+
                                     Timed_Out = 1;
                                     document.getElementById('btn_import_confirm').removeAttribute('disabled');
                                     document.getElementById('close_import').removeAttribute('disabled');
@@ -1367,7 +1438,8 @@ function initMap() {
                                     }
 
                                     if (FinishCheckCounter == counter_value) {
-                                        $("#progress_insert_upload").css("width", "100%").text("Import (Complete)");
+                                        progress_insert_upload.style.width = "100%";
+                                        progress_insert_upload.innerHTML = "Import (Complete)";
                                     }
 
                                     if (FinishCheckCounter == (counter_value + 2)) {
@@ -1381,7 +1453,8 @@ function initMap() {
                                     if (FinishCheckCounter < counter_value) {
                                         var isPreviousProgress = (TimeoutCounter <= 7 && import_percentage > 90);
                                         if (!isPreviousProgress) {
-                                            $("#progress_insert_upload").css("width", Math.round(import_percentage) + "%").text("Import (" + Math.round(import_percentage) + "%)");
+                                            progress_insert_upload.style.width = Math.round(import_percentage) + "%";
+                                            progress_insert_upload.innerHTML = "Import (" + Math.round(import_percentage) + "%)";
                                         }
                                     }
                                 }
@@ -1502,34 +1575,5 @@ function initMap() {
             document.getElementById('btn_import_confirm').removeAttribute('disabled');
             document.getElementById('close_import').removeAttribute('disabled');
         }
-    });
-
-    /*
-    |-----------------------------------------------------------------------------------------------------------
-    | Search box implementation
-    |-----------------------------------------------------------------------------------------------------------
-    */
-
-    searchBox.addListener('places_changed', function () { // Selecting a prediction from the list
-        var places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
-
-        if (places.length == 0) {
-            return;
-        }
-
-        var bounds = new google.maps.LatLngBounds();
-        places.forEach(function (place) {
-            if (!place.geometry) {
-                return;
-            }
-
-            if (place.geometry.viewport) {
-                // Only geocodes have viewport.
-                bounds.union(place.geometry.viewport);
-            } else {
-                bounds.extend(place.geometry.location);
-            }
-        });
-        map.fitBounds(bounds); // Move map to place location
     });
 }

@@ -268,13 +268,13 @@ require 'dbConfig.php'; // Include the database configuration file
 	<script src="/resources/moment.js"></script> <!-- Moment.js library -->
 
 	<script>
-		var markers = [
+		var markers = [ // Query database (return currently stored markers)
 			<?php
-			$result = $db->query("SELECT * FROM markers"); // Returns output of statement
+			$result = $db->query("SELECT * FROM markers");
 			if ($result->num_rows > 0) {
-				while ($row = $result->fetch_assoc()) { // TODO: HTML Encoding 
+				while ($row = $result->fetch_assoc()) { // TODO: HTML Encoding
 					echo "{ id: {$row['ID']}, crimeType: '{$row['Crime_Type']}', crimeDate: '{$row['Crime_Date']}', crimeTime: '{$row['Crime_Time']}',
-						 description: '" . htmlspecialchars($row['Description']) . "', latitude: '{$row['Latitude']}', longitude: '{$row['Longitude']}'},";
+					description: '" . htmlspecialchars($row['Description']) . "', latitude: '{$row['Latitude']}', longitude: '{$row['Longitude']}'},";
 				}
 			}
 			?>
@@ -291,7 +291,6 @@ require 'dbConfig.php'; // Include the database configuration file
 	<script src="/js/map.js"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/markerclustererplus/2.1.4/markerclusterer.js"></script>
-
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_kjnrExSDqqcj7Wq3rpdwgt5JiG9sJec&libraries=geometry,places&callback=initMap" async defer></script> <!-- API Key, Libraries and map function -->
 
 </body>

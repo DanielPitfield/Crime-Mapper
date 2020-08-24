@@ -1,4 +1,3 @@
-
 const ua = window.navigator.userAgent;
 const isIE = /MSIE|Trident/.test(ua);
 
