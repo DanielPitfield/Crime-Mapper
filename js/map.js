@@ -586,24 +586,30 @@ function initMap() {
         // Main Crime Type
         var main_dropdown = document.getElementById("Filter_Crime_Type");
         var Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
-
+        // If field is empty or the all option is implicitly selected, set flag to true
         const AllCrimes = (Main_Crime_Type == null) || (Main_Crime_Type == "[ALL]");
 
         // Sub Crime Type
         var sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
         var Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
-
         const AllSubCrimes = (Sub_Crime_Type == null) || (Sub_Crime_Type == "[ALL]");
 
         // Date
         var min_Date = document.getElementById("Filter_minDate").value;
         var max_Date = document.getElementById("Filter_maxDate").value;
 
-        const both_Dates_Entered = min_Date.length > 0 && max_Date.length > 0;
+        const min_Date_Entered = min_Date.length > 0;
+        const max_Date_Entered = max_Date.length > 0;
+        const both_Dates_Entered = min_Date_Entered && max_Date_Entered;
 
-        min_Date = (min_Date.length > 0) ? new Date(min_Date) : new Date(0);
-        max_Date = (max_Date.length > 0) ? new Date(max_Date) : new Date();
+        if (min_Date_Entered) {
+            min_Date = new Date(min_Date);
+        }
 
+        if (max_Date_Entered) {
+            max_Date = new Date(max_Date);
+        }
+        
         if (both_Dates_Entered) {
             if (min_Date > max_Date) { // Validation
                 filter_err_string += "The 'Minimum Date' field can't be a date after the 'Maximum Date' field<br>";
@@ -617,12 +623,6 @@ function initMap() {
 
         const both_Times_Entered = min_Time.length > 0 && max_Time.length > 0;
         const single_Time_Entered = min_Time.length > 0 || max_Time.length > 0;
-
-        if (min_Time.length <= 0) {
-            min_Time = "00:00";
-        }
-
-        max_Time = (max_Time.length > 0) ? max_Time + ":00" : "23:59";
 
         if (both_Times_Entered) {
             if (min_Time > max_Time) {
@@ -662,6 +662,9 @@ function initMap() {
                     if(!AllSubCrimes) { // One specific crime
                         if (marker.crimeType != Sub_Crime_Type) {
                             return true; // Then this marker should be filtered and hidden
+                            // Return because regardless of the remaming properties, the full criteria has not been met
+                            // This therefore means the following checks are not made (they aren't required)
+                            // TODO Optimisation of filtering order
                         }
                     }
                     else { // A (main) category of crime
@@ -676,11 +679,24 @@ function initMap() {
                     }
                 }
 
-                // Filter by remaining properties
-                return new Date(marker.crimeDate) < min_Date || 
-                new Date(marker.crimeDate) > max_Date ||
-                marker.crimeTime < min_Time ||
-                marker.crimeTime > max_Time                
+                if(min_Date_Entered) {
+                    if(new Date(marker.crimeDate) < min_Date) {
+                        return true;
+                    }
+                }
+
+                if(max_Date_Entered) {
+                    if(new Date(marker.crimeDate) > max_Date) {
+                        return true;
+                    }
+                }
+
+                if(both_Times_Entered) {
+                    if(marker.crimeTime < min_Time || marker.crimeTime > max_Time) {
+                        return true;
+                    }
+                }
+
             });
 
             // Hide the markers identified
@@ -698,7 +714,6 @@ function initMap() {
     }
 
     /* By location */
-
     var filter_marker_hold = [];
     var UK_center = new google.maps.LatLng(52.636879, -1.139759);
 
