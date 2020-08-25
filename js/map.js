@@ -117,6 +117,18 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
     HideProgressAlert();
 });
 
+document.getElementById('Filter_Clear').addEventListener("click", () => {
+    document.querySelectorAll('#Filter_minDate', '#Filter_maxDate', '#Filter_minTime', '#Filter_maxTime')
+    .forEach(el => el.value = "");
+
+    document.querySelectorAll('#Filter_Crime_Type', '#Filter_Crime_Type_sub')
+    .forEach(el => el.value = "[ALL]");
+
+    document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
+    document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
+    document.getElementById('Filter_Location').setAttribute('disabled', true);
+});
+
 /*
 |-----------------------------------------------------------------------------------------------------------
 | Editing a marker
@@ -496,7 +508,7 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    /* Setup */
+    // Setup
     var clusterStyles = [
         {
             textColor: 'white',
@@ -530,7 +542,7 @@ function initMap() {
     google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading);
     google.maps.event.addListener(markerCluster, 'clusteringend', HideLoading);
 
-    /* Invocation */
+    // Invocation
     var Cluster_Active = false; // Clusterer flagged as off to begin with
     const btn_analyse = document.getElementById("btn_analyse");
     btn_analyse.addEventListener('click', event => {
@@ -561,109 +573,71 @@ function initMap() {
     // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
 
     function FilterMarkers(center_loc, distance) {
-        var AllMainSelected = false;
-        var AllSubSelected = false;
-        var isMinDate = true;
-        var isMaxDate = true;
-        var isMinTime = true;
-        var isMaxTime = true;
         var invalidInput = false;
-
         var filter_err_string = "";
 
-        /* -------- Getting input values -------- */
-
-        /* -------- Distance/Location -------- */
+        // Distance / Location
         var AllDistanceSelected = false;
         if (distance == null || distance == "[ALL]") {
             distance = "[ALL]";
             var AllDistanceSelected = true;
         }
 
-        /* ---- Main Crime Type ---- */
+        // Main Crime Type
         var main_dropdown = document.getElementById("Filter_Crime_Type");
-        var main_dropdown_value = main_dropdown.options[main_dropdown.selectedIndex].value;
+        var Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
 
-        if ((main_dropdown_value == null) || (main_dropdown_value == "[ALL]")) {
-            AllMainSelected = true;
-        }
-        else {
-            var Main_Crime_Type = main_dropdown_value;
-        }
+        const AllCrimes = (Main_Crime_Type == null) || (Main_Crime_Type == "[ALL]");
 
-        /* ---- Sub Crime Type ---- */
+        // Sub Crime Type
         var sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
-        var sub_dropdown_value = sub_dropdown.options[sub_dropdown.selectedIndex].value;
+        var Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
 
-        if ((sub_dropdown_value == null) || (sub_dropdown_value == "[ALL]")) {
-            AllSubSelected = true;
-        }
-        else {
-            var Sub_Crime_Type = sub_dropdown_value;
-        }
+        const AllSubCrimes = (Sub_Crime_Type == null) || (Sub_Crime_Type == "[ALL]");
 
-        /* ---- Date ---- */
-        var Minimum_Date_Entered = false;
-        var Maximum_Date_Entered = false;
-
+        // Date
         var min_Date = document.getElementById("Filter_minDate").value;
         var max_Date = document.getElementById("Filter_maxDate").value;
 
-        if (min_Date != "") {
-            min_Date = new Date(min_Date);
-            Minimum_Date_Entered = true;
-        }
+        const both_Dates_Entered = min_Date.length > 0 && max_Date.length > 0;
 
-        if (max_Date != "") {
-            max_Date = new Date(max_Date);
-            Maximum_Date_Entered = true;
-        }
-
-        /* ---- Time ---- */
-        var Minimum_Time_Entered = false;
-        var Maximum_Time_Entered = false;
-
-        var min_Time = document.getElementById("Filter_minTime").value;
-        var max_Time = document.getElementById("Filter_maxTime").value;
-
-        if (min_Time != "") {
-            Minimum_Time_Entered = true;
-        }
-
-        if (max_Time != "") {
-            Maximum_Time_Entered = true;
-            // MarkerTime has seconds, not an issue for minTime but will hide on boundary of maxTime
-            max_Time = max_Time + ":00";
-        }
-
-        /* -------- Input validation -------- */
-        const both_Dates_Entered = Minimum_Date_Entered && Maximum_Date_Entered;
+        min_Date = (min_Date.length > 0) ? new Date(min_Date) : new Date(0);
+        max_Date = (max_Date.length > 0) ? new Date(max_Date) : new Date();
 
         if (both_Dates_Entered) {
-            if (min_Date > max_Date) {
+            if (min_Date > max_Date) { // Validation
                 filter_err_string += "The 'Minimum Date' field can't be a date after the 'Maximum Date' field<br>";
                 invalidInput = true;
             }
         }
 
-        const both_Times_Entered = Minimum_Time_Entered && Maximum_Time_Entered;
-        const Single_Time_Entered = Minimum_Time_Entered || Maximum_Time_Entered;
+        // Time
+        var min_Time = document.getElementById("Filter_minTime").value;
+        var max_Time = document.getElementById("Filter_maxTime").value;
 
-        if (!both_Times_Entered) {
-            if (Single_Time_Entered) {
+        const both_Times_Entered = min_Time.length > 0 && max_Time.length > 0;
+        const single_Time_Entered = min_Time.length > 0 || max_Time.length > 0;
+
+        if (min_Time.length <= 0) {
+            min_Time = "00:00";
+        }
+
+        max_Time = (max_Time.length > 0) ? max_Time + ":00" : "23:59";
+
+        if (both_Times_Entered) {
+            if (min_Time > max_Time) {
+                filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
+                invalidInput = true;
+            }
+        }
+        else {
+            if (single_Time_Entered) {
                 filter_err_string += "Both the 'Minimum Time' and 'Maximum Time' fields are required<br>";
                 invalidInput = true;
             }
-            else {
-                if (min_Time > max_Time) {
-                    filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
-                    invalidInput = true;
-                }
-            }
         }
 
-        /* -------- Showing/Hiding Markers -------- */
-
+        // Actual filtering
         function HideMarker(marker) {
             // InfoWindow
             if (typeof (marker.info) !== "undefined") {
@@ -675,84 +649,35 @@ function initMap() {
             marker.setVisible(false);
         }
 
-        /* ---- Remove any previous filters ---- */
-        if (invalidInput == false) {
-            for (i = 0; i < MarkerArray.length; i++) {
-                MarkerArray[i].setVisible(true);
+        if (!invalidInput) {
+            // Remove any previous filters
+            MarkerArray.forEach(marker => 
+                marker.setVisible(true)
+            );
 
-                var MarkerDate = new Date(MarkerArray[i].crimeDate); // Convert date
+            // Filter the markers which need to be hidden
+            const Filtered_MarkerArray = MarkerArray.filter(marker => 
+                new Date(marker.crimeDate) < min_Date || 
+                new Date(marker.crimeDate) > max_Date ||
+                marker.crimeTime < min_Time ||
+                marker.crimeTime > max_Time
+            );
 
-                var MarkerTime = MarkerArray[i].crimeTime;
+            // Hide the markers identified
+            Filtered_MarkerArray.forEach(marker =>
+                HideMarker(marker)
+            );
 
-                if (AllMainSelected == false) {
-                    if (AllSubSelected == false) { // One specific crime
-                        if (MarkerArray[i].crimeType != Sub_Crime_Type) {
-                            HideMarker(MarkerArray[i]);
-                        }
-                    }
-                    if (AllSubSelected == true) { // One main category of crime						
-                        const foundMappingFilter = crimeTypeMappings.find(x => Main_Crime_Type == x.value);
-                        if (foundMappingFilter) {
-                            if (foundMappingFilter.options.includes(MarkerArray[i].crimeType) === false) {
-                                HideMarker(MarkerArray[i]);
-                            }
-                        }
-                    }
-                }
-
-                if (Minimum_Date_Entered) { // If a minimum date was specified
-                    if (MarkerDate < min_Date) { // And the marker's date is before that date
-                        HideMarker(MarkerArray[i]);
-                    }
-                }
-
-                if (Maximum_Date_Entered) {
-                    if (MarkerDate > max_Date) {
-                        HideMarker(MarkerArray[i]);
-                    }
-                }
-
-                if (Minimum_Time_Entered) {
-                    if (MarkerTime < min_Time) {
-                        HideMarker(MarkerArray[i]);
-                    }
-                }
-
-                if (Maximum_Time_Entered) {
-                    if (MarkerTime > max_Time) {
-                        HideMarker(MarkerArray[i]);
-                    }
-                }
-
-                if (AllDistanceSelected == false) {
-                    var distanceInMiles = google.maps.geometry.spherical.computeDistanceBetween(center_loc, MarkerArray[i].getPosition());
-                    distanceInMiles = (distanceInMiles / 1609);
-                    if (distanceInMiles > distance) {
-                        HideMarker(MarkerArray[i]);
-                    }
-                }
-
-            }
             $('#modal_filter').modal('hide');
             HideErrorAlert();
         }
         else {
             ShowErrorAlert(filter_err_string, document.getElementById('modal_filter_content'));
         }
+
     }
 
     /* By location */
-    document.getElementById('Filter_Clear').addEventListener("click", () => {
-        document.getElementById('Filter_minDate').value = "";
-        document.getElementById('Filter_maxDate').value = "";
-        document.getElementById('Filter_minTime').value = "";
-        document.getElementById('Filter_maxTime').value = "";
-        document.getElementById('Filter_Crime_Type').value = "[ALL]";
-        document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
-        document.getElementById('Filter_Crime_Type_sub').value = "[ALL]";
-        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
-        document.getElementById('Filter_Location').setAttribute('disabled', true);
-    });
 
     var filter_marker_hold = [];
     var UK_center = new google.maps.LatLng(52.636879, -1.139759);
@@ -910,12 +835,12 @@ function initMap() {
     */
 
     $('#modal_add').on('shown.bs.modal', function () {
+        document.querySelectorAll('#Add_Crime_Type', '#Add_Crime_Type_sub', '#Add_Description')
+        .forEach(el => el.value = "");
+
         document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
         document.getElementById('Add_Time').value = "00:00";
-        document.getElementById('Add_Crime_Type').value = "";
         document.querySelectorAll('Add_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
-        document.getElementById('Add_Crime_Type_sub').value = "";
-        document.getElementById('Add_Description').value = "";
     });
 
     var SmallMarkerMoved = false;
