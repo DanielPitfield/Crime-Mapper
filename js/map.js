@@ -118,10 +118,10 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
 });
 
 document.getElementById('Filter_Clear').addEventListener("click", () => {
-    document.querySelectorAll('#Filter_minDate', '#Filter_maxDate', '#Filter_minTime', '#Filter_maxTime')
+    document.querySelectorAll('#Filter_minDate, #Filter_maxDate, #Filter_minTime, #Filter_maxTime')
     .forEach(el => el.value = "");
 
-    document.querySelectorAll('#Filter_Crime_Type', '#Filter_Crime_Type_sub')
+    document.querySelectorAll('#Filter_Crime_Type, #Filter_Crime_Type_sub')
     .forEach(el => el.value = "[ALL]");
 
     document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
@@ -656,12 +656,32 @@ function initMap() {
             );
 
             // Filter the markers which need to be hidden
-            const Filtered_MarkerArray = MarkerArray.filter(marker => 
-                new Date(marker.crimeDate) < min_Date || 
+            const Filtered_MarkerArray = MarkerArray.filter(marker => {
+                // Filter by crime type first
+                if(!AllCrimes) {
+                    if(!AllSubCrimes) { // One specific crime
+                        if (marker.crimeType != Sub_Crime_Type) {
+                            return true; // Then this marker should be filtered and hidden
+                        }
+                    }
+                    else { // A (main) category of crime
+                        // Find the array (of individual crimes) that corresponds to this main category
+                        const foundMappingFilter = crimeTypeMappings.find(x => Main_Crime_Type == x.value);
+                        if (foundMappingFilter) {
+                            // If the marker's crime type is not found within this array (the category)
+                            if (foundMappingFilter.options.includes(marker.crimeType) === false) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                // Filter by remaining properties
+                return new Date(marker.crimeDate) < min_Date || 
                 new Date(marker.crimeDate) > max_Date ||
                 marker.crimeTime < min_Time ||
-                marker.crimeTime > max_Time
-            );
+                marker.crimeTime > max_Time                
+            });
 
             // Hide the markers identified
             Filtered_MarkerArray.forEach(marker =>
