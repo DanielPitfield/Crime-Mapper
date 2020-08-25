@@ -557,18 +557,10 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
+    // TODO Filter by ID
+    // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
+
     function FilterMarkers(center_loc, distance) {
-        var filter_err_string = "";
-
-        if (distance == null) {
-            distance = "[ALL]";
-        }
-
-        var AllDistanceSelected = false;
-        if (distance == "[ALL]") {
-            AllDistanceSelected = true;
-        }
-
         var AllMainSelected = false;
         var AllSubSelected = false;
         var isMinDate = true;
@@ -577,7 +569,16 @@ function initMap() {
         var isMaxTime = true;
         var invalidInput = false;
 
+        var filter_err_string = "";
+
         /* -------- Getting input values -------- */
+
+        /* -------- Distance/Location -------- */
+        var AllDistanceSelected = false;
+        if (distance == null || distance == "[ALL]") {
+            distance = "[ALL]";
+            var AllDistanceSelected = true;
+        }
 
         /* ---- Main Crime Type ---- */
         var main_dropdown = document.getElementById("Filter_Crime_Type");
@@ -602,72 +603,76 @@ function initMap() {
         }
 
         /* ---- Date ---- */
-        if (document.getElementById("Filter_minDate").value == "") {
-            isMinDate = false;
-        }
-        else {
-            minDate = document.getElementById("Filter_minDate").value;
-            minDate = new Date(minDate);
+        var Minimum_Date_Entered = false;
+        var Maximum_Date_Entered = false;
+
+        var min_Date = document.getElementById("Filter_minDate").value;
+        var max_Date = document.getElementById("Filter_maxDate").value;
+
+        if (min_Date != "") {
+            min_Date = new Date(min_Date);
+            Minimum_Date_Entered = true;
         }
 
-        if (document.getElementById("Filter_maxDate").value == "") {
-            isMaxDate = false;
-        }
-        else {
-            maxDate = document.getElementById("Filter_maxDate").value;
-            maxDate = new Date(maxDate);
+        if (max_Date != "") {
+            max_Date = new Date(max_Date);
+            Maximum_Date_Entered = true;
         }
 
         /* ---- Time ---- */
-        if (document.getElementById("Filter_minTime").value == "") {
-            isMinTime = false;
-        }
-        else {
-            var minTime = document.getElementById("Filter_minTime").value;
+        var Minimum_Time_Entered = false;
+        var Maximum_Time_Entered = false;
+
+        var min_Time = document.getElementById("Filter_minTime").value;
+        var max_Time = document.getElementById("Filter_maxTime").value;
+
+        if (min_Time != "") {
+            Minimum_Time_Entered = true;
         }
 
-        if (document.getElementById("Filter_maxTime").value == "") {
-            isMaxTime = false;
+        if (max_Time != "") {
+            Maximum_Time_Entered = true;
+            // MarkerTime has seconds, not an issue for minTime but will hide on boundary of maxTime
+            max_Time = max_Time + ":00";
         }
-        else {
-            var maxTime = document.getElementById("Filter_maxTime").value;
-            maxTime = maxTime + ":00"; // MarkerTime has seconds, not an issue for minTime but will hide on boundary of maxTime
-        }
-
-        // TODO Filter by ID
-        // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
 
         /* -------- Input validation -------- */
+        const both_Dates_Entered = Minimum_Date_Entered && Maximum_Date_Entered;
 
-        if (isMinDate == true && isMaxDate == true) {
-            if (minDate > maxDate) {
+        if (both_Dates_Entered) {
+            if (min_Date > max_Date) {
                 filter_err_string += "The 'Minimum Date' field can't be a date after the 'Maximum Date' field<br>";
                 invalidInput = true;
             }
         }
 
-        if (isMinTime == true && isMaxTime == true) {
-            if (minTime > maxTime) {
-                filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
+        const both_Times_Entered = Minimum_Time_Entered && Maximum_Time_Entered;
+        const Single_Time_Entered = Minimum_Time_Entered || Maximum_Time_Entered;
+
+        if (!both_Times_Entered) {
+            if (Single_Time_Entered) {
+                filter_err_string += "Both the 'Minimum Time' and 'Maximum Time' fields are required<br>";
                 invalidInput = true;
             }
-        }
-
-        if (isMinTime == false && isMaxTime == true || isMaxTime == false && isMinTime == true) {
-            filter_err_string += "Both the 'Minimum Time' and 'Maximum Time' fields are required<br>";
-            invalidInput = true;
+            else {
+                if (min_Time > max_Time) {
+                    filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
+                    invalidInput = true;
+                }
+            }
         }
 
         /* -------- Showing/Hiding Markers -------- */
 
         function HideMarker(marker) {
-            marker.setVisible(false);
-
+            // InfoWindow
             if (typeof (marker.info) !== "undefined") {
                 if (marker.info.getMap() != null) {
                     marker.info.close();
                 }
             }
+            // Marker
+            marker.setVisible(false);
         }
 
         /* ---- Remove any previous filters ---- */
@@ -675,9 +680,7 @@ function initMap() {
             for (i = 0; i < MarkerArray.length; i++) {
                 MarkerArray[i].setVisible(true);
 
-                /* ---- Convert date into comparable object ---- */
-                var MarkerDate = moment(MarkerArray[i].crimeDate).format("YYYY-MM-DD"); // Convert date
-                MarkerDate = new Date(MarkerDate);
+                var MarkerDate = new Date(MarkerArray[i].crimeDate); // Convert date
 
                 var MarkerTime = MarkerArray[i].crimeTime;
 
@@ -697,26 +700,26 @@ function initMap() {
                     }
                 }
 
-                if (isMinDate == true) { // If a minimum date was entered
-                    if (MarkerDate < minDate) { // And the marker's date is before than that date
+                if (Minimum_Date_Entered) { // If a minimum date was specified
+                    if (MarkerDate < min_Date) { // And the marker's date is before that date
                         HideMarker(MarkerArray[i]);
                     }
                 }
 
-                if (isMaxDate == true) {
-                    if (MarkerDate > maxDate) {
+                if (Maximum_Date_Entered) {
+                    if (MarkerDate > max_Date) {
                         HideMarker(MarkerArray[i]);
                     }
                 }
 
-                if (isMinTime == true) {
-                    if (MarkerTime < minTime) {
+                if (Minimum_Time_Entered) {
+                    if (MarkerTime < min_Time) {
                         HideMarker(MarkerArray[i]);
                     }
                 }
 
-                if (isMaxTime == true) {
-                    if (MarkerTime > maxTime) {
+                if (Maximum_Time_Entered) {
+                    if (MarkerTime > max_Time) {
                         HideMarker(MarkerArray[i]);
                     }
                 }
