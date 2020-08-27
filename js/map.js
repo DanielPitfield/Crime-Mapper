@@ -119,10 +119,10 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
 
 document.getElementById('Filter_Clear').addEventListener("click", () => {
     document.querySelectorAll('#Filter_minDate, #Filter_maxDate, #Filter_minTime, #Filter_maxTime')
-    .forEach(el => el.value = "");
+        .forEach(el => el.value = "");
 
     document.querySelectorAll('#Filter_Crime_Type, #Filter_Crime_Type_sub')
-    .forEach(el => el.value = "[ALL]");
+        .forEach(el => el.value = "[ALL]");
 
     document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
     document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
@@ -453,8 +453,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 */
 
 function initMap() {
-    var ContextMenu = null;
-    var menuDisplayed = false;
+    var ContextMenu = document.getElementById("menu");
     var Latitude = 0;
     var Longitude = 0;
 
@@ -572,16 +571,82 @@ function initMap() {
     // TODO Filter by ID
     // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
 
-    function FilterMarkers(center_loc, distance) {
-        var invalidInput = false;
-        var filter_err_string = "";
-
-        // Distance / Location
-        var AllDistanceSelected = false;
-        if (distance == null || distance == "[ALL]") {
-            distance = "[ALL]";
-            var AllDistanceSelected = true;
+    function HideMarker(marker) {
+        // InfoWindow
+        if (typeof (marker.info) !== "undefined") {
+            if (marker.info.getMap() != null) {
+                marker.info.close();
+            }
         }
+        // Marker
+        marker.setVisible(false);
+    }
+
+    let filter_marker;
+    let search_area;
+
+    $('#modal_filter').on('shown.bs.modal', function () { // When filter modal opens
+        // Set back to default (serach radius of all and disabled)
+        document.getElementById('Filter_Location').selectedIndex = "0";
+        document.getElementById('Filter_Location').setAttribute('disabled', true);
+
+        // Map
+        const UK_center = new google.maps.LatLng(52.636879, -1.139759);
+        var FilterMapOptions = { // Provide smaller map to specify the center of a geographical area
+            center: UK_center,
+            zoom: 6,
+            disableDefaultUI: true, // Remove all controls but street view
+            streetViewControl: true,
+        };
+
+        var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions);
+
+        google.maps.event.addListener(filter_map, 'click', function (event) {
+            if (!filter_marker.getVisible()) { // The marker's visible property is initialised as false
+                document.getElementById('Filter_Location').removeAttribute('disabled');
+                filter_marker.setVisible(true);
+            }
+            filter_marker.setPosition(event.latLng); // Just move the marker if it already on the map
+        });
+
+        // Marker
+        filter_marker = new google.maps.Marker({ // Assign a marker which can't initially be seen to filter map
+            position: null,
+            visible: false,
+            map: filter_map
+        });
+
+        // Circle object used to display the currently selected area to filter by
+        search_area = new google.maps.Circle({
+            map: filter_map,
+            visible: false,
+            radius: 1,    // 10 miles in metres
+            fillColor: '#AA0000'
+        });
+
+        document.getElementById('Filter_Location').addEventListener("change", (event) => {
+            const search_radius = event.target.value;
+
+            const AllAreas = (search_radius == "[ALL]") || (search_radius == null);
+            if (!AllAreas) {
+                if (filter_marker.getVisible()) {
+                    // Update circle object to new center position and selected radius
+                    search_area.setVisible(true);
+                    search_area.bindTo('center', filter_marker, 'position');
+                    search_area.setRadius(search_radius * 1609); // Convert miles to metres
+                }
+            }
+            else {
+                // If all option is selected, hide the marker and area
+                document.getElementById('Filter_Location').setAttribute('disabled', true);
+                search_area.setVisible(false);
+                filter_marker.setVisible(false);
+            }
+        });
+    });
+
+    function FilterMarkers() {
+        ShowLoading();
 
         // Main Crime Type
         var main_dropdown = document.getElementById("Filter_Crime_Type");
@@ -609,13 +674,6 @@ function initMap() {
         if (max_Date_Entered) {
             max_Date = new Date(max_Date);
         }
-        
-        if (both_Dates_Entered) {
-            if (min_Date > max_Date) { // Validation
-                filter_err_string += "The 'Minimum Date' field can't be a date after the 'Maximum Date' field<br>";
-                invalidInput = true;
-            }
-        }
 
         // Time
         var min_Time = document.getElementById("Filter_minTime").value;
@@ -624,192 +682,99 @@ function initMap() {
         const both_Times_Entered = min_Time.length > 0 && max_Time.length > 0;
         const single_Time_Entered = min_Time.length > 0 || max_Time.length > 0;
 
-        if (both_Times_Entered) {
-            if (min_Time > max_Time) {
-                filter_err_string += "The 'Minimum Time' can't be a time after the 'Maximum Time' field <br>";
-                invalidInput = true;
-            }
-        }
-        else {
-            if (single_Time_Entered) {
-                filter_err_string += "Both the 'Minimum Time' and 'Maximum Time' fields are required<br>";
-                invalidInput = true;
-            }
+        const errorConditions =
+            [
+                {
+                    isMet: both_Dates_Entered && min_Date > max_Date,
+                    errorMessage: "The 'Minimum Date' field can't be a date after the 'Maximum Date' field"
+                },
+                {
+                    isMet: both_Times_Entered && min_Time > max_Time,
+                    errorMessage: "The 'Minimum Time' can't be a time after the 'Maximum Time' field"
+                },
+                {
+                    isMet: single_Time_Entered,
+                    errorMessage: "Both the 'Minimum Time' and 'Maximum Time' fields are required"
+                }
+            ];
+
+        // Get all error conditions which have been met
+        const metErrorConditions = errorConditions.filter(x => x.isMet);
+
+        // If any error conditions are met
+        if (metErrorConditions.length > 0) {
+            ShowErrorAlert(metErrorConditions.map(x => x.errorMessage).join("<br>"), document.getElementById('modal_filter_content'));
+            return;
         }
 
-        // Actual filtering
-        function HideMarker(marker) {
-            // InfoWindow
-            if (typeof (marker.info) !== "undefined") {
-                if (marker.info.getMap() != null) {
-                    marker.info.close();
+        // Remove any previous filters
+        MarkerArray.forEach(marker =>
+            marker.setVisible(true)
+        );
+
+        // Filter the markers which need to be hidden
+        const Filtered_MarkerArray = MarkerArray.filter(marker => {
+            if (min_Date_Entered) {
+                if (new Date(marker.crimeDate) < min_Date) {
+                    return true;
                 }
             }
-            // Marker
-            marker.setVisible(false);
-        }
 
-        if (!invalidInput) {
-            // Remove any previous filters
-            MarkerArray.forEach(marker => 
-                marker.setVisible(true)
-            );
+            if (max_Date_Entered) {
+                if (new Date(marker.crimeDate) > max_Date) {
+                    return true;
+                }
+            }
 
-            // Filter the markers which need to be hidden
-            const Filtered_MarkerArray = MarkerArray.filter(marker => {
-                // Filter by crime type first
-                if(!AllCrimes) {
-                    if(!AllSubCrimes) { // One specific crime
-                        if (marker.crimeType != Sub_Crime_Type) {
-                            return true; // Then this marker should be filtered and hidden
-                            // Return because regardless of the remaming properties, the full criteria has not been met
-                            // This therefore means the following checks are not made (they aren't required)
-                            // TODO Optimisation of filtering order
+            if (both_Times_Entered) {
+                if (marker.crimeTime < min_Time || marker.crimeTime > max_Time) {
+                    return true;
+                }
+            }
+
+            // TODO Optimisation of filtering order
+            if (!AllCrimes) {
+                if (!AllSubCrimes) { // One specific crime
+                    if (marker.crimeType != Sub_Crime_Type) {
+                        return true; // Then this marker should be filtered and hidden
+                    }
+                }
+                else { // A (main) category of crime
+                    // Find the array (of individual crimes) that corresponds to this main category
+                    const foundMappingFilter = crimeTypeMappings.find(x => Main_Crime_Type == x.value);
+                    if (foundMappingFilter) {
+                        // If the marker's crime type is not found within this array (the category)
+                        if (foundMappingFilter.options.includes(marker.crimeType) === false) {
+                            return true;
                         }
                     }
-                    else { // A (main) category of crime
-                        // Find the array (of individual crimes) that corresponds to this main category
-                        const foundMappingFilter = crimeTypeMappings.find(x => Main_Crime_Type == x.value);
-                        if (foundMappingFilter) {
-                            // If the marker's crime type is not found within this array (the category)
-                            if (foundMappingFilter.options.includes(marker.crimeType) === false) {
-                                return true;
-                            }
-                        }
-                    }
                 }
+            }
 
-                if(min_Date_Entered) {
-                    if(new Date(marker.crimeDate) < min_Date) {
-                        return true;
-                    }
+            if (filter_marker.getVisible() && search_area.getVisible()) {
+                var filter_center = new google.maps.LatLng(filter_marker.getPosition().lat(), filter_marker.getPosition().lng());
+                const search_radius = document.getElementById("Filter_Location").value;
+
+                const distanceInMetres = google.maps.geometry.spherical.computeDistanceBetween(filter_center, marker.getPosition());
+                const distanceInMiles = (distanceInMetres / 1609);
+
+                if (distanceInMiles > search_radius) {
+                    return true;
                 }
+            }
 
-                if(max_Date_Entered) {
-                    if(new Date(marker.crimeDate) > max_Date) {
-                        return true;
-                    }
-                }
+        });
 
-                if(both_Times_Entered) {
-                    if(marker.crimeTime < min_Time || marker.crimeTime > max_Time) {
-                        return true;
-                    }
-                }
+        // Hide the markers identified
+        Filtered_MarkerArray.forEach(marker => HideMarker(marker));
 
-            });
-
-            // Hide the markers identified
-            Filtered_MarkerArray.forEach(marker =>
-                HideMarker(marker)
-            );
-
-            $('#modal_filter').modal('hide');
-            HideErrorAlert();
-        }
-        else {
-            ShowErrorAlert(filter_err_string, document.getElementById('modal_filter_content'));
-        }
-
+        $('#modal_filter').modal('hide');
+        HideErrorAlert();
+        HideLoading();
     }
 
-    /* By location */
-    var filter_marker_hold = [];
-    var UK_center = new google.maps.LatLng(52.636879, -1.139759);
-
-    var filter_marker = new google.maps.Marker({
-        position: UK_center,
-        map: null
-    });
-    filter_marker_hold.push(filter_marker);
-
-    $('#modal_filter').on('shown.bs.modal', function () {
-        document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
-        document.getElementById('Filter_Location').setAttribute('disabled', true);
-
-        var FilterMapOptions = {
-            center: UK_center,
-            zoom: 6,
-            disableDefaultUI: true, // Remove all controls but street view
-            streetViewControl: true,
-        };
-
-        var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions); // Show smaller map
-
-        var marker_placed = false;
-
-        google.maps.event.addListener(filter_map, 'click', function (event) {
-            if (marker_placed == false) {
-                var filter_marker = new google.maps.Marker({
-                    position: event.latLng,
-                    map: filter_map
-                });
-                filter_marker_hold[0] = filter_marker;
-
-                marker_placed = true;
-                document.getElementById('Filter_Location').removeAttribute('disabled');
-            }
-            else {
-                filter_marker_hold[0].setPosition(event.latLng);
-            }
-        });
-
-        var circle_placed = false;
-        var circle_hidden = false;
-        var circle_hold = [];
-        var distance_val;
-
-        document.getElementById('Filter_Location').addEventListener("change", (event) => {
-            distance_val = event.target.value;
-
-            if (distance_val == "[ALL]") {
-                document.getElementById('Filter_Location').setAttribute('disabled', true);
-                if (circle_placed == true) {
-                    circle_hold[0].setMap(null);
-                    circle_hidden = true;
-                }
-                if (marker_placed == true) {
-                    filter_marker_hold[0].setMap(null);
-                    marker_placed = false;
-                }
-            }
-            else {
-                if (circle_hidden == true) {
-                    circle_hold[0].setMap(filter_map);
-                }
-
-                var f_marker = filter_marker_hold[0];
-
-                if (circle_placed == false) {
-                    var circle = new google.maps.Circle({
-                        map: filter_map,
-                        radius: 1,    // 10 miles in metres
-                        fillColor: '#AA0000'
-                    });
-
-                    circle_hold.push(circle);
-                    circle_placed = true;
-                }
-
-                circle_hold[0].bindTo('center', f_marker, 'position');
-                circle_hold[0].setRadius(distance_val * 1609); // Convert miles to metres
-            }
-
-
-        });
-
-        document.getElementById('btn_filter_confirm').addEventListener("click", () => {
-            ShowLoading();
-
-            var f_marker = filter_marker_hold[0];
-            var center_lat = f_marker.getPosition().lat();
-            var center_lng = f_marker.getPosition().lng();
-            var center_loc = new google.maps.LatLng(center_lat, center_lng);
-
-            FilterMarkers(center_loc, distance_val);
-            HideLoading();
-        });
-
+    document.getElementById('btn_filter_confirm').addEventListener("click", () => {
+        FilterMarkers();
     });
 
     /*
@@ -818,50 +783,42 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
+    // Move off visible screen and set display property to none
     function hideContextMenu() {
-        ContextMenu = document.getElementById("menu");
-        ContextMenu.style.left = -500 + "px"; // Hide off page
-        ContextMenu.style.top = -500 + "px";
-        ContextMenu.style.display = "none"; // For good measure
-        menuDisplayed = false;
+        if (ContextMenu.style.display == "block") {
+            ContextMenu.style.left = -500 + "px";
+            ContextMenu.style.top = -500 + "px";
+            ContextMenu.style.display = "none";
+        }
     }
 
+    // Record location of this click relative to map and screen
     map.addListener('rightclick', function (e) {
-        if (menuDisplayed == true) { // If menu is already open and user right clicks again
-            hideContextMenu();
-        }
-        else { // Open the context menu
-            FirstLocation = e.latLng;
-            Latitude = FirstLocation.lat();
-            Longitude = FirstLocation.lng();
-            for (prop in e) {
-                if (e[prop] instanceof MouseEvent) {
-                    mouseEvt = e[prop];
-                    var left = mouseEvt.clientX;
-                    var top = mouseEvt.clientY;
+        // Map (Latitude and Longitude)
+        FirstLocation = e.latLng; // Recorded click location as latLng object
+        Latitude = FirstLocation.lat();
+        Longitude = FirstLocation.lng();
 
-                    ContextMenu = document.getElementById("menu");
-                    // Position context menu one pixel to the right and below location of click (so that hover styling is not seen immediately)
-                    ContextMenu.style.left = (left + 1) + "px";
-                    ContextMenu.style.top = (top - 1) + "px";
-                    ContextMenu.style.display = "block";
-                    menuDisplayed = true;
-                }
+        // Context Menu (pixels)
+        for (prop in e) {
+            if (e[prop] instanceof MouseEvent) {
+                // Record click location
+                mouseEvt = e[prop];
+                var left = mouseEvt.clientX;
+                var top = mouseEvt.clientY;
+
+                // Show Context Menu at this location (actually very slightly beside)
+                ContextMenu.style.left = (left + 1) + "px";
+                ContextMenu.style.top = (top - 1) + "px";
+                ContextMenu.style.display = "block";
             }
         }
     });
 
-    map.addListener("click", function (e) { // Left click away from it
-        if (menuDisplayed == true) {
-            hideContextMenu();
-        }
-    });
-
-    map.addListener("drag", function (e) { // Drag away from it
-        if (menuDisplayed == true) {
-            hideContextMenu();
-        }
-    });
+    // Close the context menu when an implicit action away from it is made
+    ['click', 'drag'].forEach(evt =>
+        map.addListener(evt, hideContextMenu)
+    );
 
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -871,7 +828,7 @@ function initMap() {
 
     $('#modal_add').on('shown.bs.modal', function () {
         document.querySelectorAll('#Add_Crime_Type', '#Add_Crime_Type_sub', '#Add_Description')
-        .forEach(el => el.value = "");
+            .forEach(el => el.value = "");
 
         document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
         document.getElementById('Add_Time').value = "00:00";
@@ -1222,6 +1179,20 @@ function initMap() {
                     }
 
                     // TODO Refactor this module to handle multi-user interaction
+
+                    /*
+                    (ImportMarkers.php)
+                    Create a record in import_jobs
+                    Return job ID to the client
+                    Periodically update the processed record amount in the database
+                    */
+
+                    /*
+                    (map.js)
+                    Recieve job ID
+                    Periodically query the database using job ID to determine the progress
+                    Update the progress bar
+                    */
 
                     var t = setInterval(CheckProgressFile, 1000); // Run below function every second
 
