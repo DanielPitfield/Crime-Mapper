@@ -33,6 +33,35 @@ html, body {
   display: inline;
 }
 
+/* 
+  Filter Crime - 0% left (16% width)
+  Import Crime - 0.25% left (16% width)
+  Location Search - 0.25% left and right (35% width)
+  Analyse Crime - 0.25% right (16% width)
+  Predict Crime - 0% right (16% width)
+*/
+
+#btn_filter, #btn_import, #btn_analyse, #btn_predict {
+  color:white;
+  width:16%;
+}
+
+#btn_filter {
+  margin-left: 0;
+}
+
+#btn_import {
+  margin-left: 0.25%;
+}
+
+#btn_analyse {
+  margin-right: 0.25%;
+}
+
+#btn_predict {
+  margin-right: 0;
+}
+
 .pac-card {
   margin: 10px 10px 0 0;
   border-radius: 2px 0 0 2px;
@@ -62,10 +91,13 @@ html, body {
   background-color: #fff;
   font-size: 15px;
   font-weight: 300;
+  color: black;
   padding: 0 11px 0 13px;
   text-overflow: ellipsis;
-  width: 100%;
+  width: 35%;
   height: 38px;
+  margin-left:0.25%;
+  margin-right:0.25%;
   text-align: center;
 }
 
@@ -200,21 +232,21 @@ body > #Alert_Error, body > #Alert_Warning { /* When alerts are constructed init
 .modal-body {padding: 14px 10px;}
 
 input[type=date], input[type=time] {
- height:35px;
- font-size:15px;
- padding: 5px;
- color: black;
- border: 1px solid #ccc;
- border-radius: 4px;
- background-color:#e6eeff;
+  height:35px;
+  font-size:15px;
+  padding: 5px;
+  color: black;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color:#e6eeff;
 }
 
 input[type=date] {
- width:140px;
+  width:140px;
 }
 
 input[type=time] {
- width:90px;
+  width:90px;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator { opacity:1; }
@@ -222,53 +254,107 @@ input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-outer-spin-button { -webkit-appearance: none;display: none; }
 
 .form-control {
- background-color:#e6eeff;
- width:93%;
- font-size:15px;
- color: black;
+  background-color:#e6eeff;
+  width:93%;
+  font-size:15px;
+  color: black;
 }
 
 input[type="number"] {
- width:50px;
- text-align: center;
- background-color:#e6eeff;
- font-size:15px;
- color: black;
+  width:50px;
+  text-align: center;
+  background-color:#e6eeff;
+  font-size:15px;
+  color: black;
+}
+
+.alert-heading {
+  font-weight: bold;
+}
+
+#Alert_Error_Message, #Alert_Warning_Message, #lbl_Filter_ID {
+  font-size:14px;
+}
+
+#lbl_Filter_ID {
+  margin:5px 0 0 2.5%;
+  padding:0;
+}
+
+#Filter_ID {
+  width:15%;
+}
+
+#Filter_Clear, #Filter_ID, #ID_Search, #Delete_Filtered_Markers, #Import_Template {
+  font-size:12px;
+  height:20px;
+  padding:0px 10px 2px 10px;
+  margin-top:5px;
+  text-align:center;
+}
+
+#Filter_Clear, #Filter_ID, #ID_Search, #Import_Template {
+  margin-left:10px;
+}
+
+#Delete_Filtered_Markers {
+  margin-left:12.5%;
 }
 
 #Filter_Crime_Type option[value="[ALL]"], #Filter_Crime_Type_sub option[value="[ALL]"], #Filter_Location option[value="[ALL]"] {
-    background:rgba(0,255,0,0.3);
+  background:rgba(0,255,0,0.3);
+}
+
+#btn_add_confirm, #btn_edit_confirm, #btn_import_confirm, #btn_filter_confirm {
+  width: 100%;
+}
+
+#btn_add_confirm, #btn_edit_confirm {
+  margin-top:10px;
+}
+
+#import_lbl {
+  display:inline-block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;"
+}
+
+.progress {
+  margin-top:10px;
+}
+
+.progress-bar {
+  width: 0%;
 }
 
 #modal_left {
-    display: inline-block;
-    width:52.5%;
-    float:left;
+  display: inline-block;
+  width:52.5%;
+  float:left;
 }
 
 #modal_right {
-    border: 1px solid black;
-    display: inline-block;
-    width:47.5%;
-    float:right;
+  border: 1px solid black;
+  display: inline-block;
+  width:47.5%;
+  float:right;
 }
 
 #modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog { /* All */
-    min-width:1700px;
+  min-width:1700px;
 }
 
 @media (min-width:1200px) and (max-width:1370px) { /* e.g 1366 x 768 pixels */
   #modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog {
     left:-160px;
     top:-25px;
-  }
-  
+  }  
 }
 
 @media (max-width:1200px) { /* Even smaller resolutions */
   #modal_add_dialog, #modal_edit_dialog, #modal_filter_dialog {
     left:-340px;
     top:-35px;
-  }
-  
+  }  
 }

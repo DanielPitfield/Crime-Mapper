@@ -12,6 +12,7 @@ require 'dbConfig.php'; // Include the database configuration file
 	<link rel="shortcut icon" href="#"> <!-- Website tab icon, change link to ico file -->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> <!-- JQuery (Google CDN) -->
+	<script src="https://use.fontawesome.com/releases/v5.0.13/js/all.js"></script> <!-- Font Awesome -->
 </head>
 
 <link rel="stylesheet" href="/css/layout.css"> <!-- External styling -->
@@ -19,25 +20,18 @@ require 'dbConfig.php'; // Include the database configuration file
 <body oncontextmenu="return false;">
 	<!-- Disable the default right click context menu for the body of the page -->
 
-	<!-- Filter Crime - 0% left (16% width)
-     Import Crime - 0.25% left (16% width)
-     Location Search - 0.25% left and right (35% width)
-     Analyse Crime - 0.25% right (16% width)
-     Predict Crime - 0% right (16% width)
--->
-
 	<!-- Navigation Bar -->
 	<nav class="navbar navbar-dark bg-dark">
 		<!-- Filter Crime -->
-		<button class="btn btn-outline-primary navbar-btn" id="btn_filter" role="button" data-toggle="modal" data-target="#modal_filter" disabled style="color:white;width:16%;margin-left:0%;">Filter Crime</button>
+		<button class="btn btn-outline-primary navbar-btn" id="btn_filter" role="button" data-toggle="modal" data-target="#modal_filter" disabled>Filter Crime</button>
 		<!-- Import Crime -->
-		<button class="btn btn-outline-primary navbar-btn" id="btn_import" role="button" data-toggle="modal" data-target="#modal_import" disabled style="color:white;width:16%;margin-left:0.25%;">Import Crime</button>
+		<button class="btn btn-outline-primary navbar-btn" id="btn_import" role="button" data-toggle="modal" data-target="#modal_import" disabled>Import Crime</button>
 		<!-- Location Search Bar -->
-		<input id="pac-input" class="controls" type="text" placeholder="Location Search" disabled style="color:black;width:35%;margin-left:0.25%;margin-right:0.25%;">
+		<input id="pac-input" class="controls" type="text" placeholder="Location Search" disabled>
 		<!-- Analyse Crime -->
-		<button class="btn btn-outline-primary navbar-btn" id="btn_analyse" role="button" disabled style="color:white;width:16%;margin-right:0.25%;">Analyse Crime</button>
+		<button class="btn btn-outline-primary navbar-btn" id="btn_analyse" role="button" disabled>Analyse Crime</button>
 		<!-- Predict Crime -->
-		<button class="btn btn-outline-primary disabled navbar-btn" id="btn_predict" role="button" disabled style="color:white;width:16%;margin-right:0%;">Predict Crime</button>
+		<button class="btn btn-outline-primary disabled navbar-btn" id="btn_predict" role="button" disabled>Predict Crime</button>
 	</nav>
 
 	<!-- Loading Symbol -->
@@ -55,8 +49,8 @@ require 'dbConfig.php'; // Include the database configuration file
 
 	<!-- Error Alert -->
 	<div class="alert alert-danger alert-dismissible fade show" role="alert" id="Alert_Error">
-		<h5 class="alert-heading" style="font-weight: bold;">Error</h5>
-		<div id="Alert_Error_Message" style="font-size:14px;">
+		<h5 class="alert-heading">Error</h5>
+		<div id="Alert_Error_Message">
 			Message
 		</div>
 		<button type="button" class="close" id="close_alert_error">
@@ -66,8 +60,8 @@ require 'dbConfig.php'; // Include the database configuration file
 
 	<!-- Warning Alert -->
 	<div class="alert alert-warning alert-dismissible fade show" role="alert" id="Alert_Warning">
-		<h5 class="alert-heading" style="font-weight: bold;">Warning</h5>
-		<div id="Alert_Warning_Message" style="font-size:14px;">
+		<h5 class="alert-heading">Warning</h5>
+		<div id="Alert_Warning_Message">
 			Message
 		</div>
 		<button type="button" class="close" id="close_alert_warning">
@@ -77,9 +71,9 @@ require 'dbConfig.php'; // Include the database configuration file
 
 	<!-- Delete Progress Alert -->
 	<div class="alert alert-dark alert-dismissible fade show" role="alert" id="Alert_Progress">
-		<h5 class="alert-heading" style="font-weight:bold;">Progress</h5>
-		<div class="progress" style="margin-top:10px;">
-			<div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;" data-backdrop="static" data-keyboard="false">Progress Bar
+		<h5 class="alert-heading">Progress</h5>
+		<div class="progress">
+			<div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" data-backdrop="static" data-keyboard="false">Progress Bar
 			</div>
 		</div>
 		<button type="button" class="close" id="close_alert_progress">
@@ -93,8 +87,14 @@ require 'dbConfig.php'; // Include the database configuration file
 			<div class="modal-content" id="modal_filter_content">
 				<div class="modal-header">
 					<h5 class="modal-title">Filter</h5>
-					<button class="btn btn-info" id="Filter_Clear" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Clear Filter</button>
-					<button class="btn btn-danger" id="Delete_Filtered_Markers" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:250px;margin-top:5px;text-align:center;">Delete Filtered (Visible) Markers</button>
+					<button class="btn btn-info" id="Filter_Clear">Clear Filter</button>
+					<label class="control-label" id="lbl_Filter_ID" for="Input_Filter_ID">ID:</label>
+					<input type="number" id="Filter_ID" min="1">
+					<button class="btn btn-info" id="ID_Search">
+						<i class="fa fa-search"></i>
+					</button>
+
+					<button class="btn btn-danger" id="Delete_Filtered_Markers">Delete Filtered (Visible) Markers</button>
 					<button type="button" class="close" data-dismiss="modal" id="close_filter">
 						<span>&times;</span>
 					</button>
@@ -134,7 +134,7 @@ require 'dbConfig.php'; // Include the database configuration file
 						<div id="filter_map"></div>
 					</div>
 
-					<button id="btn_filter_confirm" class="btn btn-success" style="width:100%;">Confirm</button>
+					<button id="btn_filter_confirm" class="btn btn-success">Confirm</button>
 
 				</div>
 			</div>
@@ -178,7 +178,7 @@ require 'dbConfig.php'; // Include the database configuration file
 						<div id="add_map"></div>
 					</div>
 
-					<button type="submit" id="btn_add_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Confirm</button>
+					<button type="submit" id="btn_add_confirm" class="btn btn-success">Confirm</button>
 
 					</form>
 				</div>
@@ -223,7 +223,7 @@ require 'dbConfig.php'; // Include the database configuration file
 						<div id="edit_map"></div>
 					</div>
 
-					<button type="submit" id="btn_edit_confirm" class="btn btn-success" style="width:100%;margin-top:10px;">Update</button>
+					<button type="submit" id="btn_edit_confirm" class="btn btn-success">Update</button>
 
 					</form>
 				</div>
@@ -237,7 +237,7 @@ require 'dbConfig.php'; // Include the database configuration file
 			<div class="modal-content" id="modal_import_content">
 				<div class="modal-header">
 					<h5 class="modal-title">Import</h5>
-					<a href="template.csv" class="btn btn-info" role="button" style="font-size:12px;height:20px;padding: 0px 10px 2px 10px;margin-left:10px;margin-top:5px;text-align:center;">Download Template</a>
+					<a href="template.csv" class="btn btn-info" id="Import_Template" role="button">Download Template</a>
 
 					<button type="button" class="close" id="close_import" data-dismiss="modal">
 						<span>&times;</span>
@@ -247,17 +247,17 @@ require 'dbConfig.php'; // Include the database configuration file
 				<div class="modal-body">
 					<div class="custom-file mb-3">
 						<input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
-						<label class="custom-file-label" id="import_lbl" for="customFile" style="display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Choose file</label>
+						<label class="custom-file-label" id="import_lbl" for="customFile">Choose file</label>
 					</div>
 
-					<button type="submit" id="btn_import_confirm" class="btn btn-success" style="width:100%;margin-top:8px;">Import</button>
+					<button type="submit" id="btn_import_confirm" class="btn btn-success">Import</button>
 
-					<div class="progress" style="margin-top:8px;">
-						<div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar</div>
+					<div class="progress">
+						<div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
 					</div>
 
-					<div class="progress" style="margin-top:8px;">
-						<div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;">Progress Bar</div>
+					<div class="progress">
+						<div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
 					</div>
 
 				</div>

@@ -118,7 +118,7 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
 });
 
 document.getElementById('Filter_Clear').addEventListener("click", () => {
-    document.querySelectorAll('#Filter_minDate, #Filter_maxDate, #Filter_minTime, #Filter_maxTime')
+    document.querySelectorAll('#Filter_ID, #Filter_minDate, #Filter_maxDate, #Filter_minTime, #Filter_maxTime')
         .forEach(el => el.value = "");
 
     document.querySelectorAll('#Filter_Crime_Type, #Filter_Crime_Type_sub')
@@ -568,9 +568,6 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    // TODO Filter by ID
-    // TODO Filter by most recently added crimes (e.g last 10 crimes added to the mapper)
-
     function HideMarker(marker) {
         // InfoWindow
         if (typeof (marker.info) !== "undefined") {
@@ -643,6 +640,26 @@ function initMap() {
                 filter_marker.setVisible(false);
             }
         });
+    });
+
+    // Filter by ID
+    document.getElementById('ID_Search').addEventListener("click", () => {
+        const Filter_ID = document.getElementById('Filter_ID').value;
+        const isEmpty = Filter_ID == "";
+        if(!isEmpty) {
+            // Identify marker with requested ID
+            const MarkerToShow = MarkerArray.find(marker => marker.id == Filter_ID);
+
+            // Hide all markers
+            MarkerArray.forEach(marker =>
+                HideMarker(marker)
+            );
+
+            // Show identified marker
+            if (MarkerToShow) {
+                MarkerToShow.setVisible(true);
+            }
+        }
     });
 
     function FilterMarkers() {
@@ -732,7 +749,6 @@ function initMap() {
                 }
             }
 
-            // TODO Optimisation of filtering order
             if (!AllCrimes) {
                 if (!AllSubCrimes) { // One specific crime
                     if (marker.crimeType != Sub_Crime_Type) {
@@ -752,13 +768,16 @@ function initMap() {
             }
 
             if (filter_marker.getVisible() && search_area.getVisible()) {
+                // TODO The following two variables do not change between iterations of the loop
+                // LatLng object of marker added to smaller map (center of search area)
                 var filter_center = new google.maps.LatLng(filter_marker.getPosition().lat(), filter_marker.getPosition().lng());
                 const search_radius = document.getElementById("Filter_Location").value;
 
+                // Shortest distance between search area center and the current marker
                 const distanceInMetres = google.maps.geometry.spherical.computeDistanceBetween(filter_center, marker.getPosition());
                 const distanceInMiles = (distanceInMetres / 1609);
 
-                if (distanceInMiles > search_radius) {
+                if (distanceInMiles > search_radius) { // If marker is outside of search area
                     return true;
                 }
             }
