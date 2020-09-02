@@ -37,10 +37,10 @@ function placeMarker(marker, position, map) {
             }
         }
 
-        /* Make a new InfoWindow */
+        // Make a new InfoWindow
         googleMapsMarker.info = new google.maps.InfoWindow({
             content: '<div id="iw-container">' + '<div class="iw-content">' +
-                '<b>id: </b>' + googleMapsMarker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + googleMapsMarker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(googleMapsMarker.crimeDate) +
+                '<b>ID: </b>' + googleMapsMarker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + googleMapsMarker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(googleMapsMarker.crimeDate) +
                 '<br><b>Time: </b>' + convert_crimeTime(googleMapsMarker.crimeTime) + '<br></br>' + '<i style="word-wrap: break-word;">' + googleMapsMarker.description + '</i>' +
                 '<br></br> <button type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker(' + googleMapsMarker.id + ')>Edit</button>' +
                 '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker(' + googleMapsMarker.id + ')>Delete</button>' + '</div>' + '</div>',
@@ -97,7 +97,6 @@ function ShowProgressAlert() {
     Progress_Alert.style.left = "34%";
     Progress_Alert.style.top = "500px";
     Progress_Alert.style.display = "block";
-    ProgressAlertOpen = true;
 }
 
 function HideProgressAlert() {
@@ -119,12 +118,14 @@ document.getElementById('close_alert_progress').addEventListener("click", () => 
 
 document.getElementById('Filter_Clear').addEventListener("click", () => {
     document.querySelectorAll('#Filter_ID, #Filter_minDate, #Filter_maxDate, #Filter_minTime, #Filter_maxTime')
-        .forEach(el => el.value = "");
+        .forEach(el => el.value = ""); // Clear all fields (if filter criteria is requested to be cleared)
 
     document.querySelectorAll('#Filter_Crime_Type, #Filter_Crime_Type_sub')
-        .forEach(el => el.value = "[ALL]");
+        .forEach(el => el.value = "[ALL]"); // The two dropdowns have a default hidden value of [ALL]
 
+    // All options except this hidden default value should be removed from the sub-dropdown
     document.querySelectorAll('Filter_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
+    // Reset the element that provides the functionality for filtering by location
     document.getElementById('Filter_Location').setAttribute("selectedIndex", 0);
     document.getElementById('Filter_Location').setAttribute('disabled', true);
 });
@@ -139,7 +140,7 @@ function UpdateMarkerInfo(marker) {
     marker.title = marker.crimeType; // Shown on hover
 
     marker.info.setContent('<div id="iw-container">' + '<div class="iw-content">' +
-        '<b>id: </b>' + marker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(marker.crimeDate) +
+        '<b>ID: </b>' + marker.id + '<br> <b style="word-wrap: break-word;">Crime Type: </b>' + marker.crimeType + '<br> <b>Date: </b>' + convert_crimeDate(marker.crimeDate) +
         '<br><b>Time: </b>' + convert_crimeTime(marker.crimeTime) + '<br></br>' + '<i style="word-wrap: break-word;">' + marker.description + '</i>' +
         '<br></br> <button id="btn_edit" type="button" class="btn btn-secondary" style="width:50%;" onclick=EditMarker(' + marker.id + ')>Edit</button>' +
         '<button type="button" class="btn btn-danger" style="width:50%;" onclick=DeleteMarker(' + marker.id + ')>Delete</button>' + '</div>' + '</div>');
@@ -150,11 +151,11 @@ function LoadCurrentValues(marker) {
     const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
 
     if (foundMappingEdit) { // Selected crime type from dropdowns
-        // Enable dropdown fields
+        // Re-enable dropdown fields (if they were previously disabled)
         document.getElementById('Edit_Crime_Type').removeAttribute('disabled');
         document.getElementById('Edit_Crime_Type_sub').removeAttribute('disabled');
 
-        // Set main category of crime dropdown to found value
+        // Set main category of crime (the first dropdown) to found value
         document.getElementById('Edit_Crime_Type').value = foundMappingEdit.value;
         // Invoke event so that the dropdown for the subcategory updates (updates when value is changed not just when set)
         var event = new Event('change');
@@ -170,6 +171,7 @@ function LoadCurrentValues(marker) {
         document.getElementById('Edit_Crime_Type_sub').setAttribute('disabled', true);
     }
 
+    // Set the fields for the remaining properties
     document.getElementById('Edit_Crime_Type_sub').value = marker.crimeType;
     document.getElementById('Edit_Date').value = marker.crimeDate;
     document.getElementById('Edit_Time').value = convert_crimeTime(marker.crimeTime);
@@ -179,23 +181,22 @@ function LoadCurrentValues(marker) {
 function EditMarker(id) {
     const MarkerToEdit = MarkerArray.find(marker => marker.id === id); // Find marker to edit by ID
     MarkerToEdit.info.close(); // Close marker's info window (as the information it holds may change)
-    var modal = $('#modal_edit');
 
     // Determine and display the current values for the marker
     LoadCurrentValues(MarkerToEdit);
 
     // Now show the modal with this information
-    modal.modal('show');
+    $('#modal_edit').modal('show');
 
-    // Set up smaller map in 'Edit Crime' window
-    var EditMapOptions = {
+    // Set up smaller map in 'Edit Crime' window to allowing for adjutsing the location of the marker
+    const EditMapOptions = {
         center: MarkerToEdit.position,
         zoom: 12,
         disableDefaultUI: true, // Remove all controls but street view
         streetViewControl: true,
     };
 
-    var edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions);
+    const edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions);
 
     var Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
         position: MarkerToEdit.position,
@@ -204,14 +205,17 @@ function EditMarker(id) {
     });
 
     var Edit_SmallMarkerMoved = false;
-    var FirstLocation = MarkerToEdit.position;
-    var Latitude = FirstLocation.lat();
-    var Longitude = FirstLocation.lng();
+    // Record geographical information of marker 
+    const Edit_FirstLocation = MarkerToEdit.position;
+    var Edit_Latitude =  Edit_FirstLocation.lat();
+    var Edit_Longitude = Edit_FirstLocation.lng();
 
+    // Record where the marker is moved to (if an adjustment is made)
     google.maps.event.addListener(Draggable_marker_edit, 'dragend', function (evt) {
-        SecondLocation = evt.latLng;
-        Latitude = SecondLocation.lat(); // Information to be sent
-        Longitude = SecondLocation.lng();
+        var SecondLocation = evt.latLng;
+        // Record the new geographical information
+        Edit_Latitude = SecondLocation.lat();
+        Edit_Longitude = SecondLocation.lng();
         Edit_SmallMarkerMoved = true;
     });
 
@@ -226,7 +230,7 @@ function EditMarker(id) {
             // Also send to database
             var formData = $('#edit_submit_form').serialize();
 
-            var Vars = { id: id, Latitude: Latitude, Longitude: Longitude };
+            var Vars = { id: id, Latitude: Edit_Latitude, Longitude: Edit_Longitude };
             var varsData = $.param(Vars);
 
             var data = formData + '&' + varsData;
@@ -238,7 +242,7 @@ function EditMarker(id) {
                 type: 'POST',
                 data: data,
                 success: function (result) {
-                    var dropdown = document.getElementById('Edit_Crime_Type_sub');
+                    const dropdown = document.getElementById('Edit_Crime_Type_sub');
 
                     // Update values locally (the marker's properties)
                     MarkerToEdit.crimeDate = document.getElementById('Edit_Date').value;
@@ -247,12 +251,12 @@ function EditMarker(id) {
                     MarkerToEdit.description = document.getElementById('Edit_Description').value;
 
                     if (Edit_SmallMarkerMoved == true) { // If adjustment made on smaller map
-                        MarkerToEdit.position = SecondLocation;
+                        MarkerToEdit.position = SecondLocation; // Set the newly recorded position
                         Edit_SmallMarkerMoved = false;
                     }
 
-                    MarkerToEdit.setPosition(MarkerToEdit.position);
-                    UpdateMarkerInfo(MarkerToEdit);
+                    MarkerToEdit.setPosition(MarkerToEdit.position); // Update the displayed location
+                    UpdateMarkerInfo(MarkerToEdit); // Prepare InfoWindow with new information
                     HideLoading();
                     $('#modal_edit').modal('hide');
                     HideErrorAlert();
@@ -261,7 +265,6 @@ function EditMarker(id) {
         }
         else {
             const edit_err_string = "The 'Description' field can only be a maximum of 500 characters<br>";
-
             ShowErrorAlert(edit_err_string, document.getElementById('modal_edit_content'));
         }
 
@@ -278,32 +281,32 @@ function EditMarker(id) {
 function DeleteMarker(id) {
     ShowLoading();
 
-    const MarkerToDelete = MarkerArray.find(marker => marker.id === id);
-    const MarkerToDelete_index = MarkerArray.findIndex(marker => marker.id === id);
+    const MarkerToDelete = MarkerArray.find(marker => marker.id === id); // Find object/marker
+    const MarkerToDelete_index = MarkerArray.findIndex(marker => marker.id === id); // Find index
 
     if (MarkerToDelete) { // Object found
+        // Close InfoWindow (so it isn't left behind/open after the marker is deleted)
         if (typeof (MarkerToDelete.info) !== "undefined") {
             if (MarkerToDelete.info.getMap() != null) {
                 MarkerToDelete.info.close();
             }
         }
-    }
-
-    $.ajax({
-        url: 'DeleteMarker.php',  // Database
-        type: 'POST',
-        data: { id: id },
-        success: function (data) {
-            MarkerToDelete.setVisible(false); // View
-            if (MarkerToDelete_index) {
-                if (MarkerToDelete_index !== -1) { // Index found
-                    MarkerArray.splice(MarkerToDelete_index, 1); // Array
+        // Send ID to be used in DELETE statement
+        $.ajax({
+            url: 'DeleteMarker.php',  // Delete from Database
+            type: 'POST',
+            data: { id: id },
+            success: function (data) {
+                MarkerToDelete.setVisible(false); // Delete from View
+                if (MarkerToDelete_index) {
+                    if (MarkerToDelete_index !== -1) { // Index found
+                        MarkerArray.splice(MarkerToDelete_index, 1); // Delete from Array
+                    }
+    
                 }
-
             }
-        }
-    });
-
+        });
+    }
     HideLoading();
 }
 
@@ -313,41 +316,39 @@ function DeleteMarker(id) {
 |-----------------------------------------------------------------------------------------------------------
 */
 
-// TODO Refactor this module to handle multi-user interaction
+// TODO Delete mulitiple markers - multi-user interaction
+
+function ResetProgressBar(progress_bar) {
+    if (progress_bar.contains('progress-bar bg-danger progress-bar-striped progress-bar-animated')) { // If class was to changed to class used for showing errors
+        progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change it back to default animated class
+    }
+    progress_bar.style.width = "0%"; // Also reset progress
+}
 
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
-    if ($('#progress_delete').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
-        document.getElementById('progress_delete').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
-    }
-    document.getElementById('progress_delete').style.width = "0%";
+    const progress_delete = document.getElementById('progress_delete');
+    ResetProgressBar(progress_delete);
 
     const visibleMarkers = MarkerArray.filter(marker => marker.getVisible()); // Array of visible markers
     const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of ids for these visible markers
 
-    var num_markers = visibleMarkers_IDs.length;
-    var within_marker_capacity = num_markers > 0 && num_markers < 50000;
+    const num_markers = visibleMarkers_IDs.length;
+    const within_marker_capacity = num_markers > 0 && num_markers < 50000;
 
     if (within_marker_capacity) { // If manageable amount of markers to delete
         $('#modal_filter').modal('hide');
         ShowProgressAlert();
 
-        var Filter_Modal_Delete_Top = document.getElementById('modal_filter_content').offsetTop;
-        var Filter_Modal_Delete_Left = document.getElementById('modal_filter_content').offsetLeft;
-        var Filter_Modal_Delete_Height = document.getElementById('modal_filter_content').height;
-        var Filter_Modal_Delete_Width = document.getElementById('modal_filter_content').width;
-
-        /* Alert Position (top) */
-        var Filter_Alert_Progress_Top = Filter_Modal_Delete_Top + (Filter_Modal_Delete_Height / 2);
-
-        /* Set position of alert */
-        $("#Alert_Progress").css({ top: Filter_Alert_Progress_Top, left: Filter_Modal_Delete_Left, width: Filter_Modal_Delete_Width });
-
-        var t2 = setInterval(CheckDeleteProgressFile, 1000);
+        // Set position of alert
+        const alert_progress = document.getElementById('alert_progress');
+        alert_progress.style.top = document.getElementById('modal_filter_content').offsetTop + (document.getElementById('modal_filter_content').height /2);
+        alert_progress.style.left = document.getElementById('modal_filter_content').offsetLeft;
+        alert_progress.style.width = document.getElementById('modal_filter_content').width;
 
         $.ajax({
             url: 'DeleteMarker.php',
             type: 'POST',
-            data: { visibleMarkers_IDs: visibleMarkers_IDs }, // Send ids
+            data: { visibleMarkers_IDs: visibleMarkers_IDs }, // Send IDs
             success: function (data) {
                 //
             }
@@ -355,95 +356,10 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
     }
     else {
         HideProgressAlert();
-        var filter_delete_string = "";
-        if (num_markers == 0) {
-            filter_delete_string = "There are no visible or filtered markers to delete<br>";
-        }
-        else {
-            filter_delete_string = "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
-        }
+        const filter_delete_string = (num_markers == 0) ? "There are no visible or filtered markers to delete<br>" : 
+        "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
         ShowErrorAlert(filter_delete_string, document.getElementById('modal_filter_content'));
     }
-
-    var delete_data_hold = -10;
-    var Delete_FinishCheckCounter = 0;
-    var Delete_NoChangeCounter = 0;
-    var Delete_TimeoutCounter = 0;
-    var Delete_Timed_Out = 0;
-
-    var delete_counter_value = 0;
-    if (num_markers < 5000) {
-        delete_counter_value = 3;
-    }
-    else if (num_markers < 10000) {
-        delete_counter_value = 5;
-    }
-    else if (num_markers < 25000) {
-        delete_counter_value = 7;
-    }
-    else {
-        delete_counter_value = 10;
-    }
-
-    function CheckDeleteProgressFile() {
-        $.ajax({
-            url: "/delete_progress.txt",
-            cache: false,
-            async: false,
-            dataType: "text",
-            success: function (data, textStatus, jqXHR) {
-                Delete_TimeoutCounter += 1;
-                var delete_percentage = data;
-
-                if (delete_percentage == 0) {
-                    Delete_NoChangeCounter += 1;
-                }
-                if (delete_percentage != 0) {
-                    Delete_NoChangeCounter = 0;
-                }
-
-                if (Delete_NoChangeCounter == 10) {
-                    clearInterval(t2);
-                    document.getElementById('progress_delete').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                    $("#progress_delete").css("width", "100%").text("Delete (Failed)");
-                    Delete_Timed_Out = 1;
-                }
-
-                if (Delete_Timed_Out == 0 && delete_percentage != 0) {
-                    if (delete_percentage == 100) {
-                        Delete_FinishCheckCounter += 1;
-                    }
-                    if (delete_percentage != delete_data_hold) {
-                        Delete_FinishCheckCounter = 0;
-                    }
-
-                    if (Delete_FinishCheckCounter == delete_counter_value) {
-                        $("#progress_delete").css("width", "100%").text("Delete (Complete)");
-                    }
-
-                    if (Delete_FinishCheckCounter == (delete_counter_value + 2)) {
-                        clearInterval(t2);
-                        ShowLoading();
-                        location.reload();
-                    }
-
-                    delete_data_hold = delete_percentage;
-
-                    if (Delete_FinishCheckCounter < delete_counter_value) {
-                        const progressPrevious = Delete_TimeoutCounter < 5 && delete_percentage > 90;
-                        if (!progressPrevious) {
-                            const progress_delete = document.getElementById('progress_delete');
-                            progress_delete.style.width = Math.round(delete_percentage) + "%";
-                            progress_delete.innerHTML = "Delete (" + Math.round(delete_percentage) + "%)";
-                        }
-                    }
-
-                }
-
-            }
-        });
-    }
-
 });
 
 /*
@@ -453,12 +369,11 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 */
 
 function initMap() {
-    var ContextMenu = document.getElementById("menu");
-    var Latitude = 0;
-    var Longitude = 0;
+    const initial_location = { lat: 51.454266, lng: -0.978130 };
+    // Main map object
+    const map = new google.maps.Map(document.getElementById("map"), { zoom: 8, center: initial_location });
 
-    var initial_location = { lat: 51.454266, lng: -0.978130 };
-    var map = new google.maps.Map(document.getElementById("map"), { zoom: 8, center: initial_location });
+    const ContextMenu = document.getElementById("menu");
 
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -466,30 +381,36 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    var input = document.getElementById('pac-input'); // Create a text input
-    var searchBox = new google.maps.places.SearchBox(input); // Link it to search bar element
+    const input = document.getElementById('pac-input'); // Create a text input
+    const searchBox = new google.maps.places.SearchBox(input); // Link it to search bar element
 
     searchBox.addListener('places_changed', function () { // Selecting a prediction from the list
-        var places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
+        const places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
 
         if (places.length == 0) {
             return;
         }
 
-        var bounds = new google.maps.LatLngBounds();
+        const bounds = new google.maps.LatLngBounds();
         places.forEach(function (place) {
             if (!place.geometry) {
                 return;
             }
 
             if (place.geometry.viewport) {
-                bounds.union(place.geometry.viewport); // Only geocodes have viewport.
+                bounds.union(place.geometry.viewport); // Only geocodes have viewport
             } else {
                 bounds.extend(place.geometry.location);
             }
         });
         map.fitBounds(bounds); // Move map to place location
     });
+
+    /*
+    |-----------------------------------------------------------------------------------------------------------
+    | Placing markers (from database)
+    |-----------------------------------------------------------------------------------------------------------
+    */
 
     function LoadMarkers() {
         markers.forEach(marker =>
@@ -508,7 +429,7 @@ function initMap() {
     */
 
     // Setup
-    var clusterStyles = [
+    const clusterStyles = [
         {
             textColor: 'white',
             url: '/cluster_images/SmallCluster.png',
@@ -529,22 +450,21 @@ function initMap() {
         }
     ];
 
-    var mcOptions = {
+    const mcOptions = {
         gridSize: 50,
         styles: clusterStyles,
         maxZoom: 15
     };
 
-    var markerCluster = new MarkerClusterer(null, MarkerArray, mcOptions);
-    markerCluster.setIgnoreHidden(true);
+    const markerCluster = new MarkerClusterer(null, MarkerArray, mcOptions);
+    markerCluster.setIgnoreHidden(true); // Object will not cluster markers which are hidden
 
     google.maps.event.addListener(markerCluster, 'clusteringstart', ShowLoading);
     google.maps.event.addListener(markerCluster, 'clusteringend', HideLoading);
 
     // Invocation
     var Cluster_Active = false; // Clusterer flagged as off to begin with
-    const btn_analyse = document.getElementById("btn_analyse");
-    btn_analyse.addEventListener('click', event => {
+    document.getElementById("btn_analyse").addEventListener('click', event => {
         hideContextMenu();
         ShowLoading();
 
@@ -579,35 +499,36 @@ function initMap() {
         marker.setVisible(false);
     }
 
+    // Displaying and recording information regarding filtering by location
     let filter_marker;
     let search_area;
 
     $('#modal_filter').on('shown.bs.modal', function () { // When filter modal opens
-        // Set back to default (serach radius of all and disabled)
+        // Set location filtering element back to its default value (serach radius of [ALL])
         document.getElementById('Filter_Location').selectedIndex = "0";
         document.getElementById('Filter_Location').setAttribute('disabled', true);
 
         // Map
         const UK_center = new google.maps.LatLng(52.636879, -1.139759);
-        var FilterMapOptions = { // Provide smaller map to specify the center of a geographical area
+        const FilterMapOptions = { // Provide smaller map to specify the center of a geographical area
             center: UK_center,
             zoom: 6,
             disableDefaultUI: true, // Remove all controls but street view
             streetViewControl: true,
         };
 
-        var filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions);
+        const filter_map = new google.maps.Map(document.getElementById("filter_map"), FilterMapOptions);
 
         google.maps.event.addListener(filter_map, 'click', function (event) {
-            if (!filter_marker.getVisible()) { // The marker's visible property is initialised as false
+            if (!filter_marker.getVisible()) { // If the marker is not yet shown on the map
                 document.getElementById('Filter_Location').removeAttribute('disabled');
-                filter_marker.setVisible(true);
+                filter_marker.setVisible(true); // Show the marker
             }
-            filter_marker.setPosition(event.latLng); // Just move the marker if it already on the map
+            filter_marker.setPosition(event.latLng); // Just move the marker if it is already on the map
         });
 
         // Marker
-        filter_marker = new google.maps.Marker({ // Assign a marker which can't initially be seen to filter map
+        filter_marker = new google.maps.Marker({ // Assign a marker which can't initially be seen (to filter map)
             position: null,
             visible: false,
             map: filter_map
@@ -617,24 +538,25 @@ function initMap() {
         search_area = new google.maps.Circle({
             map: filter_map,
             visible: false,
-            radius: 1,    // 10 miles in metres
+            radius: 1,
             fillColor: '#AA0000'
         });
 
+        // When the search radius is selected/changed in the relevant dropdown
         document.getElementById('Filter_Location').addEventListener("change", (event) => {
             const search_radius = event.target.value;
 
             const AllAreas = (search_radius == "[ALL]") || (search_radius == null);
-            if (!AllAreas) {
-                if (filter_marker.getVisible()) {
-                    // Update circle object to new center position and selected radius
+            if (!AllAreas) { // If a quantifiable (numeric) value for search radius is chosen
+                if (filter_marker.getVisible()) { // And a center point of the search area is specified
+                    // Update the circle object to this center point with a radius of the search radius
                     search_area.setVisible(true);
                     search_area.bindTo('center', filter_marker, 'position');
                     search_area.setRadius(search_radius * 1609); // Convert miles to metres
                 }
             }
             else {
-                // If all option is selected, hide the marker and area
+                // If [ALL] option is selected, hide the marker and area
                 document.getElementById('Filter_Location').setAttribute('disabled', true);
                 search_area.setVisible(false);
                 filter_marker.setVisible(false);
@@ -646,7 +568,7 @@ function initMap() {
     document.getElementById('ID_Search').addEventListener("click", () => {
         const Filter_ID = document.getElementById('Filter_ID').value;
         const isEmpty = Filter_ID == "";
-        if(!isEmpty) {
+        if (!isEmpty) {
             // Identify marker with requested ID
             const MarkerToShow = MarkerArray.find(marker => marker.id == Filter_ID);
 
@@ -666,19 +588,19 @@ function initMap() {
         ShowLoading();
 
         // Main Crime Type
-        var main_dropdown = document.getElementById("Filter_Crime_Type");
-        var Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
+        const main_dropdown = document.getElementById("Filter_Crime_Type");
+        const Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
         // If field is empty or the all option is implicitly selected, set flag to true
         const AllCrimes = (Main_Crime_Type == null) || (Main_Crime_Type == "[ALL]");
 
         // Sub Crime Type
-        var sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
-        var Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
+        const sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
+        const Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
         const AllSubCrimes = (Sub_Crime_Type == null) || (Sub_Crime_Type == "[ALL]");
 
         // Date
-        var min_Date = document.getElementById("Filter_minDate").value;
-        var max_Date = document.getElementById("Filter_maxDate").value;
+        const min_Date = document.getElementById("Filter_minDate").value;
+        const max_Date = document.getElementById("Filter_maxDate").value;
 
         const min_Date_Entered = min_Date.length > 0;
         const max_Date_Entered = max_Date.length > 0;
@@ -693,8 +615,8 @@ function initMap() {
         }
 
         // Time
-        var min_Time = document.getElementById("Filter_minTime").value;
-        var max_Time = document.getElementById("Filter_maxTime").value;
+        const min_Time = document.getElementById("Filter_minTime").value;
+        const max_Time = document.getElementById("Filter_maxTime").value;
 
         const both_Times_Entered = min_Time.length > 0 && max_Time.length > 0;
         const single_Time_Entered = min_Time.length > 0 || max_Time.length > 0;
@@ -729,8 +651,22 @@ function initMap() {
             marker.setVisible(true)
         );
 
+        // Before filtering the markers, determine if the filter criteria includes location
+        const location_filtering = filter_marker.getVisible() && search_area.getVisible();
+
+        let filter_center;
+        let search_radius;
+        
+        // If so, determine the center point and search radius
+        if (location_filtering) {
+            // LatLng object of marker added to smaller map (center of search area)
+            filter_center = new google.maps.LatLng(filter_marker.getPosition().lat(), filter_marker.getPosition().lng());
+            search_radius = document.getElementById("Filter_Location").value;
+        }
+
         // Filter the markers which need to be hidden
         const Filtered_MarkerArray = MarkerArray.filter(marker => {
+            // The properties which are less computationally expensive to filter by should come first
             if (min_Date_Entered) {
                 if (new Date(marker.crimeDate) < min_Date) {
                     return true;
@@ -749,10 +685,12 @@ function initMap() {
                 }
             }
 
+            // More computationally expensive to filter by crime type
+            // But will not be reached if the marker was filtered out by date or time (above)
             if (!AllCrimes) {
                 if (!AllSubCrimes) { // One specific crime
                     if (marker.crimeType != Sub_Crime_Type) {
-                        return true; // Then this marker should be filtered and hidden
+                        return true;
                     }
                 }
                 else { // A (main) category of crime
@@ -767,15 +705,10 @@ function initMap() {
                 }
             }
 
-            if (filter_marker.getVisible() && search_area.getVisible()) {
-                // TODO The following two variables do not change between iterations of the loop
-                // LatLng object of marker added to smaller map (center of search area)
-                var filter_center = new google.maps.LatLng(filter_marker.getPosition().lat(), filter_marker.getPosition().lng());
-                const search_radius = document.getElementById("Filter_Location").value;
-
+            if (location_filtering) { // Filter criteria included location
                 // Shortest distance between search area center and the current marker
                 const distanceInMetres = google.maps.geometry.spherical.computeDistanceBetween(filter_center, marker.getPosition());
-                const distanceInMiles = (distanceInMetres / 1609);
+                const distanceInMiles = (distanceInMetres / 1609); // Convert to miles
 
                 if (distanceInMiles > search_radius) { // If marker is outside of search area
                     return true;
@@ -811,20 +744,23 @@ function initMap() {
         }
     }
 
-    // Record location of this click relative to map and screen
+    var Add_Latitude;
+    var Add_Longitude;
+
+    // Record location of this click in terms of on the map and on the screen
     map.addListener('rightclick', function (e) {
         // Map (Latitude and Longitude)
-        FirstLocation = e.latLng; // Recorded click location as latLng object
-        Latitude = FirstLocation.lat();
-        Longitude = FirstLocation.lng();
+        var Add_FirstLocation = e.latLng; // Record click location as latLng object
+        Add_Latitude = Add_FirstLocation.lat();
+        Add_Longitude = Add_FirstLocation.lng();
 
         // Context Menu (pixels)
         for (prop in e) {
             if (e[prop] instanceof MouseEvent) {
                 // Record click location
                 mouseEvt = e[prop];
-                var left = mouseEvt.clientX;
-                var top = mouseEvt.clientY;
+                const left = mouseEvt.clientX;
+                const top = mouseEvt.clientY;
 
                 // Show Context Menu at this location (actually very slightly beside)
                 ContextMenu.style.left = (left + 1) + "px";
@@ -848,7 +784,6 @@ function initMap() {
     $('#modal_add').on('shown.bs.modal', function () {
         document.querySelectorAll('#Add_Crime_Type', '#Add_Crime_Type_sub', '#Add_Description')
             .forEach(el => el.value = "");
-
         document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
         document.getElementById('Add_Time').value = "00:00";
         document.querySelectorAll('Add_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
@@ -856,24 +791,22 @@ function initMap() {
 
     var SmallMarkerMoved = false;
 
-    const add_btn = document.getElementById("btn_add"); // 'Add crime' button
-    add_btn.addEventListener('click', event => {
+    document.getElementById("btn_add").addEventListener('click', event => {
         hideContextMenu();
 
-        var modal = $('#modal_add');
-        modal.modal('show');
+        $('#modal_add').modal('show');
 
-        var CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
-        var RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
+        const CurrentZoom = map.getZoom(); // Get zoom level when add button was clicked
+        const RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
 
-        var AddMapOptions = {
+        const AddMapOptions = {
             center: FirstLocation,
             zoom: RefinedZoom,
-            disableDefaultUI: true, // Remove all controls but street view
+            disableDefaultUI: true,
             streetViewControl: true,
         };
 
-        var add_map = new google.maps.Map(document.getElementById("add_map"), AddMapOptions); // Show smaller map
+        const add_map = new google.maps.Map(document.getElementById("add_map"), AddMapOptions); // Show smaller map
 
         var Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
             position: FirstLocation,
@@ -881,47 +814,58 @@ function initMap() {
             map: add_map
         });
 
+        // Record position of marker if an adjustment is made
         google.maps.event.addListener(Draggable_marker_add, 'dragend', function (evt) {
-            SecondLocation = evt.latLng; // To be used to place static marker on main map
-            Latitude = SecondLocation.lat(); // Information to be sent
-            Longitude = SecondLocation.lng();
+            var Add_SecondLocation = evt.latLng;
+            Add_Latitude = Add_SecondLocation.lat();
+            Add_Longitude = Add_SecondLocation.lng();
             SmallMarkerMoved = true;
         });
 
-        // TODO Implement 3D View (adding markers in street view)
+        // TODO 3D View (adding markers in street view)
     });
 
     document.getElementById('add_submit_form').addEventListener("submit", function (e) {
         e.preventDefault();
 
-        var dropdown = document.getElementById("Add_Crime_Type");
-        var sub_dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crime type
+        const dropdown = document.getElementById("Add_Crime_Type");
+        const sub_dropdown = document.getElementById("Add_Crime_Type_sub"); // Initial step of getting crimeType
 
-        // Take values locally
-        var crimeDate = document.getElementById("Add_Date").value;
-        var crimeTime = document.getElementById("Add_Time").value;
-        var crimeType = sub_dropdown.options[sub_dropdown.selectedIndex].value;
-        var description = document.getElementById("Add_Description").value;
+        const Crime_Category = dropdown.options[dropdown.selectedIndex].value;
 
-        /* Check Crime Type(s) are specified */
-        var crimeTypes_Chosen = false;
+        // Record values entered into input fields
+        const crimeDate = document.getElementById("Add_Date").value;
+        const crimeTime = document.getElementById("Add_Time").value;
+        const crimeType = sub_dropdown.options[sub_dropdown.selectedIndex].value;
+        const description = document.getElementById("Add_Description").value;
 
-        var Crime_Category = dropdown.options[dropdown.selectedIndex].value;
-        if (Crime_Category == "" || crimeType == "") {
-            crimeTypes_Chosen = false;
+        const errorConditions =
+            [
+                {
+                    isMet: Crime_Category == "",
+                    errorMessage: "The 'Crime Type - Main Category' field is a required field"
+                },
+                {
+                    isMet: crimeType == "",
+                    errorMessage: "The 'Crime Type - Subcategory' field is a required field"
+                },
+                {
+                    isMet: description.length > 500,
+                    errorMessage: "The 'Description' field can only be a maximum of 500 characters"
+                }
+            ];
+
+        const metErrorConditions = errorConditions.filter(x => x.isMet);
+
+        if (metErrorConditions.length > 0) {
+            ShowErrorAlert(metErrorConditions.map(x => x.errorMessage).join("<br>"), document.getElementById('modal_add_content'));
+            return;
         }
         else {
-            crimeTypes_Chosen = true;
-        }
-
-        if (description.length <= 500 && MarkerArray.length < 250000 && crimeTypes_Chosen == true) {
-            /* Also send to database */
-            var formData = $('#add_submit_form').serialize();
-
-            var Vars = { Latitude: Latitude, Longitude: Longitude };
-            var varsData = $.param(Vars);
-
-            var data = formData + '&' + varsData;
+            var formData = $('#add_submit_form').serialize(); // Collate data from form
+            var Vars = { Latitude: Add_Latitude, Longitude: Add_Longitude }; // Additional two variables
+            var varsData = $.param(Vars); // Convert to format to send as part of bundle
+            var data = formData + '&' + varsData; // Combine all information as one bundle
 
             ShowLoading();
 
@@ -930,14 +874,16 @@ function initMap() {
                 type: 'POST',
                 data: data,
                 success: function (id) {
-                    if (SmallMarkerMoved == false) {
-                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, FirstLocation, map); // Place a static marker on the main map				    
+                    if (!SmallMarkerMoved) {
+                         // No adjustment was made so use the map location where the context menu to add a crime was requested
+                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, FirstLocation, map);				    
                     }
                     else {
-                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, SecondLocation, map); // Place a static marker on the main map
+                         // An adjutsment was made, so use the map location of where the draggable marker was at the time of submit
+                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, SecondLocation, map);
                     }
 
-                    SmallMarkerMoved = false;
+                    SmallMarkerMoved = false; // Reset for the next time a marker is added
                     HideLoading();
                     $('#modal_add').modal('hide');
                     HideErrorAlert();
@@ -945,27 +891,8 @@ function initMap() {
                 fail: function () {
                     HideLoading();
                 }
-            });
-        }
-        else {
-            var add_err_string = "";
-            if (description.length > 500) {
-                add_err_string += "The 'description' field can only be a maximum of 500 characters<br>";
-            }
-            if (MarkerArray.length > 250000) {
-                add_err_string += "The mapper is at its capacity of displaying 250,000 crimes<br>";
-            }
-            if (crimeTypes_Chosen == false) {
-                if (Crime_Category == "") {
-                    add_err_string += "The 'Crime Type - Main Category' field is a required field<br>";
-                }
-                if (crimeType == "") {
-                    add_err_string += "The 'Crime Type - Subcategory' field is a required field<br>";
-                }
-            }
-            ShowErrorAlert(add_err_string, document.getElementById('modal_add_content'));
-        }
-
+            });            
+        }     
     });
 
     /*
@@ -974,16 +901,13 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
+    // TODO Readibility/Comments for the 'Import Crime' module (below)
     $('#modal_import').on('shown.bs.modal', function () {
-        if ($('#progress_file_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) { // If class was to changed to class used for showing errors
-            document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change it back to default
-        }
-        document.getElementById('progress_file_upload').style.width = "0%";
-
-        if ($('#progress_insert_upload').hasClass('progress-bar bg-danger progress-bar-striped progress-bar-animated')) {
-            document.getElementById('progress_insert_upload').setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
-        }
-        document.getElementById('progress_insert_upload').style.width = "0%";
+        const progress_file_upload = document.getElementById('progress_file_upload');
+        const progress_insert_upload = document.getElementById('progress_insert_upload');
+        
+        ResetProgressBar(progress_file_upload);
+        ResetProgressBar(progress_insert_upload)
     });
 
     var isFileSelected = false;
@@ -993,332 +917,109 @@ function initMap() {
         isFileSelected = false;
         isCSV = false;
 
-        files = this.files;
+        const files = document.getElementById('Import_Input').files;
+        const file_label = document.getElementById('import_lbl');
 
         if (files.length >= 1) { // If input has a file selected
             isFileSelected = true; // Toggle presence of file
-            var fileName = files[0].name;
-            var ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+            const fileName = files[0].name;
+            const ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
 
             if (ext == 'csv') {
                 isCSV = true; // Toggle CSV check
             }
 
-            document.getElementById('import_lbl').text(fileName); // Change label of input 
+            file_label.innerHTML = fileName; // Change label of input to filename
         }
         else {
             isFileSelected = false;
-            document.getElementById('import_lbl').text("Choose file");
+            file_label.innerHTML = "Choose file"; // Set back to default text
         }
 
     });
+
+    function ShowUploadError() {
+        const progress_file_upload = document.getElementById('progress_file_upload');
+        progress_file_upload.setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
+        progress_file_upload.style.width = "100%";
+        progress_file_upload.innerHTML = "File Upload (Fail/Error)";
+    }
 
     document.getElementById('btn_import_confirm').addEventListener('click', () => { // Sending selected file to PHP file (to be handled)
         HideErrorAlert();
         HideWarningAlert();
 
-        document.getElementById('btn_import_confirm').setAttribute('disabled', true); // Disable import button
-        document.getElementById('close_import').setAttribute('disabled', true); // Disable close button
+        document.querySelectorAll('#btn_import_confirm, #close_import')
+            .forEach(el => el.setAttribute('disabled', true)); // Disable both these buttons during import process
 
-        if ($('#Import_Input').prop('files').length > 0 && (isCSV === true)) {
-            file = $('#Import_Input').prop('files')[0];
+        if (document.getElementById('Import_Input').files.length > 0 && (isCSV === true)) {
+            file = document.getElementById('Import_Input').files[0];
 
             var reader = new FileReader();
             reader.readAsText(file);
 
             reader.onload = function (event) {
-                var Date_index = -1;
-                var Latitude_index = -1;
-                var Longitude_index = -1;
-                var CrimeType_index = -1;
-                var Description_index = -1;
-                var Time_index = -1;
+                const progress_file_upload = document.getElementById('progress_file_upload');
 
-                var Accepted_Date_headers = ["Date", "date", "Month", "month"];
-                var Accepted_Latitude_headers = ["Latitude", "latitude", "Lat", "lat"];
-                var Accepted_Longitude_headers = ["Longitude", "longitude", "Long", "long", "Lng", "lng"];
-                var Accepted_CrimeType_headers = ["Crime type", "Crime Type", "crime type", "CrimeType", "crimetype", "Type", "type"];
-                var Accepted_description_headers = ["Context", "context", "description", "description", "Notes", "notes"];
-                var Accepted_Time_headers = ["Time", "time", "Timestamp", "timestamp"];
+                formdata = new FormData();
+                formdata.append("fileToUpload", file);
 
-                // Read file locally
-                var csv = event.target.result;
-                var rows = csv.split('\n');
+                $.ajax({
+                    // Progress of sending file to server (file upload progress)
+                    xhr: function () {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener("progress", function (evt) {
+                            if (evt.lengthComputable) {
+                                // Get file upload progress
+                                var upload_percentage = (evt.loaded / evt.total) * 100;
 
-                // Check headers
-                headers = rows[0].split(','); // The first row split by commas give the headers
+                                // Update progress bar width and text using progress
+                                progress_file_upload.style.width = Math.round(upload_percentage) + "%";
+                                progress_file_upload.style.innerHTML = "File Upload (" + upload_percentage + "%)";
 
-                for (var i = 0; i < headers.length; i++) {
-                    headers[i] = $.trim(headers[i].replace(/[\t\n]+/g, ' ')); // Remove any whitespace (e.g before first header or after last header)
-                    if (Accepted_Date_headers.indexOf(headers[i]) !== -1) {
-                        Date_index = i;
-                    }
-                    if (Accepted_Latitude_headers.indexOf(headers[i]) !== -1) {
-                        Latitude_index = i;
-                    }
-                    if (Accepted_Longitude_headers.indexOf(headers[i]) !== -1) {
-                        Longitude_index = i;
-                    }
-                    if (Accepted_CrimeType_headers.indexOf(headers[i]) !== -1) {
-                        CrimeType_index = i;
-                    }
-                    if (Accepted_description_headers.indexOf(headers[i]) !== -1) {
-                        Description_index = i;
-                    }
-                    if (Accepted_Time_headers.indexOf(headers[i]) !== -1) {
-                        Time_index = i;
-                    }
-                }
-
-                var validFile = true;
-                var import_err_str = "";
-
-                var FileWarning = false;
-                var import_warning_str = "";
-
-                var Reached_Limit = false;
-
-                if (Date_index === -1) {
-                    import_warning_str += "Missing 'Date' column in file (the current date will be used)<br>";
-                    FileWarning = true;
-                }
-                if (Latitude_index === -1) {
-                    import_err_str += "Missing 'Latitude' column in file<br>";
-                    validFile = false;
-                }
-                if (Longitude_index === -1) {
-                    import_err_str += "Missing 'Longitude' column in file<br>";
-                    validFile = false;
-                }
-                if (CrimeType_index === -1) {
-                    import_warning_str += "Missing 'Crime Type' column in file (the crime type 'Unknown' will be used)<br>";
-                    FileWarning = true;
-                }
-                if (Description_index === -1) {
-                    import_warning_str += "Missing 'Description' column in file (no description will be used)<br>";
-                    FileWarning = true;
-                }
-                if (Time_index === -1) {
-                    import_warning_str += "Missing 'Time' column in file (the current time will be used)<br>";
-                    FileWarning = true;
-                }
-
-                // Check number of rows
-                var num_rows = rows.length;
-                var num_records = num_rows - 1;
-
-                if (num_records <= 0) {
-                    validFile = false;
-                }
-
-                if ((MarkerArray.length + num_records) > 250000) {
-                    Reached_Limit = true;
-                }
-
-                if (num_records > 50000) {
-                    import_err_str += "Only 50000 records can be imported at any one time<br>(The selected file has " + num_records + " records)<br>";
-                    validFile = false;
-                }
-
-                if (validFile == true && Reached_Limit == false) {
-                    if (FileWarning == true) {
-                        ShowWarningAlert(import_warning_str, document.getElementById('modal_import_content'));
-                    }
-
-                    var progress_file_upload = document.getElementById('progress_file_upload');
-                    progress_file_upload.style.width = "100%";
-                    progress_file_upload.innerHTML = "Ready";
-                    formdata = new FormData();
-                    formdata.append("fileToUpload", file);
-
-                    $.ajax({
-                        // File upload progress
-                        xhr: function () {
-                            var xhr = new window.XMLHttpRequest();
-                            xhr.upload.addEventListener("progress", function (evt) {
-                                if (evt.lengthComputable) {
-                                    var percentComplete = evt.loaded / evt.total;
-                                    var upload_percentage = percentComplete * 100;
-                                    var progress_file_upload = document.getElementById('progress_file_upload');
-                                    if (upload_percentage = 100) {
-                                        progress_file_upload.style.width = "100%";
-                                        progress_file_upload.innerHTML = "File Upload (Processing)";
-                                    }
-                                    else {
-                                        progress_file_upload.style.width = Math.round(upload_percentage) + "%";
-                                        progress_file_upload.innerHTML = "File Upload (" + upload_percentage + "%)";
-                                    }
-
+                                if (upload_percentage == 100) { // Use 'Complete' text instead of 100% on completion
+                                    progress_file_upload.style.innerHTML = "File Upload (Complete)";
                                 }
-                            }, false);
-                            return xhr;
-                        },
-
-                        url: 'ImportMarkers.php',
-                        type: 'POST',
-                        data: formdata,
-                        processData: false,
-                        contentType: false,
-                        success: function () {
-                            progress_file_upload.style.width = "100%";
-                            progress_file_upload.innerHTML = "File Upload (Complete)";
-                        },
-                        fail: function () {
-                            document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                            progress_file_upload.style.width = "100%";
-                            progress_file_upload.innerHTML = "File Upload (Failed)";
-                        },
-                        error: function () {
-                            document.getElementById('progress_file_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-                            progress_file_upload.style.width = "100%";
-                            progress_file_upload.innerHTML = "File Upload (Error)";
-                        }
-                    });
-
-                    var NoChangeCounter = 0;
-                    var FinishCheckCounter = 0;
-                    var TimeoutCounter = 0;
-                    var Timed_Out = 0;
-                    var data_hold = -10;
-
-                    var counter_value = 0;
-                    var TimeoutLimit = 0;
-
-                    if (num_records < 7500) {
-                        counter_value = 5
-                        TimeoutLimit = 60;
-                    }
-                    else if (num_records < 25000) {
-                        counter_value = 7;
-                        TimeoutLimit = 180;
-                    }
-                    else {
-                        counter_value = 9;
-                        TimeoutLimit = 300;
-                    }
-
-                    // TODO Refactor this module to handle multi-user interaction
-
-                    /*
-                    (ImportMarkers.php)
-                    Create a record in import_jobs
-                    Return job ID to the client
-                    Periodically update the processed record amount in the database
-                    */
-
-                    /*
-                    (map.js)
-                    Recieve job ID
-                    Periodically query the database using job ID to determine the progress
-                    Update the progress bar
-                    */
-
-                    var t = setInterval(CheckProgressFile, 1000); // Run below function every second
-
-                    function CheckProgressFile() {
-                        $.ajax({
-                            url: "/counts.txt",
-                            cache: false,
-                            async: false,
-                            dataType: "text",
-                            success: function (data, textStatus, jqXHR) {
-                                TimeoutCounter += 1;
-                                var import_percentage = data;
-
-                                if (import_percentage == 0) {
-                                    NoChangeCounter += 1;
-                                }
-                                if (import_percentage != 0) {
-                                    NoChangeCounter = 0;
-                                }
-
-                                if (TimeoutCounter == TimeoutLimit || import_percentage == "-1000" || NoChangeCounter == 10) { // Timeout, file upload error or no update
-                                    clearInterval(t);
-                                    // Show full width red progress bar
-                                    document.getElementById('progress_insert_upload').setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-
-                                    const progress_insert_upload = docuemt.getElementById('progress_insert_upload');
-
-                                    progress_insert_upload.style.width = "100%";
-                                    progress_insert_upload.innerHTML = "Import (Failed)";
-
-                                    Timed_Out = 1;
-                                    document.getElementById('btn_import_confirm').removeAttribute('disabled');
-                                    document.getElementById('close_import').removeAttribute('disabled');
-                                }
-
-                                if (Timed_Out == 0 && import_percentage != 0) {
-                                    if (import_percentage == 100) {
-                                        FinishCheckCounter += 1;
-                                    }
-                                    if (import_percentage != data_hold) {
-                                        FinishCheckCounter = 0;
-                                    }
-
-                                    if (FinishCheckCounter == counter_value) {
-                                        progress_insert_upload.style.width = "100%";
-                                        progress_insert_upload.innerHTML = "Import (Complete)";
-                                    }
-
-                                    if (FinishCheckCounter == (counter_value + 2)) {
-                                        clearInterval(t);
-                                        ShowLoading();
-                                        location.reload();
-                                    }
-
-                                    data_hold = import_percentage;
-
-                                    if (FinishCheckCounter < counter_value) {
-                                        var isPreviousProgress = (TimeoutCounter <= 7 && import_percentage > 90);
-                                        if (!isPreviousProgress) {
-                                            progress_insert_upload.style.width = Math.round(import_percentage) + "%";
-                                            progress_insert_upload.innerHTML = "Import (" + Math.round(import_percentage) + "%)";
-                                        }
-                                    }
-                                }
-
                             }
-                        });
-                    }
+                        }, false);
+                        return xhr;
+                    },
 
-                }
-                else {
-                    if (num_records <= 0) {
-                        import_err_str += "No records found in the file<br>";
+                    url: 'ImportMarkers.php',
+                    type: 'POST',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    fail: function () {
+                        ShowUploadError();
+                    },
+                    error: function () {
+                        ShowUploadError();
                     }
-                    if (Reached_Limit == true) {
-                        import_err_str += "Importing this file would exceed the limit of 250,000 markers<br>";
-                    }
+                });
 
-                    if (FileWarning == true) {
-                        ShowWarningAlert(import_warning_str, document.getElementById('modal_import_content'));
-                        ShowErrorAlert(import_err_str, document.getElementById('Alert_Warning'));
-                    }
-                    else {
-                        ShowErrorAlert(import_err_str, document.getElementById('modal_import_content'));
-                    }
+                // TODO Display of the progress of adding records to database (from an imported file)
 
-                    document.getElementById('btn_import_confirm').removeAttribute('disabled');
-                    document.getElementById('close_import').removeAttribute('disabled');
-                }
+                /*
+                (ImportMarkers.php)
+                Return job ID to the client
+                Periodically update the processed record amount in the database
+                */
 
+                /*
+                (map.js)
+                Recieve job ID
+                Periodically query the database using job ID to determine the progress
+                Update the progress bar
+                */
             }
         }
         else {
-            selectfile_err_string = "";
-            if (isCSV === false) { // File of input is not a .csv file
-                if (isFileSelected === false) { // And no file has been added
-                    selectfile_err_string += "No file has been selected for import";
-                    ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
-                }
-                else {
-                    selectfile_err_string += "The file is not a .csv file";
-                    ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
-                }
-            }
-
-            document.getElementById('btn_import_confirm').removeAttribute('disabled');
-            document.getElementById('close_import').removeAttribute('disabled');
+            const selectfile_err_string = (!isFileSelected) ? "No file has been selected for import" : "The file is not a .csv file";
+            ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
         }
+
+        document.querySelectorAll('#btn_import_confirm, #close_import')
+            .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling an import
     });
 }
