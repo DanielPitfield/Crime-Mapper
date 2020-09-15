@@ -207,7 +207,7 @@ function EditMarker(id) {
     var Edit_SmallMarkerMoved = false;
     // Record geographical information of marker 
     const Edit_FirstLocation = MarkerToEdit.position;
-    var Edit_Latitude =  Edit_FirstLocation.lat();
+    var Edit_Latitude = Edit_FirstLocation.lat();
     var Edit_Longitude = Edit_FirstLocation.lng();
 
     // Record where the marker is moved to (if an adjustment is made)
@@ -227,13 +227,10 @@ function EditMarker(id) {
         const validDescription = description_edit.length <= 500;
 
         if (validDescription) {
-            // Also send to database
-            var formData = $('#edit_submit_form').serialize();
-
-            var Vars = { id: id, Latitude: Edit_Latitude, Longitude: Edit_Longitude };
-            var varsData = $.param(Vars);
-
-            var data = formData + '&' + varsData;
+            var formData = $('#edit_submit_form').serialize(); // Collate data from form
+            var Vars = { id: id, Latitude: Edit_Latitude, Longitude: Edit_Longitude }; // Additional two variables
+            var varsData = $.param(Vars); // Convert to format to send as part of bundle
+            var data = formData + '&' + varsData; // Combine all information as one bundle
 
             ShowLoading();
 
@@ -267,9 +264,7 @@ function EditMarker(id) {
             const edit_err_string = "The 'Description' field can only be a maximum of 500 characters<br>";
             ShowErrorAlert(edit_err_string, document.getElementById('modal_edit_content'));
         }
-
     });
-
 }
 
 /*
@@ -302,7 +297,7 @@ function DeleteMarker(id) {
                     if (MarkerToDelete_index !== -1) { // Index found
                         MarkerArray.splice(MarkerToDelete_index, 1); // Delete from Array
                     }
-    
+
                 }
             }
         });
@@ -341,7 +336,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 
         // Set position of alert
         const alert_progress = document.getElementById('alert_progress');
-        alert_progress.style.top = document.getElementById('modal_filter_content').offsetTop + (document.getElementById('modal_filter_content').height /2);
+        alert_progress.style.top = document.getElementById('modal_filter_content').offsetTop + (document.getElementById('modal_filter_content').height / 2);
         alert_progress.style.left = document.getElementById('modal_filter_content').offsetLeft;
         alert_progress.style.width = document.getElementById('modal_filter_content').width;
 
@@ -356,8 +351,8 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
     }
     else {
         HideProgressAlert();
-        const filter_delete_string = (num_markers == 0) ? "There are no visible or filtered markers to delete<br>" : 
-        "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
+        const filter_delete_string = (num_markers == 0) ? "There are no visible or filtered markers to delete<br>" :
+            "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
         ShowErrorAlert(filter_delete_string, document.getElementById('modal_filter_content'));
     }
 });
@@ -513,7 +508,7 @@ function initMap() {
         const FilterMapOptions = { // Provide smaller map to specify the center of a geographical area
             center: UK_center,
             zoom: 6,
-            disableDefaultUI: true, // Remove all controls but street view
+            disableDefaultUI: true,
             streetViewControl: true,
         };
 
@@ -656,7 +651,7 @@ function initMap() {
 
         let filter_center;
         let search_radius;
-        
+
         // If so, determine the center point and search radius
         if (location_filtering) {
             // LatLng object of marker added to smaller map (center of search area)
@@ -685,8 +680,11 @@ function initMap() {
                 }
             }
 
-            // More computationally expensive to filter by crime type
-            // But will not be reached if the marker was filtered out by date or time (above)
+            /*
+            More computationally expensive to filter by crime type
+            But will not be reached if the marker was filtered out by date or time (above)
+            */
+
             if (!AllCrimes) {
                 if (!AllSubCrimes) { // One specific crime
                     if (marker.crimeType != Sub_Crime_Type) {
@@ -875,11 +873,11 @@ function initMap() {
                 data: data,
                 success: function (id) {
                     if (!SmallMarkerMoved) {
-                         // No adjustment was made so use the map location where the context menu to add a crime was requested
-                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, FirstLocation, map);				    
+                        // No adjustment was made so use the map location where the context menu to add a crime was requested
+                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, FirstLocation, map);
                     }
                     else {
-                         // An adjutsment was made, so use the map location of where the draggable marker was at the time of submit
+                        // An adjutsment was made, so use the map location of where the draggable marker was at the time of submit
                         placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, SecondLocation, map);
                     }
 
@@ -891,8 +889,8 @@ function initMap() {
                 fail: function () {
                     HideLoading();
                 }
-            });            
-        }     
+            });
+        }
     });
 
     /*
@@ -905,13 +903,13 @@ function initMap() {
     $('#modal_import').on('shown.bs.modal', function () {
         const progress_file_upload = document.getElementById('progress_file_upload');
         const progress_insert_upload = document.getElementById('progress_insert_upload');
-        
+
         ResetProgressBar(progress_file_upload);
         ResetProgressBar(progress_insert_upload)
     });
 
-    var isFileSelected = false;
-    var isCSV = false;
+    var isFileSelected;
+    var isCSV;
 
     document.getElementById('Import_Input').addEventListener("change", () => {
         isFileSelected = false;
@@ -955,64 +953,72 @@ function initMap() {
         if (document.getElementById('Import_Input').files.length > 0 && (isCSV === true)) {
             file = document.getElementById('Import_Input').files[0];
 
-            var reader = new FileReader();
-            reader.readAsText(file);
+            const progress_file_upload = document.getElementById('progress_file_upload');
 
-            reader.onload = function (event) {
-                const progress_file_upload = document.getElementById('progress_file_upload');
+            formdata = new FormData();
+            formdata.append("ImportFile", file);
 
-                formdata = new FormData();
-                formdata.append("fileToUpload", file);
+            $.ajax({
+                // Progress of sending file to server (file upload progress)
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            // Get file upload progress
+                            var upload_percentage = (evt.loaded / evt.total) * 100;
 
-                $.ajax({
-                    // Progress of sending file to server (file upload progress)
-                    xhr: function () {
-                        var xhr = new window.XMLHttpRequest();
-                        xhr.upload.addEventListener("progress", function (evt) {
-                            if (evt.lengthComputable) {
-                                // Get file upload progress
-                                var upload_percentage = (evt.loaded / evt.total) * 100;
+                            // Update progress bar width and text using progress
+                            progress_file_upload.style.width = Math.round(upload_percentage) + "%";
+                            progress_file_upload.style.innerHTML = "File Upload (" + upload_percentage + "%)";
 
-                                // Update progress bar width and text using progress
-                                progress_file_upload.style.width = Math.round(upload_percentage) + "%";
-                                progress_file_upload.style.innerHTML = "File Upload (" + upload_percentage + "%)";
-
-                                if (upload_percentage == 100) { // Use 'Complete' text instead of 100% on completion
-                                    progress_file_upload.style.innerHTML = "File Upload (Complete)";
-                                }
+                            if (upload_percentage == 100) { // Use 'Complete' text instead of 100% on completion
+                                progress_file_upload.style.innerHTML = "File Upload (Complete)";
                             }
-                        }, false);
-                        return xhr;
-                    },
+                        }
+                    }, false);
+                    return xhr;
+                },
 
-                    url: 'ImportMarkers.php',
-                    type: 'POST',
-                    data: formdata,
-                    processData: false,
-                    contentType: false,
-                    fail: function () {
-                        ShowUploadError();
-                    },
-                    error: function () {
-                        ShowUploadError();
-                    }
-                });
+                url: 'ImportMarkers.php',
+                type: 'POST',
+                data: formdata,
+                processData: false,
+                contentType: false,
+                fail: function () {
+                    ShowUploadError();
+                },
+                error: function () {
+                    ShowUploadError();
+                }
+            });
 
-                // TODO Display of the progress of adding records to database (from an imported file)
+            // Get Job ID in above POST request
 
-                /*
-                (ImportMarkers.php)
-                Return job ID to the client
-                Periodically update the processed record amount in the database
-                */
+            // Every 1 second, getTimeout()
+            $.ajax({
+                url: 'GetImportProgress.php',
+                type: 'POST',
+                // Use Job ID as data paramater in this request
+                data: jobID,
+                success: function (response) {
+                    console.log(response);
+                }
 
-                /*
-                (map.js)
-                Recieve job ID
-                Periodically query the database using job ID to determine the progress
-                Update the progress bar
-                */
-            }
+            });
+
+            // TODO Display of the progress of adding records to database (from an imported file)
+
+            /*
+            (ImportMarkers.php)
+            Return job ID to the client
+            */
+
+            /*
+            (map.js)
+            Recieve job ID
+            Periodically query the database using job ID to determine the progress (GetImportProgress.php endpoint)
+            Update the progress bar
+            */
         }
         else {
             const selectfile_err_string = (!isFileSelected) ? "No file has been selected for import" : "The file is not a .csv file";
