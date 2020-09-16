@@ -314,10 +314,8 @@ function DeleteMarker(id) {
 // TODO Delete mulitiple markers - multi-user interaction
 
 function ResetProgressBar(progress_bar) {
-    if (progress_bar.contains('progress-bar bg-danger progress-bar-striped progress-bar-animated')) { // If class was to changed to class used for showing errors
-        progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change it back to default animated class
-    }
-    progress_bar.style.width = "0%"; // Also reset progress
+    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change progress bar back to default animated class
+    progress_bar.style.width = "0%"; // Reset progress 
 }
 
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
@@ -901,15 +899,14 @@ function initMap() {
 
     // TODO Readibility/Comments for the 'Import Crime' module (below)
     $('#modal_import').on('shown.bs.modal', function () {
-        const progress_file_upload = document.getElementById('progress_file_upload');
         const progress_insert_upload = document.getElementById('progress_insert_upload');
-
+        const progress_file_upload = document.getElementById('progress_file_upload');
+        ResetProgressBar(progress_insert_upload);
         ResetProgressBar(progress_file_upload);
-        ResetProgressBar(progress_insert_upload)
     });
 
-    var isFileSelected;
-    var isCSV;
+    let isFileSelected;
+    let isCSV;
 
     document.getElementById('Import_Input').addEventListener("change", () => {
         isFileSelected = false;
@@ -930,33 +927,24 @@ function initMap() {
             file_label.innerHTML = fileName; // Change label of input to filename
         }
         else {
-            isFileSelected = false;
             file_label.innerHTML = "Choose file"; // Set back to default text
         }
-
     });
 
-    function ShowUploadError() {
-        const progress_file_upload = document.getElementById('progress_file_upload');
-        progress_file_upload.setAttribute('class', 'progress-bar bg-danger progress-bar-striped progress-bar-animated');
-        progress_file_upload.style.width = "100%";
-        progress_file_upload.innerHTML = "File Upload (Fail/Error)";
-    }
-
-    document.getElementById('btn_import_confirm').addEventListener('click', () => { // Sending selected file to PHP file (to be handled)
+    document.getElementById('btn_import_confirm').addEventListener('click', () => {
         HideErrorAlert();
         HideWarningAlert();
 
         document.querySelectorAll('#btn_import_confirm, #close_import')
             .forEach(el => el.setAttribute('disabled', true)); // Disable both these buttons during import process
 
-        if (document.getElementById('Import_Input').files.length > 0 && (isCSV === true)) {
+        if (isFileSelected && isCSV) {
             file = document.getElementById('Import_Input').files[0];
-
-            const progress_file_upload = document.getElementById('progress_file_upload');
-
             formdata = new FormData();
             formdata.append("ImportFile", file);
+
+            const progress_file_upload = document.getElementById('progress_file_upload');
+            const progress_insert_upload = document.getElementById('progress_insert_upload');
 
             $.ajax({
                 // Progress of sending file to server (file upload progress)
@@ -969,21 +957,54 @@ function initMap() {
 
                             // Update progress bar width and text using progress
                             progress_file_upload.style.width = Math.round(upload_percentage) + "%";
-                            progress_file_upload.style.innerHTML = "File Upload (" + upload_percentage + "%)";
+                            progress_file_upload.innerHTML = `File Upload (${upload_percentage}%)`;
 
                             if (upload_percentage == 100) { // Use 'Complete' text instead of 100% on completion
-                                progress_file_upload.style.innerHTML = "File Upload (Complete)";
+                                progress_file_upload.innerHTML = "File Upload (Complete)";
                             }
                         }
                     }, false);
                     return xhr;
                 },
 
+                // Sending file to server
                 url: 'ImportMarkers.php',
                 type: 'POST',
                 data: formdata,
                 processData: false,
                 contentType: false,
+                success: function (result) {
+                    // Response of the Job_ID (the ID of the database record created for this job)
+                    var Job_ID = parseInt(result);
+
+                    // This response can be a statement error (so validation is needed here)
+                                      
+                    var poll_progress = setInterval(GetImportProgress, 2000);
+
+                    // Send the Job_ID to GetImportProgress.php endpoint to determine the progress 
+                    function GetImportProgress() {
+                        console.log("GetImportProgress()");
+                        $.ajax({
+                            url: 'GetImportProgress.php',
+                            type: 'POST',
+                            data: { Job_ID: Job_ID },
+                            success: function (result) {
+                                var progress = parseInt(result); // Percentage completion (of import)
+
+                                // Set progress bar length to response value
+                                progress_insert_upload.style.width = Math.round(progress) + "%";
+                                progress_insert_upload.innerHTML = `File Import (${progress}%)`;
+    
+                                if (progress == 100) {
+                                    clearInterval(poll_progress); // Stop checking the progress
+                                    progress_insert_upload.innerHTML = "File Import (Complete)";
+                                    // After 2 seconds, reload the page to show new markers
+                                    setTimeout(function(){ window.location.reload(); }, 2000); 
+                                }
+                            }
+                        });
+                    }                                     
+                },
                 fail: function () {
                     ShowUploadError();
                 },
@@ -991,34 +1012,6 @@ function initMap() {
                     ShowUploadError();
                 }
             });
-
-            // Get Job ID in above POST request
-
-            // Every 1 second, getTimeout()
-            $.ajax({
-                url: 'GetImportProgress.php',
-                type: 'POST',
-                // Use Job ID as data paramater in this request
-                data: jobID,
-                success: function (response) {
-                    console.log(response);
-                }
-
-            });
-
-            // TODO Display of the progress of adding records to database (from an imported file)
-
-            /*
-            (ImportMarkers.php)
-            Return job ID to the client
-            */
-
-            /*
-            (map.js)
-            Recieve job ID
-            Periodically query the database using job ID to determine the progress (GetImportProgress.php endpoint)
-            Update the progress bar
-            */
         }
         else {
             const selectfile_err_string = (!isFileSelected) ? "No file has been selected for import" : "The file is not a .csv file";

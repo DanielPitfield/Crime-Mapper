@@ -238,6 +238,7 @@ require 'dbConfig.php'; // Include the database configuration file
 				<div class="modal-header">
 					<h5 class="modal-title">Import</h5>
 					<a href="template.csv" class="btn btn-info" id="Import_Template" role="button">Download Template</a>
+					<a href="https://data.police.uk/data/" target="_blank" class="btn btn-info" id="Import_Browse" role="button">Browse Files</a>
 
 					<button type="button" class="close" id="close_import" data-dismiss="modal">
 						<span>&times;</span>
@@ -246,16 +247,14 @@ require 'dbConfig.php'; // Include the database configuration file
 
 				<div class="modal-body">
 					<div class="custom-file mb-3">
-						<input type="file" id="Import_Input" class="custom-file-input" name="fileToUpload" accept=".csv">
+						<input type="file" id="Import_Input" class="custom-file-input" name="ImportFile" accept=".csv">
 						<label class="custom-file-label" id="import_lbl" for="customFile">Choose file</label>
 					</div>
-
-					<button type="submit" id="btn_import_confirm" class="btn btn-success">Import</button>
+					<input type="submit" value="Import" id="btn_import_confirm" class="btn btn-success" />
 
 					<div class="progress">
 						<div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
 					</div>
-
 					<div class="progress">
 						<div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
 					</div>

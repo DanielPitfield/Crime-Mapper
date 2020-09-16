@@ -285,7 +285,7 @@ input[type="number"] {
   width:15%;
 }
 
-#Filter_Clear, #Filter_ID, #ID_Search, #Delete_Filtered_Markers, #Import_Template {
+#Filter_Clear, #Filter_ID, #ID_Search, #Delete_Filtered_Markers, #Import_Template, #Import_Browse {
   font-size:12px;
   height:20px;
   padding:0px 10px 2px 10px;
@@ -293,7 +293,7 @@ input[type="number"] {
   text-align:center;
 }
 
-#Filter_Clear, #Filter_ID, #ID_Search, #Import_Template {
+#Filter_Clear, #Filter_ID, #ID_Search, #Import_Template, #Import_Browse {
   margin-left:10px;
 }
 
@@ -317,7 +317,7 @@ input[type="number"] {
   display:inline-block;
   white-space:nowrap;
   overflow:hidden;
-  text-overflow:ellipsis;"
+  text-overflow:ellipsis;
 }
 
 .progress {
@@ -329,14 +329,12 @@ input[type="number"] {
 }
 
 #modal_left {
-  display: inline-block;
   width:52.5%;
   float:left;
 }
 
 #modal_right {
   border: 1px solid black;
-  display: inline-block;
   width:47.5%;
   float:right;
 }

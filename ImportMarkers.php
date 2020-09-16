@@ -6,7 +6,10 @@ date_default_timezone_set("Europe/London");
 // Check for any errors with file upload
 if ($_FILES['ImportFile']['error'] == 0) {
     $name = $_FILES['ImportFile']['name'];
-    $ext = strtolower(end(explode('.', $_FILES['ImportFile']['name'])));
+
+    $tmp = explode('.', $name);
+    $ext = end($tmp);
+
     $type = $_FILES['ImportFile']['type'];
     $tmpName = $_FILES['ImportFile']['tmp_name'];
 
@@ -24,14 +27,11 @@ if ($_FILES['ImportFile']['error'] == 0) {
         'application/txt',
     );
 
-    echo $type;
-
     // Check file is a csv file (extension and type)
     if (($ext == "csv") && (in_array($type, $csvMimes))) {
         $csvAsArray = array_map('str_getcsv', file($tmpName)); // Convert csv to array
         $firstline = $csvAsArray[0]; // Get the first line
-        $header_count = sizeof($firstline); // Number of columns
-        $total_records = count($csvAsArray); // Number of rows (lines)        
+        $header_count = count($firstline); // Number of columns
 
         // State acceptable column headers
         $Latitude_headers = array("Latitude", "latitude", "Lat", "lat");
@@ -72,7 +72,9 @@ if ($_FILES['ImportFile']['error'] == 0) {
 
         if ($hasLatitudeColumn && $hasLongitudeColumn) {
             $timestamp = date('Y-m-d H:i:s'); // Current timestamp
-            $processed = 0;
+            $processed = 1; // Start at 1 (as the header line has been processed)
+
+            $total_records = count($csvAsArray);
 
             // Set up new record (to track progress)
             $stmt = $db->prepare('INSERT INTO import_jobs (Start_Time, Processed_Record_Count, Total_Record_Count) VALUES (?,?,?)');
@@ -83,11 +85,11 @@ if ($_FILES['ImportFile']['error'] == 0) {
             }
 
             // Determine how often the record is updated
-            $check_interval = $num_rows / 20;
+            $check_interval = $total_records / 20;
             $check_interval = ceil($check_interval);
 
             // Process each line
-            for ($j = 1; $j < $num_rows; $j++) {
+            for ($j = 1; $j < $total_records; $j++) {
 
                 // Latitude
                 $isValid_Latitude = false;
@@ -159,7 +161,7 @@ if ($_FILES['ImportFile']['error'] == 0) {
                     $description_Send = "-";
                     $isValid_description = false;
 
-                    if ($description_index) {
+                    if ($Description_index) {
                         if (isset($csvAsArray[$j][$Description_index])) {
                             $description = $csvAsArray[$j][$Description_index];
                         }
@@ -183,24 +185,33 @@ if ($_FILES['ImportFile']['error'] == 0) {
                         //
                     }
                     $processed++;
+                }
+                else {
+                    $processed++; // No location could be resolved (but the row has still been processed)
+                }
 
-                    if ($processed % $check_interval == 0) { // Every interval of rows
-                        $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-                        $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-                        if ($stmt->execute()) {
-                            //
-                        }
+                // Check if progress needs to be reported to database after every row that is processed
+                if ($processed % $check_interval == 0) { // Every interval of rows
+                    $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+                    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
+                    if ($stmt->execute()) {
+                        //
+                    }
+                }
+
+                // Check for last interval (completion)
+                if ($processed == $total_records) { // Every interval of rows
+                    $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+                    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
+                    if ($stmt->execute()) {
+                        //
                     }
                 }
             }
         }
-        else {
-            echo "The file does not have both a Latitude and Longitude column";
-        }
     }
     else {
-        echo $type;
-        echo "The file is not a .csv file (the type is shown above)";
+        echo "The file is not a .csv file";
     }
 }
 else {
