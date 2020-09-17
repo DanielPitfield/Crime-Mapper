@@ -13,6 +13,7 @@ else { // Enable main toolbar/interface buttons
 }
 
 function ShowLoading() {
+    // Remove hidden class?
     LoadingSymbol = document.getElementById("loading_symbol");
     LoadingSymbol.style.left = "calc(50% - 50px)";
     LoadingSymbol.style.top = "calc(50% - 50px)";
@@ -20,6 +21,7 @@ function ShowLoading() {
 }
 
 function HideLoading() {
+    // Add hidden class?
     LoadingSymbol = document.getElementById("loading_symbol");
     LoadingSymbol.style.left = "-500px";
     LoadingSymbol.style.top = "-500px";

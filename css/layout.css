@@ -134,14 +134,17 @@ body > #Alert_Error, body > #Alert_Warning { /* When alerts are constructed init
   margin-bottom: 0;
 }
 
-.hidden {
-  display: none !important;
-}
-
 #Alert_Progress {
   position: fixed;
   display: none;
-  z-index:20001;
+  z-index: 20001;
+  width: 500px;
+  left: calc(50% - 250px);
+  top: 350px;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .spinner-border {

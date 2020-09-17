@@ -15,7 +15,7 @@ function convert_crimeDate(crimeDate) {
 
 /*
 |-----------------------------------------------------------------------------------------------------------
-| Adding a marker to the map
+| Adding a marker object to the map
 |-----------------------------------------------------------------------------------------------------------
 */
 
@@ -93,17 +93,20 @@ function HideWarningAlert() {
 }
 
 function ShowProgressAlert() {
-    Progress_Alert = document.getElementById("Alert_Progress");
-    Progress_Alert.style.left = "34%";
-    Progress_Alert.style.top = "500px";
-    Progress_Alert.style.display = "block";
+    const progress_alert = document.getElementById("Alert_Progress");
+    progress_alert.classList.remove("hidden");
+    progress_alert.style.display = "block";
 }
 
 function HideProgressAlert() {
-    Progress_Alert = document.getElementById("Alert_Progress");
-    Progress_Alert.style.left = "-500px";
-    Progress_Alert.style.top = "-500px";
-    Progress_Alert.style.display = "none";
+    const progress_alert = document.getElementById("Alert_Progress");
+    progress_alert.classList.add("hidden");
+}
+
+function ResetProgressBar(progress_bar) {
+    // Change progress bar back to default animated class
+    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); 
+    progress_bar.style.width = "0%"; // Reset progress 
 }
 
 document.querySelectorAll('#close_alert_error, #close_add, #close_filter, #close_edit, #close_import')
@@ -132,7 +135,7 @@ document.getElementById('Filter_Clear').addEventListener("click", () => {
 
 /*
 |-----------------------------------------------------------------------------------------------------------
-| Editing a marker
+| 'Edit Crime' (editing a marker)
 |-----------------------------------------------------------------------------------------------------------
 */
 
@@ -205,6 +208,7 @@ function EditMarker(id) {
     });
 
     var Edit_SmallMarkerMoved = false;
+
     // Record geographical information of marker 
     const Edit_FirstLocation = MarkerToEdit.position;
     var Edit_Latitude = Edit_FirstLocation.lat();
@@ -269,7 +273,7 @@ function EditMarker(id) {
 
 /*
 |-----------------------------------------------------------------------------------------------------------
-| Deleting a single marker
+| 'Delete Crime' (deleting a single marker)
 |-----------------------------------------------------------------------------------------------------------
 */
 
@@ -307,23 +311,17 @@ function DeleteMarker(id) {
 
 /*
 |-----------------------------------------------------------------------------------------------------------
-| Deleting multiple markers
+| 'Delete Crime' (deleting multiple markers)
 |-----------------------------------------------------------------------------------------------------------
 */
 
 // TODO Delete mulitiple markers - multi-user interaction
-
-function ResetProgressBar(progress_bar) {
-    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); // Change progress bar back to default animated class
-    progress_bar.style.width = "0%"; // Reset progress 
-}
-
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
     const progress_delete = document.getElementById('progress_delete');
     ResetProgressBar(progress_delete);
 
     const visibleMarkers = MarkerArray.filter(marker => marker.getVisible()); // Array of visible markers
-    const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of ids for these visible markers
+    const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of IDs for these visible markers
 
     const num_markers = visibleMarkers_IDs.length;
     const within_marker_capacity = num_markers > 0 && num_markers < 50000;
@@ -332,19 +330,44 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
         $('#modal_filter').modal('hide');
         ShowProgressAlert();
 
-        // Set position of alert
-        const alert_progress = document.getElementById('alert_progress');
-        alert_progress.style.top = document.getElementById('modal_filter_content').offsetTop + (document.getElementById('modal_filter_content').height / 2);
-        alert_progress.style.left = document.getElementById('modal_filter_content').offsetLeft;
-        alert_progress.style.width = document.getElementById('modal_filter_content').width;
-
         $.ajax({
             url: 'DeleteMarker.php',
             type: 'POST',
-            data: { visibleMarkers_IDs: visibleMarkers_IDs }, // Send IDs
-            success: function (data) {
-                //
+            data: { Markers_IDs: visibleMarkers_IDs }, // Send IDs
+            success: function (result) {
+                // Response of the Job_ID (the ID of the database record created for this job)
+                var Job_ID = parseInt(result);
+
+                // TODO This response can be a statement error (so validation is needed here)
+                                  
+                var delete_progress_poll = setInterval(GetDeleteProgress, 2000);
+
+                // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
+                function GetDeleteProgress() {
+                    $.ajax({
+                        url: 'GetJobProgress.php',
+                        type: 'POST',
+                        data: { Job_ID: Job_ID },
+                        success: function (result) {
+                            // TODO This response can also be a statement error (so validation is needed here)
+
+                            var progress = parseInt(result); // Percentage completion (of import)
+
+                            // Set progress bar length to response value
+                            progress_insert_upload.style.width = Math.round(progress) + "%";
+                            progress_insert_upload.innerHTML = `File Import (${progress}%)`;
+
+                            if (progress == 100) {
+                                clearInterval(delete_progress_poll); // Stop checking the progress
+                                progress_insert_upload.innerHTML = "File Import (Complete)";
+                                // After 2 seconds, reload the page to show new markers
+                                setTimeout(function(){ window.location.reload(); }, 2000); 
+                            }
+                        }
+                    });
+                }  
             }
+            // TODO Delete Progress Validation
         });
     }
     else {
@@ -401,7 +424,7 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Placing markers (from database)
+    | Placing existing markers (from database)
     |-----------------------------------------------------------------------------------------------------------
     */
 
@@ -477,7 +500,7 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Filtering Markers
+    | 'Filter Crime' (filtering markers)
     |-----------------------------------------------------------------------------------------------------------
     */
 
@@ -740,13 +763,14 @@ function initMap() {
         }
     }
 
-    var Add_Latitude;
-    var Add_Longitude;
+    let Add_FirstLocation;
+    let Add_Latitude;
+    let Add_Longitude;
 
     // Record location of this click in terms of on the map and on the screen
     map.addListener('rightclick', function (e) {
         // Map (Latitude and Longitude)
-        var Add_FirstLocation = e.latLng; // Record click location as latLng object
+        Add_FirstLocation = e.latLng; // Record click location as latLng object
         Add_Latitude = Add_FirstLocation.lat();
         Add_Longitude = Add_FirstLocation.lng();
 
@@ -773,22 +797,21 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Adding a crime/marker
+    | 'Add Crime' (adding a marker)
     |-----------------------------------------------------------------------------------------------------------
     */
-
-    $('#modal_add').on('shown.bs.modal', function () {
-        document.querySelectorAll('#Add_Crime_Type', '#Add_Crime_Type_sub', '#Add_Description')
-            .forEach(el => el.value = "");
-        document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
-        document.getElementById('Add_Time').value = "00:00";
-        document.querySelectorAll('Add_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
-    });
 
     var SmallMarkerMoved = false;
 
     document.getElementById("btn_add").addEventListener('click', event => {
         hideContextMenu();
+
+        // Reset input fields before showing modal
+        document.querySelectorAll('#Add_Crime_Type, #Add_Crime_Type_sub, #Add_Description')
+            .forEach(el => el.value = "");
+        document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
+        document.getElementById('Add_Time').value = "00:00";
+        document.querySelectorAll('Add_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
 
         $('#modal_add').modal('show');
 
@@ -796,7 +819,7 @@ function initMap() {
         const RefinedZoom = CurrentZoom + 1; // Enhance zoom level by one level
 
         const AddMapOptions = {
-            center: FirstLocation,
+            center: Add_FirstLocation,
             zoom: RefinedZoom,
             disableDefaultUI: true,
             streetViewControl: true,
@@ -805,14 +828,15 @@ function initMap() {
         const add_map = new google.maps.Map(document.getElementById("add_map"), AddMapOptions); // Show smaller map
 
         var Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
-            position: FirstLocation,
+            position: Add_FirstLocation,
             draggable: true,
             map: add_map
         });
 
+        let Add_SecondLocation;
         // Record position of marker if an adjustment is made
         google.maps.event.addListener(Draggable_marker_add, 'dragend', function (evt) {
-            var Add_SecondLocation = evt.latLng;
+            Add_SecondLocation = evt.latLng;
             Add_Latitude = Add_SecondLocation.lat();
             Add_Longitude = Add_SecondLocation.lng();
             SmallMarkerMoved = true;
@@ -872,11 +896,11 @@ function initMap() {
                 success: function (id) {
                     if (!SmallMarkerMoved) {
                         // No adjustment was made so use the map location where the context menu to add a crime was requested
-                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, FirstLocation, map);
+                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, Add_FirstLocation, map);
                     }
                     else {
                         // An adjutsment was made, so use the map location of where the draggable marker was at the time of submit
-                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, SecondLocation, map);
+                        placeMarker({ id: parseInt(id), crimeType, crimeDate, crimeTime, description }, Add_SecondLocation, map);
                     }
 
                     SmallMarkerMoved = false; // Reset for the next time a marker is added
@@ -893,7 +917,7 @@ function initMap() {
 
     /*
     |-----------------------------------------------------------------------------------------------------------
-    | Importing crimes
+    | 'Import Crime' (adding crime from information in an external file)
     |-----------------------------------------------------------------------------------------------------------
     */
 
@@ -977,18 +1001,19 @@ function initMap() {
                     // Response of the Job_ID (the ID of the database record created for this job)
                     var Job_ID = parseInt(result);
 
-                    // This response can be a statement error (so validation is needed here)
+                    // TODO This response can be a statement error (so validation is needed here)
                                       
-                    var poll_progress = setInterval(GetImportProgress, 2000);
+                    var import_progress_poll = setInterval(GetImportProgress, 2000);
 
-                    // Send the Job_ID to GetImportProgress.php endpoint to determine the progress 
+                    // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
                     function GetImportProgress() {
-                        console.log("GetImportProgress()");
                         $.ajax({
-                            url: 'GetImportProgress.php',
+                            url: 'GetJobProgress.php',
                             type: 'POST',
                             data: { Job_ID: Job_ID },
                             success: function (result) {
+                                // TODO This response can also be a statement error (so validation is needed here)
+
                                 var progress = parseInt(result); // Percentage completion (of import)
 
                                 // Set progress bar length to response value
@@ -996,7 +1021,7 @@ function initMap() {
                                 progress_insert_upload.innerHTML = `File Import (${progress}%)`;
     
                                 if (progress == 100) {
-                                    clearInterval(poll_progress); // Stop checking the progress
+                                    clearInterval(import_progress_poll); // Stop checking the progress
                                     progress_insert_upload.innerHTML = "File Import (Complete)";
                                     // After 2 seconds, reload the page to show new markers
                                     setTimeout(function(){ window.location.reload(); }, 2000); 
@@ -1005,6 +1030,7 @@ function initMap() {
                         });
                     }                                     
                 },
+                // TODO Import Progress Validation
                 fail: function () {
                     ShowUploadError();
                 },

@@ -83,6 +83,9 @@ if ($_FILES['ImportFile']['error'] == 0) {
                 $job_id = mysqli_insert_id($db);
                 echo $job_id;
             }
+            else {
+                echo $stmt->error;
+            }
 
             // Determine how often the record is updated
             $check_interval = $total_records / 20;
@@ -181,31 +184,22 @@ if ($_FILES['ImportFile']['error'] == 0) {
                     // Upload
                     $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude) VALUES (?,?,?,?,?,?)');
                     $stmt->bind_param('ssssdd', $crimeType_Send, $Date_Send, $Time_Send, $description_Send, $Latitude, $Longitude);
-                    if ($stmt->execute()) {
-                        //
-                    }
-                    $processed++;
+                    if(!$stmt->execute()) echo $stmt->error;
                 }
-                else {
-                    $processed++; // No location could be resolved (but the row has still been processed)
-                }
+                $processed++; // Increment this regardless of whether a location could be resolved
 
                 // Check if progress needs to be reported to database after every row that is processed
-                if ($processed % $check_interval == 0) { // Every interval of rows
+                if ($processed % $check_interval == 0) {
                     $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
                     $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-                    if ($stmt->execute()) {
-                        //
-                    }
+                    if(!$stmt->execute()) echo $stmt->error;
                 }
 
                 // Check for last interval (completion)
-                if ($processed == $total_records) { // Every interval of rows
+                if ($processed == $total_records) {
                     $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-                    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-                    if ($stmt->execute()) {
-                        //
-                    }
+                    $stmt->bind_param('ii', $processed, $job_id);
+                    if(!$stmt->execute()) echo $stmt->error;
                 }
             }
         }

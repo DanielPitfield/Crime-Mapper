@@ -13,28 +13,54 @@ if(isset($_POST['id']))
 }
 
 // Multiple markers
-if(isset($_POST['visibleMarkers_IDs']))
+if(isset($_POST['Markers_IDs']))
 {
-    file_put_contents("delete_progress.txt", "0");
-    $Marker_Array = $_POST['visibleMarkers_IDs'];
-    $MarkerID_m = -1;
-    
-    $num_markers = count($Marker_Array);
-    $check_interval = $num_markers / 20;
+    $timestamp = date('Y-m-d H:i:s'); // Current timestamp
+    $processed = 0;
+
+    $Marker_Array = $_POST['Markers_IDs'];
+    $total_records = count($Marker_Array);
+
+    // Set up new record (to track progress)
+    $stmt = $db->prepare('INSERT INTO import_jobs (Start_Time, Processed_Record_Count, Total_Record_Count) VALUES (?,?,?)');
+    $stmt->bind_param('sii', $timestamp, $processed, $total_records);
+    if ($stmt->execute()) {
+        $job_id = mysqli_insert_id($db);
+        echo $job_id;
+    }
+    else {
+        echo $stmt->error;
+    }
+
+    // Determine how often the record is updated
+    $check_interval = $total_records / 20;
     $check_interval = ceil($check_interval);
 
+    // Process each ID
     for ($i = 0; $i < count($Marker_Array); $i++) {
-        $MarkerID_m = $Marker_Array[$i];
-
         $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
-        $stmt->bind_param('i', $MarkerID_m);
+        $stmt->bind_param('i', $Marker_Array[$i]);
 
         if(!$stmt->execute()) echo $stmt->error;
-        
-        if ($i % $check_interval == 0) {
-            file_put_contents("delete_progress.txt",(($i/$num_markers)*100));
-        }        
+
+        $processed++;
+
+        // Check if progress needs to be reported to database after every ID that is processed
+        if ($processed % $check_interval == 0) {
+            $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+            $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
+            if(!$stmt->execute()) echo $stmt->error;
+        }
+
+        // Check for last interval (completion)
+        if ($processed == $total_records) {
+            $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+            $stmt->bind_param('ii', $processed, $job_id);
+            if(!$stmt->execute()) echo $stmt->error;
+        }             
     }
-    file_put_contents("delete_progress.txt","100");
+}
+else {
+    echo "The collection of Marker IDs was not found";
 }
 ?>

@@ -39,5 +39,5 @@ if (isset($_POST['Longitude']))
 $stmt = $db->prepare('UPDATE markers SET Crime_Type = ?, Crime_Date = ?, Crime_Time = ?, Description = ?, Latitude = ?, Longitude = ? WHERE ID = ?');
 $stmt->bind_param('ssssddi', $crime_type, $date, $time, $description, $latitude, $longitude, $id);
 
-if(!$stmt->execute()) echo $stmt->error; // Does execute but also returns error if unsuccessful
+if(!$stmt->execute()) echo $stmt->error;
 ?>

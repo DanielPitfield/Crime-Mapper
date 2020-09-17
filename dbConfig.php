@@ -6,10 +6,10 @@ $dbPassword = "test_crime_2019";
 $dbName     = "crime_mapper"; 
  
 // Create database connection 
-$db = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName); 
+$db = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName);
  
 // Check connection 
 if (!$db) { 
-    die("Connection failed: " . $db->connect_error()); 
+    die("Connection Error: " . mysqli_connect_error()); 
 }
 ?>
