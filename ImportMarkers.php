@@ -33,13 +33,9 @@ if ($_FILES['ImportFile']['error'] == 0) {
         $firstline = $csvAsArray[0]; // Get the first line
         $header_count = count($firstline); // Number of columns
 
-        // State acceptable column headers
+        // State acceptable column headers for required columns
         $Latitude_headers = array("Latitude", "latitude", "Lat", "lat");
         $Longitude_headers = array("Longitude", "longitude", "Long", "long", "Lng", "lng");
-        $Date_headers = array("Date", "date", "Month", "month");
-        $Time_headers = array("Time", "time", "Timestamp", "timestamp");
-        $CrimeType_headers = array("Crime type", "Crime Type", "crime type", "CrimeType", "crimetype", "Type", "type");
-        $Description_headers = array("Context", "context", "Description", "description", "Notes", "notes");
 
         $hasLatitudeColumn = false;
         $hasLongitudeColumn = false;
@@ -47,26 +43,11 @@ if ($_FILES['ImportFile']['error'] == 0) {
         for ($i = 0; $i < $header_count; $i++) {
             $actual_header = $firstline[$i]; // Get each header
 
-            // Find which of the arrays it belongs to and update the index
             if (in_array($actual_header, $Latitude_headers)) {
-                $Latitude_index = $i;
                 $hasLatitudeColumn = true;
             }
             if (in_array($actual_header, $Longitude_headers)) {
-                $Longitude_index = $i;
                 $hasLongitudeColumn = true;
-            }
-            if (in_array($actual_header, $Date_headers)) {
-                $Date_index = $i;
-            }
-            if (in_array($actual_header, $Time_headers)) {
-                $Time_index = $i;
-            }
-            if (in_array($actual_header, $CrimeType_headers)) {
-                $CrimeType_index = $i;
-            }
-            if (in_array($actual_header, $Description_headers)) {
-                $Description_index = $i;
             }
         }
 
@@ -77,138 +58,36 @@ if ($_FILES['ImportFile']['error'] == 0) {
             $total_records = count($csvAsArray);
 
             // Set up new record (to track progress)
-            $stmt = $db->prepare('INSERT INTO import_jobs (Start_Time, Processed_Record_Count, Total_Record_Count) VALUES (?,?,?)');
-            $stmt->bind_param('sii', $timestamp, $processed, $total_records);
+            $stmt = $db->prepare('INSERT INTO import_jobs (Start_Time, Processed_Record_Count, Total_Record_Count, File_Content) VALUES (?,?,?,?)');
+            $empty = "";
+            $stmt->bind_param('siib', $timestamp, $processed, $total_records, $empty);
+            $stmt->send_long_data(3, json_encode($csvAsArray));
+
             if ($stmt->execute()) {
                 $job_id = mysqli_insert_id($db);
+                // TODO Specifying path (deployment not local)
+                
+                // Terminal Example: C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php 79
+                // shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php \'' . $job_id . '\' | at now');
+
+                shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php ' . $job_id);
+
+                http_response_code(202);
                 echo $job_id;
             }
             else {
+                http_response_code(500);
                 echo $stmt->error;
-            }
-
-            // Determine how often the record is updated
-            $check_interval = $total_records / 20;
-            $check_interval = ceil($check_interval);
-
-            // Process each line
-            for ($j = 1; $j < $total_records; $j++) {
-
-                // Latitude
-                $isValid_Latitude = false;
-                if (isset($csvAsArray[$j][$Latitude_index])) { // Value is found in column for current line
-                    $Latitude = $csvAsArray[$j][$Latitude_index];
-                    $isValid_Latitude = is_numeric($Latitude) && ($Latitude >= -90) && ($Latitude <= 90); // Value is numeric and between -90 and 90
-                }
-
-                // Longitude
-                $isValid_Longitude = false;
-                if (isset($csvAsArray[$j][$Longitude_index])) {
-                    $Longitude = $csvAsArray[$j][$Longitude_index];
-                    $isValid_Longitude = is_numeric($Longitude) && ($Longitude >= -180) && ($Longitude <= 180);
-                }
-
-                if ($isValid_Latitude && $isValid_Longitude) { // Only proceed if location can be derived from the line
-                    // Date
-                    $Date_Send = date("Y-m-d");
-                    $isValid_Date = false;
-
-                    if ($Date_index) {
-                        if (isset($csvAsArray[$j][$Date_index])) {
-                            $Date = $csvAsArray[$j][$Date_index];
-                        }
-                        if (strlen($Date) == 7) {
-                            $Date = $Date . "-01";
-                        }
-
-                        $isValid_Date = ($Date != null) && (strtotime($Date)); // Not null and can be converted to a UNIX timestamp
-
-                        if ($isValid_Date) {
-                            $Date_Send = $Date;
-                        }
-                    }
-
-                    // Time
-                    $Time_Send = date("H:i");
-                    $isValid_Time = false;
-
-                    if ($Time_index) {
-                        if (isset($csvAsArray[$j][$Time_index])) {
-                            $Time = $csvAsArray[$j][$Time_index];
-                        }
-
-                        $isValid_Time = ($Time != null) && (strtotime($Time));
-
-                        if ($isValid_Time) {
-                            $Time_Send = $Time;
-                        }
-                    }
-
-                    // Crime Type
-                    $crimeType_Send = "Unknown";
-                    $isValid_crimeType = false;
-
-                    if ($CrimeType_index) {
-                        if (isset($csvAsArray[$j][$CrimeType_index])) {
-                            $crimeType = $csvAsArray[$j][$CrimeType_index];
-                        }
-
-                        $isValid_crimeType = ($crimeType != '') && (ctype_space($crimeType) == false) && (is_string($crimeType));
-
-                        if ($isValid_crimeType) {
-                            $crimeType_Send = $crimeType;
-                        }
-                    }
-
-                    // Description
-                    $description_Send = "-";
-                    $isValid_description = false;
-
-                    if ($Description_index) {
-                        if (isset($csvAsArray[$j][$Description_index])) {
-                            $description = $csvAsArray[$j][$Description_index];
-                        }
-
-                        $isValid_description = ($description != '') && (ctype_space($description) == false) && (is_string($description))
-                            && ((strpos($description, '>') === false || strpos($description, '<') === false));
-
-                        if ($isValid_description) {
-                            if (strlen($description) <= 500) {
-                                $description_Send = $description;
-                            } else {
-                                $description_Send = substr($description, 0, 500); // Only use first 500 characters
-                            }
-                        }
-                    }
-
-                    // Upload
-                    $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude) VALUES (?,?,?,?,?,?)');
-                    $stmt->bind_param('ssssdd', $crimeType_Send, $Date_Send, $Time_Send, $description_Send, $Latitude, $Longitude);
-                    if(!$stmt->execute()) echo $stmt->error;
-                }
-                $processed++; // Increment this regardless of whether a location could be resolved
-
-                // Check if progress needs to be reported to database after every row that is processed
-                if ($processed % $check_interval == 0) {
-                    $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-                    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-                    if(!$stmt->execute()) echo $stmt->error;
-                }
-
-                // Check for last interval (completion)
-                if ($processed == $total_records) {
-                    $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-                    $stmt->bind_param('ii', $processed, $job_id);
-                    if(!$stmt->execute()) echo $stmt->error;
-                }
             }
         }
     }
     else {
+        http_response_code(400);
         echo "The file is not a .csv file";
     }
 }
 else {
+    http_response_code(400);
     echo "There was an error with processing the imported file";
 }
-?>`
+?>

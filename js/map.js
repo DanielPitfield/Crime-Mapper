@@ -293,7 +293,7 @@ function DeleteMarker(id) {
         // Send ID to be used in DELETE statement
         $.ajax({
             url: 'DeleteMarker.php',  // Delete from Database
-            type: 'POST',
+            type: 'DELETE',
             data: { id: id },
             success: function (data) {
                 MarkerToDelete.setVisible(false); // Delete from View
@@ -340,7 +340,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 
                 // TODO This response can be a statement error (so validation is needed here)
                                   
-                var delete_progress_poll = setInterval(GetDeleteProgress, 2000);
+                var delete_progress_poll = setInterval(GetDeleteProgress, 1000);
 
                 // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
                 function GetDeleteProgress() {
@@ -1000,21 +1000,18 @@ function initMap() {
                 success: function (result) {
                     // Response of the Job_ID (the ID of the database record created for this job)
                     var Job_ID = parseInt(result);
-
-                    // TODO This response can be a statement error (so validation is needed here)
                                       
-                    var import_progress_poll = setInterval(GetImportProgress, 2000);
+                    var import_progress_poll = setInterval(GetImportProgress, 1000);
 
                     // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
                     function GetImportProgress() {
                         $.ajax({
                             url: 'GetJobProgress.php',
-                            type: 'POST',
+                            type: 'GET',
                             data: { Job_ID: Job_ID },
                             success: function (result) {
-                                // TODO This response can also be a statement error (so validation is needed here)
-
-                                var progress = parseInt(result); // Percentage completion (of import)
+                                // TODO Test reporting of progress using progress bar
+                                var progress = parseInt(result); // Current percentage completion (of import)
 
                                 // Set progress bar length to response value
                                 progress_insert_upload.style.width = Math.round(progress) + "%";
@@ -1030,21 +1027,19 @@ function initMap() {
                         });
                     }                                     
                 },
-                // TODO Import Progress Validation
-                fail: function () {
+                error: function ({ responseText, status, statusText }) {
+                    alert(`${responseText} ${status} ${statusText}`);
                     ShowUploadError();
-                },
-                error: function () {
-                    ShowUploadError();
+                    document.querySelectorAll('#btn_import_confirm, #close_import')
+                        .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling an import
                 }
             });
         }
         else {
             const selectfile_err_string = (!isFileSelected) ? "No file has been selected for import" : "The file is not a .csv file";
             ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
+            document.querySelectorAll('#btn_import_confirm, #close_import')
+                .forEach(el => el.removeAttribute('disabled'));
         }
-
-        document.querySelectorAll('#btn_import_confirm, #close_import')
-            .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling an import
     });
 }

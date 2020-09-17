@@ -2,9 +2,9 @@
 require 'dbConfig.php';
 
 // Single marker
-if(isset($_POST['id']))
+if(isset($_GET['id']))
 {
-    $id = $_POST['id'];
+    $id = $_GET['id'];
 
     $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
     $stmt->bind_param('i', $id);
@@ -13,12 +13,12 @@ if(isset($_POST['id']))
 }
 
 // Multiple markers
-if(isset($_POST['Markers_IDs']))
+if(isset($_GET['Markers_IDs']))
 {
     $timestamp = date('Y-m-d H:i:s'); // Current timestamp
     $processed = 0;
 
-    $Marker_Array = $_POST['Markers_IDs'];
+    $Marker_Array = $_GET['Markers_IDs'];
     $total_records = count($Marker_Array);
 
     // Set up new record (to track progress)
