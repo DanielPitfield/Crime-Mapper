@@ -2,18 +2,18 @@
 require 'dbConfig.php';
 
 if (count($argv) != 2) {
-    echo "Expected 2 paramters; filePath and jobId";
+    echo "Expected 2 paramters; filePath and Job ID";
     exit;
 }
 
 $job_id = $argv[1];
 
 if (empty($job_id)) {
-    echo "No job id";
+    echo "No Job ID";
     exit;
 }
 
-$stmt = $db->prepare('SELECT File_Content FROM import_jobs WHERE ID = ?');
+$stmt = $db->prepare('SELECT File_Content FROM operation_jobs WHERE ID = ?');
 $stmt->bind_param('i', $job_id);
 if ($stmt->execute()) {
     $stmt->store_result();
@@ -164,14 +164,14 @@ for ($j = 1; $j < $total_records; $j++) {
 
     // Check if progress needs to be reported to database after every row that is processed
     if ($processed % $check_interval == 0) {
-        $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
         $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
         if (!$stmt->execute()) echo $stmt->error;
     }
 
     // Check for last interval (completion)
     if ($processed == $total_records) {
-        $stmt = $db->prepare('UPDATE import_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
         $stmt->bind_param('ii', $processed, $job_id);
         if (!$stmt->execute()) echo $stmt->error;
     }

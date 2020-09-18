@@ -105,7 +105,7 @@ function HideProgressAlert() {
 
 function ResetProgressBar(progress_bar) {
     // Change progress bar back to default animated class
-    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated'); 
+    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
     progress_bar.style.width = "0%"; // Reset progress 
 }
 
@@ -292,7 +292,7 @@ function DeleteMarker(id) {
         }
         // Send ID to be used in DELETE statement
         $.ajax({
-            url: 'DeleteMarker.php',  // Delete from Database
+            url: 'DeleteMarkers.php',  // Delete from Database
             type: 'DELETE',
             data: { id: id },
             success: function (data) {
@@ -315,13 +315,14 @@ function DeleteMarker(id) {
 |-----------------------------------------------------------------------------------------------------------
 */
 
-// TODO Delete mulitiple markers - multi-user interaction
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
     const progress_delete = document.getElementById('progress_delete');
     ResetProgressBar(progress_delete);
 
     const visibleMarkers = MarkerArray.filter(marker => marker.getVisible()); // Array of visible markers
     const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of IDs for these visible markers
+
+    console.log(visibleMarkers_IDs);
 
     const num_markers = visibleMarkers_IDs.length;
     const within_marker_capacity = num_markers > 0 && num_markers < 50000;
@@ -331,15 +332,13 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
         ShowProgressAlert();
 
         $.ajax({
-            url: 'DeleteMarker.php',
+            url: 'DeleteMarkers.php',
             type: 'POST',
-            data: { Markers_IDs: visibleMarkers_IDs }, // Send IDs
+            data: { Marker_IDs: visibleMarkers_IDs },
             success: function (result) {
-                // Response of the Job_ID (the ID of the database record created for this job)
+                // Response - The ID of the database record (created to record/track the progress of this job)
                 var Job_ID = parseInt(result);
 
-                // TODO This response can be a statement error (so validation is needed here)
-                                  
                 var delete_progress_poll = setInterval(GetDeleteProgress, 1000);
 
                 // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
@@ -349,25 +348,30 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                         type: 'POST',
                         data: { Job_ID: Job_ID },
                         success: function (result) {
-                            // TODO This response can also be a statement error (so validation is needed here)
-
                             var progress = parseInt(result); // Percentage completion (of import)
 
                             // Set progress bar length to response value
-                            progress_insert_upload.style.width = Math.round(progress) + "%";
-                            progress_insert_upload.innerHTML = `File Import (${progress}%)`;
+                            progress_delete.style.width = Math.round(progress) + "%";
+                            progress_delete.innerHTML = `Marker Deletion (${progress}%)`;
 
                             if (progress == 100) {
                                 clearInterval(delete_progress_poll); // Stop checking the progress
-                                progress_insert_upload.innerHTML = "File Import (Complete)";
+                                progress_delete.innerHTML = "File Import (Complete)";
                                 // After 2 seconds, reload the page to show new markers
-                                setTimeout(function(){ window.location.reload(); }, 2000); 
+                                setTimeout(function () { window.location.reload(); }, 1000);
                             }
+                        },
+                        // TODO Validation (Polling of delete progress fail)
+                        error: function ({ responseText, status, statusText }) {
+                            alert(`Polling delete progress:\n${status} ${statusText}\n${responseText}`);
                         }
                     });
-                }  
+                }
+            },
+            error: function ({ responseText, status, statusText }) {
+                // TODO Validation (Marker_ID transmission failed)
+                alert(`Sending IDs to server: ${responseText} ${status} ${statusText}`);
             }
-            // TODO Delete Progress Validation
         });
     }
     else {
@@ -515,10 +519,7 @@ function initMap() {
         marker.setVisible(false);
     }
 
-    // Displaying and recording information regarding filtering by location
-    let filter_marker;
-    let search_area;
-
+    // Setup
     $('#modal_filter').on('shown.bs.modal', function () { // When filter modal opens
         // Set location filtering element back to its default value (serach radius of [ALL])
         document.getElementById('Filter_Location').selectedIndex = "0";
@@ -557,45 +558,53 @@ function initMap() {
             radius: 1,
             fillColor: '#AA0000'
         });
-
-        // When the search radius is selected/changed in the relevant dropdown
-        document.getElementById('Filter_Location').addEventListener("change", (event) => {
-            const search_radius = event.target.value;
-
-            const AllAreas = (search_radius == "[ALL]") || (search_radius == null);
-            if (!AllAreas) { // If a quantifiable (numeric) value for search radius is chosen
-                if (filter_marker.getVisible()) { // And a center point of the search area is specified
-                    // Update the circle object to this center point with a radius of the search radius
-                    search_area.setVisible(true);
-                    search_area.bindTo('center', filter_marker, 'position');
-                    search_area.setRadius(search_radius * 1609); // Convert miles to metres
-                }
-            }
-            else {
-                // If [ALL] option is selected, hide the marker and area
-                document.getElementById('Filter_Location').setAttribute('disabled', true);
-                search_area.setVisible(false);
-                filter_marker.setVisible(false);
-            }
-        });
     });
 
-    // Filter by ID
+    // Recording information for filtering by location (if required)
+    let filter_marker;
+    let search_area;
+
+    // When the search radius is selected/changed in the relevant dropdown
+    document.getElementById('Filter_Location').addEventListener("change", (event) => {
+        const search_radius = event.target.value;
+
+        const AllAreas = (search_radius == "[ALL]") || (search_radius == null);
+        if (!AllAreas) { // If a quantifiable (numeric) value for search radius is chosen
+            if (filter_marker.getVisible()) { // And a center point of the search area is specified
+                // Update the circle object to this center point with a radius of the search radius
+                search_area.setVisible(true);
+                search_area.bindTo('center', filter_marker, 'position');
+                search_area.setRadius(search_radius * 1609); // Convert miles to metres
+            }
+        }
+        else {
+            // If [ALL] option is selected, hide the marker and area
+            document.getElementById('Filter_Location').setAttribute('disabled', true);
+            search_area.setVisible(false);
+            filter_marker.setVisible(false);
+        }
+    });
+
+    // TODO Include filtering by ID in main function of FilterMarkers()
+    // Filter by ID (currently handled outside of FilterMarkers())
     document.getElementById('ID_Search').addEventListener("click", () => {
         const Filter_ID = document.getElementById('Filter_ID').value;
         const isEmpty = Filter_ID == "";
         if (!isEmpty) {
             // Identify marker with requested ID
             const MarkerToShow = MarkerArray.find(marker => marker.id == Filter_ID);
-
-            // Hide all markers
-            MarkerArray.forEach(marker =>
-                HideMarker(marker)
-            );
-
-            // Show identified marker
-            if (MarkerToShow) {
-                MarkerToShow.setVisible(true);
+            
+            if (MarkerToShow) { // Marker with requested ID exists
+                // Hide all markers
+                MarkerArray.forEach(marker =>
+                    HideMarker(marker)
+                );
+                MarkerToShow.setVisible(true); // Show identified marker
+                $('#modal_filter').modal('hide');
+            }
+            else {
+                // Don't do any filtering, and simply display a warning that no marker has that ID
+                ShowWarningAlert(`No marker with ID: ${Filter_ID}`, document.getElementById('modal_filter_content'));
             }
         }
     });
@@ -922,9 +931,11 @@ function initMap() {
     */
 
     // TODO Readibility/Comments for the 'Import Crime' module (below)
-    $('#modal_import').on('shown.bs.modal', function () {
+
+    document.getElementById('btn_import').addEventListener("click", () => {
         const progress_insert_upload = document.getElementById('progress_insert_upload');
         const progress_file_upload = document.getElementById('progress_file_upload');
+
         ResetProgressBar(progress_insert_upload);
         ResetProgressBar(progress_file_upload);
     });
@@ -954,6 +965,8 @@ function initMap() {
             file_label.innerHTML = "Choose file"; // Set back to default text
         }
     });
+
+    // TODO function ImportMarkers(), confirm button calls this function
 
     document.getElementById('btn_import_confirm').addEventListener('click', () => {
         HideErrorAlert();
@@ -998,9 +1011,9 @@ function initMap() {
                 processData: false,
                 contentType: false,
                 success: function (result) {
-                    // Response of the Job_ID (the ID of the database record created for this job)
+                    // Response - The ID of the database record (created to record/track the progress of this job)
                     var Job_ID = parseInt(result);
-                                      
+
                     var import_progress_poll = setInterval(GetImportProgress, 1000);
 
                     // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
@@ -1010,28 +1023,28 @@ function initMap() {
                             type: 'GET',
                             data: { Job_ID: Job_ID },
                             success: function (result) {
-                                // TODO Test reporting of progress using progress bar
                                 var progress = parseInt(result); // Current percentage completion (of import)
 
                                 // Set progress bar length to response value
                                 progress_insert_upload.style.width = Math.round(progress) + "%";
                                 progress_insert_upload.innerHTML = `File Import (${progress}%)`;
-    
+
                                 if (progress == 100) {
                                     clearInterval(import_progress_poll); // Stop checking the progress
                                     progress_insert_upload.innerHTML = "File Import (Complete)";
                                     // After 2 seconds, reload the page to show new markers
-                                    setTimeout(function(){ window.location.reload(); }, 2000); 
+                                    setTimeout(function () { window.location.reload(); }, 1000);
                                 }
                             }
+                            // TODO Validation (Polling of import progress fail)
                         });
-                    }                                     
+                    }
                 },
                 error: function ({ responseText, status, statusText }) {
                     alert(`${responseText} ${status} ${statusText}`);
                     ShowUploadError();
                     document.querySelectorAll('#btn_import_confirm, #close_import')
-                        .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling an import
+                        .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling/cancelling an import
                 }
             });
         }

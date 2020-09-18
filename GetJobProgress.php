@@ -5,7 +5,7 @@ if (isset($_GET['Job_ID'])) {
     $job_id = $_GET['Job_ID'];
 
     // Statement preparation and execution
-    $stmt = $db->prepare('SELECT * FROM import_jobs WHERE ID = ? LIMIT 1'); // Rename table
+    $stmt = $db->prepare('SELECT * FROM operation_jobs WHERE ID = ? LIMIT 1'); // Rename table
     $stmt->bind_param('i', $job_id);
 
     if ($stmt->execute()) {

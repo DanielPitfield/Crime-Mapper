@@ -58,7 +58,7 @@ if ($_FILES['ImportFile']['error'] == 0) {
             $total_records = count($csvAsArray);
 
             // Set up new record (to track progress)
-            $stmt = $db->prepare('INSERT INTO import_jobs (Start_Time, Processed_Record_Count, Total_Record_Count, File_Content) VALUES (?,?,?,?)');
+            $stmt = $db->prepare('INSERT INTO operation_jobs (Start_Time, Processed_Record_Count, Total_Record_Count, File_Content) VALUES (?,?,?,?)');
             $empty = "";
             $stmt->bind_param('siib', $timestamp, $processed, $total_records, $empty);
             $stmt->send_long_data(3, json_encode($csvAsArray));
