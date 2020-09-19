@@ -66,11 +66,8 @@ if ($_FILES['ImportFile']['error'] == 0) {
             if ($stmt->execute()) {
                 $job_id = mysqli_insert_id($db);
                 // TODO Specifying path (deployment not local)
-                
-                // Terminal Example: C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php 79
-                // shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php \'' . $job_id . '\' | at now');
-
-                shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php ' . $job_id);
+                // Background process (multithreading)
+                shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php ' . $job_id . ' | at now');
 
                 http_response_code(202);
                 echo $job_id;
@@ -89,5 +86,14 @@ if ($_FILES['ImportFile']['error'] == 0) {
 else {
     http_response_code(400);
     echo "There was an error with processing the imported file";
+}
+
+function execInBackground($cmd) {
+    if (substr(php_uname(), 0, 7) == "Windows"){
+        pclose(popen("start /B ". $cmd, "r")); 
+    }
+    else {
+        exec($cmd . " > /dev/null &");  
+    }
 }
 ?>

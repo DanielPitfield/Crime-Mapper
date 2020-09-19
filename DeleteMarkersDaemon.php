@@ -38,7 +38,7 @@ $check_interval = $total_records / 20;
 $check_interval = ceil($check_interval);
 
 // Process each ID
-for ($i = 0; $i < count($Marker_Array); $i++) {
+for ($i = 0; $i < $total_records; $i++) {
     $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
     $stmt->bind_param('i', $Marker_Array[$i]);
 
@@ -60,3 +60,4 @@ for ($i = 0; $i < count($Marker_Array); $i++) {
         if(!$stmt->execute()) echo $stmt->error;
     }             
 }
+?>

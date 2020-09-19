@@ -70,16 +70,11 @@ for ($i = 0; $i < $header_count; $i++) {
     }
 }
 
-$processed = 1; // Start at 1 (as the header line has been processed)
-
 $total_records = count($csvAsArray);
 
-// Determine how often the progress record is updated
-$check_interval = $total_records / 20;
-$check_interval = ceil($check_interval);
-
 // Process each line
-for ($j = 1; $j < $total_records; $j++) {
+for ($j = 1; $j <= $total_records; $j++) {
+
     // Latitude
     $isValid_Latitude = false;
     if (isset($csvAsArray[$j][$Latitude_index])) { // Value is found in column for current line
@@ -160,20 +155,16 @@ for ($j = 1; $j < $total_records; $j++) {
         $stmt->bind_param('ssssdd', $crimeType_Send, $Date_Send, $Time_Send, $description_Send, $Latitude, $Longitude);
         if (!$stmt->execute()) echo $stmt->error;
     }
-    $processed++; // Increment this regardless of whether a location could be resolved
 
     // Check if progress needs to be reported to database after every row that is processed
-    if ($processed % $check_interval == 0) {
-        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-        $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-        if (!$stmt->execute()) echo $stmt->error;
-    }
+    $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
+    
+    $x = $j;
+    $stmt->bind_param('ii', $x, $job_id); // Update the processed number of rows
 
-    // Check for last interval (completion)
-    if ($processed == $total_records) {
-        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-        $stmt->bind_param('ii', $processed, $job_id);
-        if (!$stmt->execute()) echo $stmt->error;
-    }
+    echo "Row: " . $j . "; Job ID: " . $job_id;
+    echo "\r\n";
+
+    if (!$stmt->execute()) echo $stmt->error;
 }
 ?>

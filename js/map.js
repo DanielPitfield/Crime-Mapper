@@ -1,3 +1,18 @@
+
+/* TODO Marker Icons
+Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be given both animations
+The drop animation could be used to indiciate the change in location made after editing a crime
+https://developers.google.com/maps/documentation/javascript/custom-markers
+https://developers.google.com/maps/documentation/javascript/adding-a-legend
+marker.setIcon('newImage.png') for new icon
+marker.setIcon(null) for default icon
+*/
+
+/* TODO Animation of markers (DROP and BOUNCE)
+Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be given both animations
+The drop animation could be used to indiciate the change in location made after editing a crime
+*/
+
 var MarkerArray = []; // Local array of marker objects
 
 function convert_crimeTime(crimeTime) {
@@ -293,7 +308,7 @@ function DeleteMarker(id) {
         // Send ID to be used in DELETE statement
         $.ajax({
             url: 'DeleteMarkers.php',  // Delete from Database
-            type: 'DELETE',
+            type: 'POST',
             data: { id: id },
             success: function (data) {
                 MarkerToDelete.setVisible(false); // Delete from View
@@ -325,7 +340,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
     console.log(visibleMarkers_IDs);
 
     const num_markers = visibleMarkers_IDs.length;
-    const within_marker_capacity = num_markers > 0 && num_markers < 50000;
+    const within_marker_capacity = num_markers > 0;
 
     if (within_marker_capacity) { // If manageable amount of markers to delete
         $('#modal_filter').modal('hide');
@@ -345,7 +360,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                 function GetDeleteProgress() {
                     $.ajax({
                         url: 'GetJobProgress.php',
-                        type: 'POST',
+                        type: 'GET',
                         data: { Job_ID: Job_ID },
                         success: function (result) {
                             var progress = parseInt(result); // Percentage completion (of import)
@@ -368,16 +383,15 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                     });
                 }
             },
+            // TODO Validation (Marker_IDs Upload)
             error: function ({ responseText, status, statusText }) {
-                // TODO Validation (Marker_ID transmission failed)
-                alert(`Sending IDs to server: ${responseText} ${status} ${statusText}`);
+                alert(`Marker_IDs Upload:\n${status} ${statusText}\n${responseText}`);
             }
         });
     }
     else {
         HideProgressAlert();
-        const filter_delete_string = (num_markers == 0) ? "There are no visible or filtered markers to delete<br>" :
-            "Only 50,000 markers can be deleted at once, refine the filter to select fewer markers<br>";
+        const filter_delete_string = "There are no visible or filtered markers to delete<br>";
         ShowErrorAlert(filter_delete_string, document.getElementById('modal_filter_content'));
     }
 });
@@ -593,7 +607,7 @@ function initMap() {
         if (!isEmpty) {
             // Identify marker with requested ID
             const MarkerToShow = MarkerArray.find(marker => marker.id == Filter_ID);
-            
+
             if (MarkerToShow) { // Marker with requested ID exists
                 // Hide all markers
                 MarkerArray.forEach(marker =>
@@ -851,7 +865,10 @@ function initMap() {
             SmallMarkerMoved = true;
         });
 
-        // TODO 3D View (adding markers in street view)
+        /* TODO 3D View (adding markers in street view)
+        https://developers.google.com/maps/documentation/javascript/streetview
+        https://developers.google.com/maps/documentation/javascript/examples/streetview-overlays
+        */
     });
 
     document.getElementById('add_submit_form').addEventListener("submit", function (e) {
@@ -1035,13 +1052,17 @@ function initMap() {
                                     // After 2 seconds, reload the page to show new markers
                                     setTimeout(function () { window.location.reload(); }, 1000);
                                 }
-                            }
+                            },
                             // TODO Validation (Polling of import progress fail)
+                            error: function ({ responseText, status, statusText }) {
+                                alert(`Polling import progress:\n${status} ${statusText}\n${responseText}`);
+                            }
                         });
                     }
                 },
+                // TODO Validation (File Upload)
                 error: function ({ responseText, status, statusText }) {
-                    alert(`${responseText} ${status} ${statusText}`);
+                    alert(`File Upload:\n${status} ${statusText}\n${responseText}`);
                     ShowUploadError();
                     document.querySelectorAll('#btn_import_confirm, #close_import')
                         .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling/cancelling an import

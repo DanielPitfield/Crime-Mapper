@@ -171,7 +171,7 @@ body > #Alert_Error, body > #Alert_Warning { /* When alerts are constructed init
 }
 
 .add {
-  background-color: #4CAF50;
+  background-color: #007bff;
 }
 
 .modal {
