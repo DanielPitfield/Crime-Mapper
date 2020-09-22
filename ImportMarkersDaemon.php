@@ -150,20 +150,17 @@ for ($j = 1; $j <= $total_records; $j++) {
             }
         }
 
-        // Upload
+        // INSERT statement (add/save marker)
         $stmt = $db->prepare('INSERT INTO markers (Crime_Type, Crime_Date, Crime_Time, Description, Latitude, Longitude) VALUES (?,?,?,?,?,?)');
         $stmt->bind_param('ssssdd', $crimeType_Send, $Date_Send, $Time_Send, $description_Send, $Latitude, $Longitude);
         if (!$stmt->execute()) echo $stmt->error;
     }
 
-    // Check if progress needs to be reported to database after every row that is processed
+    // UPDATE statement (progress)
     $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
     
-    $x = $j;
-    $stmt->bind_param('ii', $x, $job_id); // Update the processed number of rows
-
-    echo "Row: " . $j . "; Job ID: " . $job_id;
-    echo "\r\n";
+    $processed = $j; // Must be passed by reference
+    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
 
     if (!$stmt->execute()) echo $stmt->error;
 }

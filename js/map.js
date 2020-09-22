@@ -1,32 +1,5 @@
-
-/* TODO Marker Icons
-Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be given both animations
-The drop animation could be used to indiciate the change in location made after editing a crime
-https://developers.google.com/maps/documentation/javascript/custom-markers
-https://developers.google.com/maps/documentation/javascript/adding-a-legend
-marker.setIcon('newImage.png') for new icon
-marker.setIcon(null) for default icon
-*/
-
-/* TODO Animation of markers (DROP and BOUNCE)
-Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be given both animations
-The drop animation could be used to indiciate the change in location made after editing a crime
-*/
-
 var MarkerArray = []; // Local array of marker objects
-
-function convert_crimeTime(crimeTime) {
-    if (crimeTime.length == 8) {
-        return crimeTime.substring(0, crimeTime.length - 3);
-    }
-    else {
-        return crimeTime;
-    }
-}
-
-function convert_crimeDate(crimeDate) {
-    return moment(crimeDate).format("DD-MM-YYYY");
-}
+const iconBase = 'icons/'; // Start of file path for marker icons
 
 /*
 |-----------------------------------------------------------------------------------------------------------
@@ -35,15 +8,34 @@ function convert_crimeDate(crimeDate) {
 */
 
 function placeMarker(marker, position, map) {
+    /* TODO Marker Icons
+    The icon needs to be updated when a marker is edited
+    Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be changed to the icon to be used/shown
+    Implement a feature to toggle the symbols on/off (use default markers when toggled off)
+    */
+
+    var iconPath = null; // Null is used for default marker icon
+
+    // Determine the main category of crime the marker being created belongs to
+    const foundMappingCrimeCategory = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
+
+    if (foundMappingCrimeCategory) {
+        if (foundMappingCrimeCategory.image_path != null) {
+            iconPath = iconBase + foundMappingCrimeCategory.image_path; // Construct complete image path
+        }
+    }
+
     const googleMapsMarker = new google.maps.Marker({
         title: '',
+        //animation: google.maps.Animation.DROP,
+        icon: iconPath,
         position,
         map,
         ...marker,
     });
     MarkerArray.push(googleMapsMarker);
 
-    googleMapsMarker.title = googleMapsMarker.crimeType; // Shown on hover
+    googleMapsMarker.title = googleMapsMarker.crimeType; // Shown on hover    
 
     google.maps.event.addListener(googleMapsMarker, 'click', function () { // Marker is clicked
         if (typeof (googleMapsMarker.info) !== "undefined") { // Marker has an InfoWindow
@@ -68,6 +60,19 @@ function placeMarker(marker, position, map) {
         }
 
     });
+}
+
+function convert_crimeTime(crimeTime) {
+    if (crimeTime.length == 8) {
+        return crimeTime.substring(0, crimeTime.length - 3);
+    }
+    else {
+        return crimeTime;
+    }
+}
+
+function convert_crimeDate(crimeDate) {
+    return moment(crimeDate).format("DD-MM-YYYY");
 }
 
 /*
@@ -218,9 +223,11 @@ function EditMarker(id) {
 
     var Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
         position: MarkerToEdit.position,
+        //animation: google.maps.Animation.DROP,
         draggable: true,
         map: edit_map
     });
+    //Draggable_marker_edit.setAnimation(google.maps.Animation.BOUNCE);
 
     var Edit_SmallMarkerMoved = false;
 
@@ -446,6 +453,7 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
+    // The array of markers is derived in the index.php file
     function LoadMarkers() {
         markers.forEach(marker =>
             // Placing the markers stored in the database
@@ -787,6 +795,8 @@ function initMap() {
     }
 
     let Add_FirstLocation;
+    let Add_SecondLocation;
+
     let Add_Latitude;
     let Add_Longitude;
 
@@ -852,11 +862,12 @@ function initMap() {
 
         var Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
             position: Add_FirstLocation,
+            //animation: google.maps.Animation.DROP,
             draggable: true,
             map: add_map
         });
+        //Draggable_marker_add.setAnimation(google.maps.Animation.BOUNCE);
 
-        let Add_SecondLocation;
         // Record position of marker if an adjustment is made
         google.maps.event.addListener(Draggable_marker_add, 'dragend', function (evt) {
             Add_SecondLocation = evt.latLng;

@@ -12,18 +12,18 @@ const misc_sub_options = ["Concealing an infant death close to birth", "Exploita
 const other_sub_options = ["Unspecified Crime", "Other crime"];
 
 const crimeTypeMappings = [
-    { options: violence_sub_options, value: "Violence against the person" },
-    { options: public_sub_options, value: "Public Order" },
-    { options: drug_sub_options, value: "Drug offences" },
-    { options: vehicle_sub_options, value: "Vehicle offences" },
-    { options: sexual_sub_options, value: "Sexual offences" },
-    { options: arson_sub_options, value: "Arson and criminal damage" },
-    { options: weapons_sub_options, value: "Possession of weapons" },
-    { options: theft_sub_options, value: "Theft" },
-    { options: burglary_sub_options, value: "Burglary" },
-    { options: robbery_sub_options, value: "Robbery" },
-    { options: misc_sub_options, value: "Miscellaneous crimes against society" },
-    { options: other_sub_options, value: "Other" }
+    { options: violence_sub_options, value: "Violence against the person", image_path: "violence.png" },
+    { options: public_sub_options, value: "Public Order", image_path: "public_order.png" },
+    { options: drug_sub_options, value: "Drug offences", image_path: "drugs.png" },
+    { options: vehicle_sub_options, value: "Vehicle offences", image_path: "vehicle.png" },
+    { options: sexual_sub_options, value: "Sexual offences", image_path: "sexual.png" },
+    { options: arson_sub_options, value: "Arson and criminal damage", image_path: "arson.png" },
+    { options: weapons_sub_options, value: "Possession of weapons", image_path: "weapons.png" },
+    { options: theft_sub_options, value: "Theft", image_path: "theft.png" },
+    { options: burglary_sub_options, value: "Burglary", image_path: "burglary.png" },
+    { options: robbery_sub_options, value: "Robbery", image_path: "robbery.png" },
+    { options: misc_sub_options, value: "Miscellaneous crimes against society", image_path: "other.png" },
+    { options: other_sub_options, value: "Other", image_path: "other.png" }
 ];
 
 const locMappings = [

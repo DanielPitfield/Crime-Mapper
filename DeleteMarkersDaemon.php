@@ -39,25 +39,20 @@ $check_interval = ceil($check_interval);
 
 // Process each ID
 for ($i = 0; $i < $total_records; $i++) {
+    // DELETE statement (delete marker)
     $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
-    $stmt->bind_param('i', $Marker_Array[$i]);
+
+    $marker = $Marker_Array[$i]; // Must be passed by reference
+    $stmt->bind_param('i', $marker);
 
     if(!$stmt->execute()) echo $stmt->error;
 
-    $processed++;
+    // UPDATE statement (progress)
+    $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
 
-    // Check if progress needs to be reported to database after every ID that is processed
-    if ($processed % $check_interval == 0) {
-        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-        $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
-        if(!$stmt->execute()) echo $stmt->error;
-    }
+    $processed = $i; // Must be passed by reference
+    $stmt->bind_param('ii', $processed, $job_id); // Update the processed number of rows
 
-    // Check for last interval (completion)
-    if ($processed == $total_records) {
-        $stmt = $db->prepare('UPDATE operation_jobs SET Processed_Record_Count = ? WHERE ID = ?');
-        $stmt->bind_param('ii', $processed, $job_id);
-        if(!$stmt->execute()) echo $stmt->error;
-    }             
+    if (!$stmt->execute()) echo $stmt->error;           
 }
 ?>
