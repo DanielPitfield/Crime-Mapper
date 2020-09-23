@@ -1,22 +1,37 @@
 # Crime Mapper
-A web-based crime mapping, visualisation and analysis solution developed using HTML, CSS, JavaScript, PHP, SQL and the Google Maps JavaScript API.
+![Status](https://img.shields.io/website?down_color=red&down_message=offline&up_color=brightgreen&up_message=online&url=http%3A%2F%2Fec2-35-178-182-176.eu-west-2.compute.amazonaws.com)
+![Commit](https://img.shields.io/github/last-commit/DanielPitfield/Crime_Mapper)
+![Issues](https://img.shields.io/github/issues-raw/DanielPitfield/Crime_Mapper)
+
+A web-based crime mapping, visualisation and analysis solution (**[Live Demo](http://ec2-35-178-182-176.eu-west-2.compute.amazonaws.com)**)
+
+## Table of contents
+* [Programming Languages](#ProgrammingLanguages)
+* [Built with](#Builtwith)
+	
+## Programming Languages
+* HTML
+* CSS
+* JavaScript
+* PHP
+* SQL
+
+## Built with
+* Google Maps JavaScript API
+* MySQL
+* BootStrap (v4.4.1)
+* jQuery (v3.4.1)
 
 ### Add Crime
 #### Crime categories (with icons)
-| Icon | Description |
-|--|--|
-| ![Violence](crime_icons/violence.png) | Violence against the person |
-| ![Public Order](crime_icons/public_order.png) | Public Order |
-| ![Drugs](crime_icons/drugs.png) | Drug offences |
-| ![Vehicle](crime_icons/vehicle.png)  | Vehicle offences |
-| ![Sexual](crime_icons/sexual.png) | Sexual offences |
-| ![Arson](crime_icons/arson.png) | Arson and criminal damage |
-| ![Weapons](crime_icons/weapons.png) | Possession of weapons |
-| ![Theft](crime_icons/theft.png) | Theft |
-| ![Burglary](crime_icons/burglary.png) | Burglary |
-| ![Robbery](crime_icons/robbery.png) | Robbery |
-| ![Misc](crime_icons/other.png) | Miscellaneous crimes against society | 
-| ![Other](crime_icons/other.png) | Other |
+| Icon | Description | Icon | Description |
+|--|--|--|--|
+| ![Violence](crime_icons/violence.png) | Violence against the person | ![Weapons](crime_icons/weapons.png) | Possession of weapons |
+| ![Public Order](crime_icons/public_order.png) | Public Order | ![Theft](crime_icons/theft.png) | Theft |
+| ![Drugs](crime_icons/drugs.png) | Drug offences | ![Burglary](crime_icons/burglary.png) | Burglary |
+| ![Vehicle](crime_icons/vehicle.png)  | Vehicle offences | ![Robbery](crime_icons/robbery.png) | Robbery |
+| ![Sexual](crime_icons/sexual.png) | Sexual offences | ![Misc](crime_icons/other.png) | Miscellaneous crimes | 
+| ![Arson](crime_icons/arson.png) | Arson and criminal damage | ![Other](crime_icons/other.png) | Other |
 
 ### Known Issues ###  
 * IE11 is not supported
