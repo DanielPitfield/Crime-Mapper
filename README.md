@@ -23,7 +23,22 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 * jQuery (v3.4.1)
 
 ### Add Crime
-#### Crime categories (with icons)
+
+**1)** Right click anywhere on the map and select the 'Add Crime' option (from the context menu which appears):
+
+![Add_Context_Menu](documentation/images/Add/Add_Context_Menu.PNG)
+
+**2)** Enter the crime's information using the input fields:
+
+![Add_Modal](documentation/images/Add/Add_Modal.PNG)
+
+*(**Note:** The crime location can be adjusted using the marker and smaller map provided)*
+
+**3)** Click the 'Confirm' button for the crime to be added to the mapper:
+
+![Add_Marker](documentation/images/Add/Add_Marker.PNG)
+
+#### Crime categories
 | Icon | Description | Icon | Description |
 |--|--|--|--|
 | ![Violence](crime_icons/violence.png) | Violence against the person | ![Weapons](crime_icons/weapons.png) | Possession of weapons |
