@@ -1,5 +1,6 @@
 var MarkerArray = []; // Local array of marker objects
 const iconBase = 'icons/'; // Start of file path for marker icons
+var isDefaultIcon = false; // All markers begin with custom (not default) icons
 
 /*
 |-----------------------------------------------------------------------------------------------------------
@@ -8,34 +9,17 @@ const iconBase = 'icons/'; // Start of file path for marker icons
 */
 
 function placeMarker(marker, position, map) {
-    /* TODO Marker Icons
-    The icon needs to be updated when a marker is edited
-    Adjustment markers in the 'Add Crime' and 'Edit Crime' windows could be changed to the icon to be used/shown
-    Implement a feature to toggle the symbols on/off (use default markers when toggled off)
-    */
-
-    var iconPath = null; // Null is used for default marker icon
-
-    // Determine the main category of crime the marker being created belongs to
-    const foundMappingCrimeCategory = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
-
-    if (foundMappingCrimeCategory) {
-        if (foundMappingCrimeCategory.image_path != null) {
-            iconPath = iconBase + foundMappingCrimeCategory.image_path; // Construct complete image path
-        }
-    }
-
     const googleMapsMarker = new google.maps.Marker({
         title: '',
         //animation: google.maps.Animation.DROP,
-        icon: iconPath,
         position,
         map,
         ...marker,
     });
     MarkerArray.push(googleMapsMarker);
 
-    googleMapsMarker.title = googleMapsMarker.crimeType; // Shown on hover    
+    googleMapsMarker.title = googleMapsMarker.crimeType; // Shown on hover
+    UpdateMarkerIcon(googleMapsMarker);
 
     google.maps.event.addListener(googleMapsMarker, 'click', function () { // Marker is clicked
         if (typeof (googleMapsMarker.info) !== "undefined") { // Marker has an InfoWindow
@@ -62,6 +46,35 @@ function placeMarker(marker, position, map) {
     });
 }
 
+function UpdateMarkerIcon(marker) {
+    var iconPath = null; // Intialise as null (which is used to specify the default marker icon)
+
+    // Determine the main category of crime the marker being created belongs to
+    const foundMappingCrimeCategory = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
+
+    if (foundMappingCrimeCategory) {
+        if (foundMappingCrimeCategory.image_path != null) {
+            iconPath = iconBase + foundMappingCrimeCategory.image_path; // Construct complete image path
+        }
+    }
+
+    marker.setIcon(iconPath);
+}
+
+// Toggles between using custom icons and the default icon
+function ToggleIcons() {
+    MarkerArray.forEach(marker => {
+        if (isDefaultIcon) { // If markers are currently all the default icon
+            UpdateMarkerIcon(marker); // Update marker icons to custom icons
+        }
+        else {
+            marker.setIcon(null); // Update marker icons to default icon
+        }
+    });
+    isDefaultIcon = !isDefaultIcon; // Alternate boolean flag
+}
+
+// Removes seconds from a given time
 function convert_crimeTime(crimeTime) {
     if (crimeTime.length == 8) {
         return crimeTime.substring(0, crimeTime.length - 3);
@@ -71,6 +84,7 @@ function convert_crimeTime(crimeTime) {
     }
 }
 
+// Formats a given date into UK date format
 function convert_crimeDate(crimeDate) {
     return moment(crimeDate).format("DD-MM-YYYY");
 }
@@ -124,8 +138,8 @@ function HideProgressAlert() {
 }
 
 function ResetProgressBar(progress_bar) {
-    // Change progress bar back to default animated class
-    progress_bar.setAttribute('class', 'progress-bar progress-bar-striped progress-bar-animated');
+    // Change progress bar back to default animated class   
+    progress_bar.setAttribute('class', 'progress-bar progress-bar-success');
     progress_bar.style.width = "0%"; // Reset progress 
 }
 
@@ -173,7 +187,7 @@ function LoadCurrentValues(marker) {
     // Find which main category of crime that marker.crimeTime belongs to
     const foundMappingEdit = crimeTypeMappings.find(x => x.options.includes(marker.crimeType));
 
-    if (foundMappingEdit) { // Selected crime type from dropdowns
+    if (foundMappingEdit) { // A crime type which can be selected from dropdowns
         // Re-enable dropdown fields (if they were previously disabled)
         document.getElementById('Edit_Crime_Type').removeAttribute('disabled');
         document.getElementById('Edit_Crime_Type_sub').removeAttribute('disabled');
@@ -181,7 +195,7 @@ function LoadCurrentValues(marker) {
         // Set main category of crime (the first dropdown) to found value
         document.getElementById('Edit_Crime_Type').value = foundMappingEdit.value;
         // Invoke event so that the dropdown for the subcategory updates (updates when value is changed not just when set)
-        var event = new Event('change');
+        const event = new Event('change');
         document.getElementById('Edit_Crime_Type').dispatchEvent(event);
     }
     else { // Imported crime type
@@ -221,7 +235,7 @@ function EditMarker(id) {
 
     const edit_map = new google.maps.Map(document.getElementById("edit_map"), EditMapOptions);
 
-    var Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
+    const Draggable_marker_edit = new google.maps.Marker({ // Add a single draggable marker to smaller map
         position: MarkerToEdit.position,
         //animation: google.maps.Animation.DROP,
         draggable: true,
@@ -233,12 +247,14 @@ function EditMarker(id) {
 
     // Record geographical information of marker 
     const Edit_FirstLocation = MarkerToEdit.position;
+    let SecondLocation;
+
     var Edit_Latitude = Edit_FirstLocation.lat();
     var Edit_Longitude = Edit_FirstLocation.lng();
 
     // Record where the marker is moved to (if an adjustment is made)
     google.maps.event.addListener(Draggable_marker_edit, 'dragend', function (evt) {
-        var SecondLocation = evt.latLng;
+        SecondLocation = evt.latLng;
         // Record the new geographical information
         Edit_Latitude = SecondLocation.lat();
         Edit_Longitude = SecondLocation.lng();
@@ -280,6 +296,8 @@ function EditMarker(id) {
 
                     MarkerToEdit.setPosition(MarkerToEdit.position); // Update the displayed location
                     UpdateMarkerInfo(MarkerToEdit); // Prepare InfoWindow with new information
+                    UpdateMarkerIcon(MarkerToEdit); // Change icon for marker (if required)
+
                     HideLoading();
                     $('#modal_edit').modal('hide');
                     HideErrorAlert();
@@ -338,13 +356,11 @@ function DeleteMarker(id) {
 */
 
 document.getElementById('Delete_Filtered_Markers').addEventListener("click", () => {
-    const progress_delete = document.getElementById('progress_delete');
+    const progress_delete = document.getElementById('progress_delete'); // Progress bar
     ResetProgressBar(progress_delete);
 
     const visibleMarkers = MarkerArray.filter(marker => marker.getVisible()); // Array of visible markers
     const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of IDs for these visible markers
-
-    console.log(visibleMarkers_IDs);
 
     const num_markers = visibleMarkers_IDs.length;
     const within_marker_capacity = num_markers > 0;
@@ -359,9 +375,9 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
             data: { Marker_IDs: visibleMarkers_IDs },
             success: function (result) {
                 // Response - The ID of the database record (created to record/track the progress of this job)
-                var Job_ID = parseInt(result);
+                const Job_ID = parseInt(result);
 
-                var delete_progress_poll = setInterval(GetDeleteProgress, 1000);
+                const delete_progress_poll = setInterval(GetDeleteProgress, 1000);
 
                 // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
                 function GetDeleteProgress() {
@@ -370,7 +386,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                         type: 'GET',
                         data: { Job_ID: Job_ID },
                         success: function (result) {
-                            var progress = parseInt(result); // Percentage completion (of import)
+                            const progress = parseInt(result); // Percentage completion (of import)
 
                             // Set progress bar length to response value
                             progress_delete.style.width = Math.round(progress) + "%";
@@ -383,16 +399,24 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                                 setTimeout(function () { window.location.reload(); }, 1000);
                             }
                         },
-                        // TODO Validation (Polling of delete progress fail)
                         error: function ({ responseText, status, statusText }) {
-                            alert(`Polling delete progress:\n${status} ${statusText}\n${responseText}`);
+                            clearInterval(delete_progress_poll); // Ensure the polling has stopped
+
+                            // Change contextual class of progress bar to danger (error)
+                            progress_delete.setAttribute('class', 'progress-bar progress-bar-danger');
+
+                            // Show an alert with message constructed from HTTP response
+                            const delete_progress_err_string = `Polling Delete progress:\n${status} ${statusText}\n${responseText}`;
+                            ShowErrorAlert(delete_progress_err_string , document.getElementById('alert_delete_content'));
                         }
                     });
                 }
             },
-            // TODO Validation (Marker_IDs Upload)
             error: function ({ responseText, status, statusText }) {
-                alert(`Marker_IDs Upload:\n${status} ${statusText}\n${responseText}`);
+                progress_delete.setAttribute('class', 'progress-bar progress-bar-danger');
+
+                const delete_upload_err_string = `Markers ID Array (transmission):\n${status} ${statusText}\n${responseText}`;
+                ShowErrorAlert(delete_upload_err_string, document.getElementById('alert_delete_content'));
             }
         });
     }
@@ -410,9 +434,21 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 */
 
 function initMap() {
-    const initial_location = { lat: 51.454266, lng: -0.978130 };
+    const initial_location = { lat: 51.454266, lng: -0.978130 }; // Reading, UK
+
     // Main map object
     const map = new google.maps.Map(document.getElementById("map"), { zoom: 8, center: initial_location });
+
+    /*
+    heatmap = new google.maps.visualization.HeatmapLayer({
+        data: getPoints(),
+        map: null
+    });
+
+    function getPoints() {
+        //
+    }
+    */
 
     const ContextMenu = document.getElementById("menu");
 
@@ -425,7 +461,7 @@ function initMap() {
     const input = document.getElementById('pac-input'); // Create a text input
     const searchBox = new google.maps.places.SearchBox(input); // Link it to search bar element
 
-    searchBox.addListener('places_changed', function () { // Selecting a prediction from the list
+    searchBox.addListener('places_changed', function () { // Selecting a prediction from the (suggestion) list
         const places = searchBox.getPlaces(); // Can be more than one place if using text-based geographic search
 
         if (places.length == 0) {
@@ -441,10 +477,10 @@ function initMap() {
             if (place.geometry.viewport) {
                 bounds.union(place.geometry.viewport); // Only geocodes have viewport
             } else {
-                bounds.extend(place.geometry.location);
+                bounds.extend(place.geometry.location); // Map Bounds (centered around location)
             }
         });
-        map.fitBounds(bounds); // Move map to place location
+        map.fitBounds(bounds); // Move map to place location (set map to determined bounds)
     });
 
     /*
@@ -453,7 +489,7 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    // The array of markers is derived in the index.php file
+    // The array of markers (declared and assigned within the index.php file)
     function LoadMarkers() {
         markers.forEach(marker =>
             // Placing the markers stored in the database
@@ -523,6 +559,25 @@ function initMap() {
 
         HideLoading();
     });
+
+    /*
+    |-----------------------------------------------------------------------------------------------------------
+    | Marker Heatmap
+    |-----------------------------------------------------------------------------------------------------------
+    */
+
+    /*
+    function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+    }
+
+    document.getElementById("btn_predict").addEventListener('click', event => {
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: getPoints(),
+            map: map
+          });
+    });
+    */
 
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -607,8 +662,7 @@ function initMap() {
         }
     });
 
-    // TODO Include filtering by ID in main function of FilterMarkers()
-    // Filter by ID (currently handled outside of FilterMarkers())
+    // Filter by ID (handled independently from the below FilterMarkers() function)
     document.getElementById('ID_Search').addEventListener("click", () => {
         const Filter_ID = document.getElementById('Filter_ID').value;
         const isEmpty = Filter_ID == "";
@@ -732,11 +786,6 @@ function initMap() {
                 }
             }
 
-            /*
-            More computationally expensive to filter by crime type
-            But will not be reached if the marker was filtered out by date or time (above)
-            */
-
             if (!AllCrimes) {
                 if (!AllSubCrimes) { // One specific crime
                     if (marker.crimeType != Sub_Crime_Type) {
@@ -840,8 +889,7 @@ function initMap() {
         hideContextMenu();
 
         // Reset input fields before showing modal
-        document.querySelectorAll('#Add_Crime_Type, #Add_Crime_Type_sub, #Add_Description')
-            .forEach(el => el.value = "");
+        document.querySelectorAll('#Add_Crime_Type, #Add_Crime_Type_sub, #Add_Description').forEach(el => el.value = "");
         document.getElementById('Add_Date').value = new Date().toISOString().split("T")[0];
         document.getElementById('Add_Time').value = "00:00";
         document.querySelectorAll('Add_Crime_Type_sub option:not(:first-child)').forEach(el => el.remove());
@@ -860,7 +908,7 @@ function initMap() {
 
         const add_map = new google.maps.Map(document.getElementById("add_map"), AddMapOptions); // Show smaller map
 
-        var Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
+        const Draggable_marker_add = new google.maps.Marker({ // Add a single draggable marker to smaller map
             position: Add_FirstLocation,
             //animation: google.maps.Animation.DROP,
             draggable: true,
@@ -958,9 +1006,9 @@ function initMap() {
     |-----------------------------------------------------------------------------------------------------------
     */
 
-    // TODO Readibility/Comments for the 'Import Crime' module (below)
-
+    // 'Import Crime' button is clicked
     document.getElementById('btn_import').addEventListener("click", () => {
+        // Reset progress bars
         const progress_insert_upload = document.getElementById('progress_insert_upload');
         const progress_file_upload = document.getElementById('progress_file_upload');
 
@@ -971,6 +1019,7 @@ function initMap() {
     let isFileSelected;
     let isCSV;
 
+    // File input for uplaoding a file is changed
     document.getElementById('Import_Input').addEventListener("change", () => {
         isFileSelected = false;
         isCSV = false;
@@ -979,13 +1028,15 @@ function initMap() {
         const file_label = document.getElementById('import_lbl');
 
         if (files.length >= 1) { // If input has a file selected
-            isFileSelected = true; // Toggle presence of file
+            isFileSelected = true;
             const fileName = files[0].name;
             const ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
 
+            // Check extension (in file name)
             if (ext == 'csv') {
-                isCSV = true; // Toggle CSV check
+                isCSV = true;
             }
+            // A server side check confirms the mime type
 
             file_label.innerHTML = fileName; // Change label of input to filename
         }
@@ -994,31 +1045,35 @@ function initMap() {
         }
     });
 
-    // TODO function ImportMarkers(), confirm button calls this function
-
+    // 'Import' confirmation button (within modal) is clicked
     document.getElementById('btn_import_confirm').addEventListener('click', () => {
-        HideErrorAlert();
+        // Hide any warnings or errors from previous failed/cancelled imports
         HideWarningAlert();
+        HideErrorAlert();        
 
+        // Disable both these buttons during import process
         document.querySelectorAll('#btn_import_confirm, #close_import')
-            .forEach(el => el.setAttribute('disabled', true)); // Disable both these buttons during import process
+            .forEach(el => el.setAttribute('disabled', true));
 
         if (isFileSelected && isCSV) {
+            // Prepare file for POST request
             file = document.getElementById('Import_Input').files[0];
             formdata = new FormData();
             formdata.append("ImportFile", file);
 
+            // Hold references to progress bars
             const progress_file_upload = document.getElementById('progress_file_upload');
             const progress_insert_upload = document.getElementById('progress_insert_upload');
 
+            // Sending file to endpoint (server)
             $.ajax({
-                // Progress of sending file to server (file upload progress)
+                // Track the progress of the file upload
                 xhr: function () {
                     var xhr = new window.XMLHttpRequest();
                     xhr.upload.addEventListener("progress", function (evt) {
                         if (evt.lengthComputable) {
                             // Get file upload progress
-                            var upload_percentage = (evt.loaded / evt.total) * 100;
+                            const upload_percentage = (evt.loaded / evt.total) * 100;
 
                             // Update progress bar width and text using progress
                             progress_file_upload.style.width = Math.round(upload_percentage) + "%";
@@ -1032,17 +1087,18 @@ function initMap() {
                     return xhr;
                 },
 
-                // Sending file to server
+                // Configuration of POST request
                 url: 'ImportMarkers.php',
                 type: 'POST',
                 data: formdata,
                 processData: false,
                 contentType: false,
                 success: function (result) {
-                    // Response - The ID of the database record (created to record/track the progress of this job)
-                    var Job_ID = parseInt(result);
+                    // Response (result) - The ID of the database record (created to record/track the progress of this job)
+                    const Job_ID = parseInt(result);
 
-                    var import_progress_poll = setInterval(GetImportProgress, 1000);
+                    // Every second, execute the function which returns the progress
+                    const import_progress_poll = setInterval(GetImportProgress, 1000);
 
                     // Send the Job_ID to GetJobProgress.php endpoint to determine the progress 
                     function GetImportProgress() {
@@ -1051,7 +1107,7 @@ function initMap() {
                             type: 'GET',
                             data: { Job_ID: Job_ID },
                             success: function (result) {
-                                var progress = parseInt(result); // Current percentage completion (of import)
+                                const progress = parseInt(result); // Current percentage completion (of import)
 
                                 // Set progress bar length to response value
                                 progress_insert_upload.style.width = Math.round(progress) + "%";
@@ -1064,25 +1120,37 @@ function initMap() {
                                     setTimeout(function () { window.location.reload(); }, 1000);
                                 }
                             },
-                            // TODO Validation (Polling of import progress fail)
                             error: function ({ responseText, status, statusText }) {
-                                alert(`Polling import progress:\n${status} ${statusText}\n${responseText}`);
+                                clearInterval(import_progress_poll);
+
+                                progress_insert_upload.setAttribute('class', 'progress-bar progress-bar-danger');
+
+                                const insertfile_err_string = `Polling Import progress:\n${status} ${statusText}\n${responseText}`;
+                                ShowErrorAlert(insertfile_err_string, document.getElementById('modal_import_content'));
+
+                                document.querySelectorAll('#btn_import_confirm, #close_import')
+                                    .forEach(el => el.removeAttribute('disabled'));
                             }
                         });
                     }
                 },
-                // TODO Validation (File Upload)
                 error: function ({ responseText, status, statusText }) {
-                    alert(`File Upload:\n${status} ${statusText}\n${responseText}`);
-                    ShowUploadError();
+                    progress_file_upload.setAttribute('class', 'progress-bar progress-bar-danger');
+
+                    const uploadfile_err_string = `File Upload:\n${status} ${statusText}\n${responseText}`;
+                    ShowErrorAlert(uploadfile_err_string, document.getElementById('modal_import_content'));
+
+                    // Re-enable these buttons after a cancelled import
                     document.querySelectorAll('#btn_import_confirm, #close_import')
-                        .forEach(el => el.removeAttribute('disabled')); // Re-enable these buttons after handling/cancelling an import
+                        .forEach(el => el.removeAttribute('disabled'));
                 }
             });
         }
         else {
+            // Either no file has been selected or a file was selected but it wasn't a .csv file (not both, so ternary operator is used)
             const selectfile_err_string = (!isFileSelected) ? "No file has been selected for import" : "The file is not a .csv file";
             ShowErrorAlert(selectfile_err_string, document.getElementById('modal_import_content'));
+
             document.querySelectorAll('#btn_import_confirm, #close_import')
                 .forEach(el => el.removeAttribute('disabled'));
         }

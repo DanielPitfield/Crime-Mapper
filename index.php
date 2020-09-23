@@ -71,14 +71,16 @@ require 'dbConfig.php'; // Include the database configuration file
 
 	<!-- Delete Progress Alert -->
 	<div class="alert alert-dark alert-dismissible fade show" role="alert" id="Alert_Progress">
-		<h5 class="alert-heading">Progress</h5>
-		<div class="progress">
-			<div id="progress_delete" class="progress-bar progress-bar-striped progress-bar-animated" data-backdrop="static" data-keyboard="false">Progress Bar
+		<div id="alert_delete_content">
+			<h5 class="alert-heading">Progress</h5>
+			<div class="progress">
+				<div id="progress_delete" class="progress-bar" data-backdrop="static" data-keyboard="false">Progress Bar
+				</div>
 			</div>
+			<button type="button" class="close" id="close_alert_progress">
+				<span aria-hidden="true">&times;</span>
+			</button>
 		</div>
-		<button type="button" class="close" id="close_alert_progress">
-			<span aria-hidden="true">&times;</span>
-		</button>
 	</div>
 
 	<!-- Filter modal -->
@@ -253,10 +255,10 @@ require 'dbConfig.php'; // Include the database configuration file
 					<input type="submit" value="Import" id="btn_import_confirm" class="btn btn-success" />
 
 					<div class="progress">
-						<div id="progress_file_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
+						<div id="progress_file_upload" class="progress-bar progress-bar-success">Progress Bar</div>
 					</div>
 					<div class="progress">
-						<div id="progress_insert_upload" class="progress-bar progress-bar-striped progress-bar-animated">Progress Bar</div>
+						<div id="progress_insert_upload" class="progress-bar progress-bar-success">Progress Bar</div>
 					</div>
 
 				</div>

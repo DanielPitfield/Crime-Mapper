@@ -6,14 +6,10 @@ if (isIE) {
     alert("Internet Explorer is not a supported browser\n\nPlease use any of the following:\nGoogle Chrome\nMozilla Firefox\nMicrosoft Edge"); // Use standard JS alert (IE11 may not support Bootstrap alerts)
 }
 else { // Enable main toolbar/interface buttons
-    document.getElementById('btn_filter').removeAttribute('disabled');
-    document.getElementById('btn_import').removeAttribute('disabled');
-    document.getElementById('pac-input').removeAttribute('disabled');
-    document.getElementById('btn_analyse').removeAttribute('disabled');
+    document.querySelectorAll('#btn_filter, #btn_import, #pac_input, #btn_analyse'/*, #btn_predict'*/).forEach(el => el.removeAttribute('disabled'));
 }
 
 function ShowLoading() {
-    // Remove hidden class?
     LoadingSymbol = document.getElementById("loading_symbol");
     LoadingSymbol.style.left = "calc(50% - 50px)";
     LoadingSymbol.style.top = "calc(50% - 50px)";
@@ -21,7 +17,6 @@ function ShowLoading() {
 }
 
 function HideLoading() {
-    // Add hidden class?
     LoadingSymbol = document.getElementById("loading_symbol");
     LoadingSymbol.style.left = "-500px";
     LoadingSymbol.style.top = "-500px";
