@@ -1,5 +1,5 @@
 var MarkerArray = []; // Local array of marker objects
-const iconBase = 'icons/'; // Start of file path for marker icons
+const iconBase = 'crime_icons/'; // Start of file path for marker icons
 var isDefaultIcon = false; // All markers begin with custom (not default) icons
 
 /*
