@@ -23,6 +23,16 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 * jQuery (v3.4.1)
 
 ## Usage / Instructions
+### Crime Icons
+| Icon | Description | Icon | Description |
+|--|--|--|--|
+| ![Violence](crime_icons/violence.png) | Violence against the person | ![Weapons](crime_icons/weapons.png) | Possession of weapons |
+| ![Public Order](crime_icons/public_order.png) | Public Order | ![Theft](crime_icons/theft.png) | Theft |
+| ![Drugs](crime_icons/drugs.png) | Drug offences | ![Burglary](crime_icons/burglary.png) | Burglary |
+| ![Vehicle](crime_icons/vehicle.png)  | Vehicle offences | ![Robbery](crime_icons/robbery.png) | Robbery |
+| ![Sexual](crime_icons/sexual.png) | Sexual offences | ![Misc](crime_icons/other.png) | Miscellaneous crimes | 
+| ![Arson](crime_icons/arson.png) | Arson and criminal damage | ![Other](crime_icons/other.png) | Other |
+
 ### Add Crime
 
 **1)** Right click anywhere on the map and select the 'Add Crime' option (from the context menu which appears):
@@ -38,16 +48,6 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 **3)** Click the 'Confirm' button for the crime to be added to the mapper:
 
 ![Add_Marker](documentation/images/Add/Add_Marker.PNG)
-
-### Crime Icons
-| Icon | Description | Icon | Description |
-|--|--|--|--|
-| ![Violence](crime_icons/violence.png) | Violence against the person | ![Weapons](crime_icons/weapons.png) | Possession of weapons |
-| ![Public Order](crime_icons/public_order.png) | Public Order | ![Theft](crime_icons/theft.png) | Theft |
-| ![Drugs](crime_icons/drugs.png) | Drug offences | ![Burglary](crime_icons/burglary.png) | Burglary |
-| ![Vehicle](crime_icons/vehicle.png)  | Vehicle offences | ![Robbery](crime_icons/robbery.png) | Robbery |
-| ![Sexual](crime_icons/sexual.png) | Sexual offences | ![Misc](crime_icons/other.png) | Miscellaneous crimes | 
-| ![Arson](crime_icons/arson.png) | Arson and criminal damage | ![Other](crime_icons/other.png) | Other |
 
 ### View Crime
 
@@ -65,3 +65,5 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 * IE11 is not supported
 * Not responsive for mobile devices (mobile version in development)
 * Larger resolutions (above 1920x1080) are untested
+* Import and multiple marker deletion functionality not performed
+* Bug with editing markers and updating of crime icons
