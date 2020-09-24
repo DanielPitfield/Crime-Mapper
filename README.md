@@ -22,8 +22,8 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 * BootStrap (v4.4.1)
 * jQuery (v3.4.1)
 
-### Add Crime
-#### Crime categories (with icons)
+## Usage / Instructions
+### Crime Icons
 | Icon | Description | Icon | Description |
 |--|--|--|--|
 | ![Violence](crime_icons/violence.png) | Violence against the person | ![Weapons](crime_icons/weapons.png) | Possession of weapons |
@@ -33,7 +33,37 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 | ![Sexual](crime_icons/sexual.png) | Sexual offences | ![Misc](crime_icons/other.png) | Miscellaneous crimes | 
 | ![Arson](crime_icons/arson.png) | Arson and criminal damage | ![Other](crime_icons/other.png) | Other |
 
+### Add Crime
+
+**1)** Right click anywhere on the map and select the 'Add Crime' option (from the context menu which appears):
+
+![Add_Context_Menu](documentation/images/Add/Add_Context_Menu.PNG)
+
+**2)** Enter the crime's information using the input fields:
+
+*(**Note**: The crime location can be adjusted using the marker and smaller map provided)*
+
+![Add_Modal](documentation/images/Add/Add_Modal.PNG)
+
+**3)** Click the 'Confirm' button for the crime to be added to the mapper:
+
+![Add_Marker](documentation/images/Add/Add_Marker.PNG)
+
+### View Crime
+
+### Edit Crime
+
+### Delete Crime
+
+### Filter Crime
+
+### Analyse Crime
+
+### Import Crime
+
 ### Known Issues ###  
 * IE11 is not supported
 * Not responsive for mobile devices (mobile version in development)
 * Larger resolutions (above 1920x1080) are untested
+* Import and multiple marker deletion functionality not performed
+* Bug with editing markers and updating of crime icons
