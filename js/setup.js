@@ -6,7 +6,7 @@ if (isIE) {
     alert("Internet Explorer is not a supported browser\n\nPlease use any of the following:\nGoogle Chrome\nMozilla Firefox\nMicrosoft Edge"); // Use standard JS alert (IE11 may not support Bootstrap alerts)
 }
 else { // Enable main toolbar/interface buttons
-    document.querySelectorAll('#btn_filter, #btn_import, #pac_input, #btn_analyse'/*, #btn_predict'*/).forEach(el => el.removeAttribute('disabled'));
+    document.querySelectorAll('#btn_filter, #btn_import, #pac-input, #btn_analyse'/*, #btn_predict'*/).forEach(el => el.removeAttribute('disabled'));
 }
 
 function ShowLoading() {
