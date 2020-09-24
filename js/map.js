@@ -262,7 +262,7 @@ function EditMarker(id) {
     });
 
     // Edit modal confirmation
-    document.getElementById('edit_submit_form').addEventListener("submit", function (e) {
+    document.getElementById('edit_submit_form').onsubmit=("submit", function (e) {
         e.preventDefault();
 
         const description_edit = document.getElementById('Edit_Description').value;
