@@ -19,9 +19,10 @@ if (isset($_POST['id'])) {
 // Multiple markers
 else {
     $body = file_get_contents('php://input');
+
     if (isset($body)) {
-        $body = str_replace("&", "", $body);
-        $Marker_Array = explode("Job_ID=", $body);
+        $body = str_replace("Marker_IDs%5B%5D=", "", $body);
+        $Marker_Array = explode("&", $body);
 
         $timestamp = date('Y-m-d H:i:s'); // Current timestamp
         $processed = 0;
