@@ -1073,7 +1073,7 @@ function initMap() {
                     xhr.upload.addEventListener("progress", function (evt) {
                         if (evt.lengthComputable) {
                             // Get file upload progress
-                            const upload_percentage = parseFloat((evt.loaded / evt.total) * 100);
+                            const upload_percentage = parseFloat(((evt.loaded / evt.total) * 100));
 
                             // Update progress bar width and text using progress
                             progress_file_upload.style.width = Math.floor(upload_percentage) + "%";

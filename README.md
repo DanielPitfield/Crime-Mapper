@@ -171,8 +171,7 @@ The three different cluster icons and the minimum number of crimes they represen
 Crime prediciotn functionality is not yet implemented. This feature will be added soon.
 
 
-## Known Issues ###  
+## Known Issues 
 * IE11 is not supported
 * Not responsive for mobile devices (mobile version in development)
 * Larger resolutions (above 1920x1080) are untested
-* Import and multiple marker deletion functionality not performed
