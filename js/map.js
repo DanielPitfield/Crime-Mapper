@@ -386,11 +386,11 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
                         type: 'GET',
                         data: { Job_ID: Job_ID },
                         success: function (result) {
-                            const progress = parseInt(result); // Percentage completion (of import)
+                            const progress = parseFloat(result); // Percentage completion (of import)
 
                             // Set progress bar length to response value
-                            progress_delete.style.width = Math.round(progress) + "%";
-                            progress_delete.innerHTML = `Marker Deletion (${progress}%)`;
+                            progress_delete.style.width = Math.floor(progress) + "%";
+                            progress_delete.innerHTML = `Marker Deletion (${Math.floor(progress)}%)`;
 
                             if (progress == 100) {
                                 clearInterval(delete_progress_poll); // Stop checking the progress
@@ -1073,11 +1073,11 @@ function initMap() {
                     xhr.upload.addEventListener("progress", function (evt) {
                         if (evt.lengthComputable) {
                             // Get file upload progress
-                            const upload_percentage = (evt.loaded / evt.total) * 100;
+                            const upload_percentage = parseFloat((evt.loaded / evt.total) * 100);
 
                             // Update progress bar width and text using progress
-                            progress_file_upload.style.width = Math.round(upload_percentage) + "%";
-                            progress_file_upload.innerHTML = `File Upload (${upload_percentage}%)`;
+                            progress_file_upload.style.width = Math.floor(upload_percentage) + "%";
+                            progress_file_upload.innerHTML = `File Upload (${Math.floor(upload_percentage)}%)`;
 
                             if (upload_percentage == 100) { // Use 'Complete' text instead of 100% on completion
                                 progress_file_upload.innerHTML = "File Upload (Complete)";
@@ -1107,11 +1107,11 @@ function initMap() {
                             type: 'GET',
                             data: { Job_ID: Job_ID },
                             success: function (result) {
-                                const progress = parseInt(result); // Current percentage completion (of import)
+                                const progress = parseFloat(result); // Current percentage completion (of import)
 
                                 // Set progress bar length to response value
-                                progress_insert_upload.style.width = Math.round(progress) + "%";
-                                progress_insert_upload.innerHTML = `File Import (${progress}%)`;
+                                progress_insert_upload.style.width = Math.floor(progress) + "%";
+                                progress_insert_upload.innerHTML = `File Import (${Math.floor(progress)}%)`;
 
                                 if (progress == 100) {
                                     clearInterval(import_progress_poll); // Stop checking the progress
