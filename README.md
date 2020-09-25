@@ -146,7 +146,7 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 **2)** A progress bar showing the deletion process will appear:
 
-![Filter_Delete_Progress](documentation/images/Filter/Filter_Delete_Progress.png)
+![Filter_Delete_Progress](documentation/images/Filter/Filter_Delete_Progress.PNG)
 
 **3)** Once the process has finished, the mapper will reload (and the deletions made will be reflected on the mapper).
 
@@ -169,7 +169,7 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 **5)** The two progress bars will update (the top bar showing progress of the file upload and the bottom bar showing the progress of the import process):
 
-//![Import_Progress](documentation/images/Import/Import_Progress.PNG)
+![Import_Progress](documentation/images/Import/Import_Progress.PNG)
 
 **6)** Once the import process has finished (both progress bars complete), the mapper will reload (and the insertions made will be reflected on the mapper):
 
