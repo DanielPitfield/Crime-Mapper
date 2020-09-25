@@ -5,6 +5,8 @@
 
 A web-based crime mapping, visualisation and analysis solution (**[Live Demo](http://ec2-35-178-182-176.eu-west-2.compute.amazonaws.com)**)
 
+![Home](documentation/images/Home.PNG)
+
 ## Table of Contents
 * [Programming Languages](#programming-languages)
 * [Frameworks / APIs](#frameworks--APIs)
@@ -120,7 +122,9 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 #### Clear Filter
 
-**1)** Click the 'Filter Crime' button at the top of the window:
+**1)** Click the 'Clear Filter' button at the top of the window:
+
+![Filter_Clear](documentation/images/Filter/Filter_Clear.png)
 
 **2)** (Optional) Click the 'Confirm' button to show all markers (apply no filter).
 
@@ -138,7 +142,11 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 **1)** All the crimes that meet the currently active filter criteria can be deleted all at once by clicking the 'Delete Filtered (Visible) Markers' button:
 
+![Filter_Delete](documentation/images/Filter/Filter_Delete.png)
+
 **2)** A progress bar showing the deletion process will appear:
+
+![Filter_Delete_Progress](documentation/images/Filter/Filter_Delete_Progress.png)
 
 **3)** Once the process has finished, the mapper will reload (and the deletions made will be reflected on the mapper).
 
@@ -147,20 +155,43 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 **1)** From the main toolbar, click the 'Import Crime' button:
 
+![Import](documentation/images/Import/Import_Button.PNG)
+
+**2)** (Optional) Click the 'Download Template' button to begin creating an import file OR the 'Browse Files' to be navigated to supported data downloads:
+
+![Import_Download](documentation/images/Import/Import_Download.png)
+
+**3)** Click the 'Browse' button and select the file to import using the dialog:
+
+![Import_Browse](documentation/images/Import/Import_Browse.png)
+
+**4)** Click the 'Import' button to begin importing the selected file.
+
+**5)** The two progress bars will update (the top bar showing progress of the file upload and the bottom bar showing the progress of the import process):
+
+//![Import_Progress](documentation/images/Import/Import_Progress.PNG)
+
+**6)** Once the import process has finished (both progress bars complete), the mapper will reload (and the insertions made will be reflected on the mapper):
+
+![Import_Marker](documentation/images/Import/Import_Marker.png)
 
 ### Analyse Crime
 
 **1)** From the main toolbar, click the 'Analyse Crime' button:
 
-**2)** Markers will be grouped into clusters based on how close they are to other markers (representing the density of crime). The number of crimes in each cluster is shown with white text (in the middle of the cluster icon): 
+![Analyse](documentation/images/Analyse/Analyse_Button.PNG)
+
+**2)** Markers will be grouped into clusters based on how close they are to other markers (representing the density of crime). The number of crimes in each cluster is shown with white text (in the middle of the cluster icon):
+
+![Analyse](documentation/images/Analyse/Analyse_Marker.png)
 
 #### Cluster Icons
 
 The three different cluster icons and the minimum number of crimes they represent is shown in the table below:
 | Cluster | Amount |
 |--|--|
-| ![Violence](cluster_images/SmallCluster.png) | 2 - 10 |
-| ![Violence](cluster_images/MediumCluster.png) | 11 - 99 |
+| ![Violence](cluster_images/SmallCluster.png) | 2 - 9 |
+| ![Violence](cluster_images/MediumCluster.png) | 10 - 99 |
 | ![Violence](cluster_images/LargeCluster.png) | 100+ |
 
 **3)** To turn off the clustering, click the 'Analyse Crime' button again (the button acts as a toggle).
