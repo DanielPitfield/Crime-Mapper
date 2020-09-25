@@ -201,7 +201,7 @@ function LoadCurrentValues(marker) {
     else { // Imported crime type
         document.getElementById('Edit_Crime_Type').value = 'Other';
         // Add option which hasn't been added as a default option for the 'Other' category
-        AddOptions(edit_sub_select, [MarkerToEdit.crimeType]);
+        AddOptions(edit_sub_select, [marker.crimeType]);
 
         // Disable both dropdown fields to prevent the imported type being lost
         document.getElementById('Edit_Crime_Type').setAttribute('disabled', true);
@@ -394,7 +394,7 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
 
                             if (progress == 100) {
                                 clearInterval(delete_progress_poll); // Stop checking the progress
-                                progress_delete.innerHTML = "File Import (Complete)";
+                                progress_delete.innerHTML = "Marker Deletion (Complete)";
                                 // After 2 seconds, reload the page to show new markers
                                 setTimeout(function () { window.location.reload(); }, 1000);
                             }

@@ -1,6 +1,8 @@
 <?php
 require 'dbConfig.php';
 
+// TODO Delete old previous records
+
 if (count($argv) != 2) {
     echo "Expected 2 paramters; filePath and Job ID";
     exit;
