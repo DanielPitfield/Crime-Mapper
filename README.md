@@ -73,7 +73,7 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 ### Edit Crime
 
-**1)** From the window that appears when viewing a crime, click the 'Edit' button:
+**1)** From the 'View Crime' for a crime, click the 'Edit' button:
 
 ![Edit](documentation/images/Edit/Edit_Button.png)
 
@@ -88,7 +88,7 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 ### Delete Crime
 
-**1)** To remove a single instance of crime, from the window that appears when viewing that crime, click the 'Delete' button:
+**1)** To remove a single instance of crime, from the 'View Crime' for a crime, click the 'Delete' button:
 
 (**Note:** This will **permanently remove** the crime marker from the mapper).
 
@@ -111,7 +111,7 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 ![Filter_Map](documentation/images/Filter/Filter_Map.png)
 
-**2.2)** This will enable the 'Search Radius (miles) field'. Selecting a radius from this list will display the area to filter by on the map:
+**2.2)** This will enable the 'Search Radius (miles)' field. Selecting a radius will display the area to filter by on the map:
 
 ![Filter_Radius](documentation/images/Filter/Filter_Radius.png)
 
@@ -152,11 +152,11 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
 
 **1)** From the main toolbar, click the 'Analyse Crime' button:
 
-**2)** All currently visible markers will be grouped into differently coloured clusters based on how close they are to other markers (represents the density of crime). The number of crimes in each cluster is shown with white text in the middle of the cluster icon. 
+**2)** Markers will be grouped into clusters based on how close they are to other markers (representing the density of crime). The number of crimes in each cluster is shown with white text (in the middle of the cluster icon): 
 
 #### Cluster Icons
 
-The three different cluster icons and the minimum number of crimes they represent is as follows:
+The three different cluster icons and the minimum number of crimes they represent is shown in the table below:
 | Cluster | Amount |
 |--|--|
 | ![Violence](cluster_images/SmallCluster.png) | 2 - 10 |
@@ -171,7 +171,7 @@ The three different cluster icons and the minimum number of crimes they represen
 Crime prediciotn functionality is not yet implemented. This feature will be added soon.
 
 
-### Known Issues ###  
+## Known Issues ###  
 * IE11 is not supported
 * Not responsive for mobile devices (mobile version in development)
 * Larger resolutions (above 1920x1080) are untested

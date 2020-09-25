@@ -65,9 +65,14 @@ if ($_FILES['ImportFile']['error'] == 0) {
 
             if ($stmt->execute()) {
                 $job_id = mysqli_insert_id($db);
-                // TODO Specifying path (deployment not local)
-                // Background process (multithreading)
-                shell_exec('C:\laragon\bin\php\php-7.2.19-Win32-VC15-x64\php.exe -q ImportMarkersDaemon.php ' . $job_id . ' | at now');
+                
+                /* 
+                Background process (multithreading)
+                Use exec() command as the environment is Linux (AWS EC2 - Amazon Linux AMI)
+                Any output is directed to /dev/null
+                & operator puts command in the background
+                */
+                exec('php ImportMarkersDaemon.php ' . $job_id . ' > /dev/null 2>&1 & echo $');
 
                 http_response_code(202);
                 echo $job_id;
@@ -86,14 +91,5 @@ if ($_FILES['ImportFile']['error'] == 0) {
 else {
     http_response_code(400);
     echo "There was an error with processing the imported file";
-}
-
-function execInBackground($cmd) {
-    if (substr(php_uname(), 0, 7) == "Windows"){
-        pclose(popen("start /B ". $cmd, "r")); 
-    }
-    else {
-        exec($cmd . " > /dev/null &");  
-    }
 }
 ?>
