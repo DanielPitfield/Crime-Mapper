@@ -38,7 +38,7 @@ $check_interval = $total_records / 20;
 $check_interval = ceil($check_interval);
 
 // Process each ID
-for ($i = 0; $i < $total_records; $i++) {
+for ($i = 0; $i <= $total_records; $i++) {
     // DELETE statement (delete marker)
     $stmt = $db->prepare('DELETE FROM markers WHERE ID = ?');
 
