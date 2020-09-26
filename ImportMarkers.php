@@ -85,7 +85,7 @@ if ($_FILES['ImportFile']['error'] == 0) {
     }
     else {
         http_response_code(400);
-        echo "The file is not a .csv file";
+        echo "The file is not a .csv file\nExtension: " . $ext . "\nType: " . $type;
     }
 }
 else {
