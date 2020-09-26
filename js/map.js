@@ -266,9 +266,9 @@ function EditMarker(id) {
         e.preventDefault();
 
         const description_edit = document.getElementById('Edit_Description').value;
-        const validDescription = description_edit.length <= 500;
+        const isValidDescription = description_edit.length <= 500;
 
-        if (validDescription) {
+        if (isValidDescription) {
             var formData = $('#edit_submit_form').serialize(); // Collate data from form
             var Vars = { id: id, Latitude: Edit_Latitude, Longitude: Edit_Longitude }; // Additional two variables
             var varsData = $.param(Vars); // Convert to format to send as part of bundle
@@ -289,7 +289,7 @@ function EditMarker(id) {
                     MarkerToEdit.crimeType = dropdown.options[dropdown.selectedIndex].value;
                     MarkerToEdit.description = document.getElementById('Edit_Description').value;
 
-                    if (Edit_SmallMarkerMoved == true) { // If adjustment made on smaller map
+                    if (Edit_SmallMarkerMoved) { // If adjustment made on smaller map
                         MarkerToEdit.position = SecondLocation; // Set the newly recorded position
                         Edit_SmallMarkerMoved = false;
                     }
@@ -363,9 +363,9 @@ document.getElementById('Delete_Filtered_Markers').addEventListener("click", () 
     const visibleMarkers_IDs = visibleMarkers.map(marker => marker.id); // Array of IDs for these visible markers
 
     const num_markers = visibleMarkers_IDs.length;
-    const within_marker_capacity = num_markers > 0;
+    const isAnyVisibleMarker = num_markers > 0;
 
-    if (within_marker_capacity) { // If manageable amount of markers to delete
+    if (isAnyVisibleMarker) { // If manageable amount of markers to delete
         $('#modal_filter').modal('hide');
         ShowProgressAlert();
 
@@ -546,7 +546,7 @@ function initMap() {
         hideContextMenu();
         ShowLoading();
 
-        if (Cluster_Active == true) { // If already active and 'Analyse Crime' button was pressed
+        if (Cluster_Active) { // If already active and 'Analyse Crime' button was pressed
             markerCluster.setMap(null); // Turn off clustering
             Cluster_Active = false;
         }
@@ -645,8 +645,8 @@ function initMap() {
     document.getElementById('Filter_Location').addEventListener("change", (event) => {
         const search_radius = event.target.value;
 
-        const AllAreas = (search_radius == "[ALL]") || (search_radius == null);
-        if (!AllAreas) { // If a quantifiable (numeric) value for search radius is chosen
+        const isAllAreas = (search_radius == "[ALL]") || (search_radius == null);
+        if (!isAllAreas) { // If a quantifiable (numeric) value for search radius is chosen
             if (filter_marker.getVisible()) { // And a center point of the search area is specified
                 // Update the circle object to this center point with a radius of the search radius
                 search_area.setVisible(true);
@@ -665,8 +665,8 @@ function initMap() {
     // Filter by ID (handled independently from the below FilterMarkers() function)
     document.getElementById('ID_Search').addEventListener("click", () => {
         const Filter_ID = document.getElementById('Filter_ID').value;
-        const isEmpty = Filter_ID == "";
-        if (!isEmpty) {
+        const isFilterIDEmpty = (Filter_ID == "");
+        if (!isFilterIDEmpty) {
             // Identify marker with requested ID
             const MarkerToShow = MarkerArray.find(marker => marker.id == Filter_ID);
 
@@ -692,26 +692,26 @@ function initMap() {
         const main_dropdown = document.getElementById("Filter_Crime_Type");
         const Main_Crime_Type = main_dropdown.options[main_dropdown.selectedIndex].value;
         // If field is empty or the all option is implicitly selected, set flag to true
-        const AllCrimes = (Main_Crime_Type == null) || (Main_Crime_Type == "[ALL]");
+        const isAllCrimes = (Main_Crime_Type == null) || (Main_Crime_Type == "[ALL]");
 
         // Sub Crime Type
         const sub_dropdown = document.getElementById("Filter_Crime_Type_sub");
         const Sub_Crime_Type = sub_dropdown.options[sub_dropdown.selectedIndex].value;
-        const AllSubCrimes = (Sub_Crime_Type == null) || (Sub_Crime_Type == "[ALL]");
+        const isAllSubCrimes = (Sub_Crime_Type == null) || (Sub_Crime_Type == "[ALL]");
 
         // Date
         const min_Date = document.getElementById("Filter_minDate").value;
         const max_Date = document.getElementById("Filter_maxDate").value;
 
-        const min_Date_Entered = min_Date.length > 0;
-        const max_Date_Entered = max_Date.length > 0;
-        const both_Dates_Entered = min_Date_Entered && max_Date_Entered;
+        const isMinDate = min_Date.length > 0;
+        const isMaxDate = max_Date.length > 0;
+        const isBothDates = isMinDate && isMaxDate;
 
-        if (min_Date_Entered) {
+        if (isMinDate) {
             min_Date = new Date(min_Date);
         }
 
-        if (max_Date_Entered) {
+        if (isMaxDate) {
             max_Date = new Date(max_Date);
         }
 
@@ -719,21 +719,21 @@ function initMap() {
         const min_Time = document.getElementById("Filter_minTime").value;
         const max_Time = document.getElementById("Filter_maxTime").value;
 
-        const both_Times_Entered = min_Time.length > 0 && max_Time.length > 0;
-        const single_Time_Entered = min_Time.length > 0 || max_Time.length > 0;
+        const isBothTimes = min_Time.length > 0 && max_Time.length > 0;
+        const isSingleTime = min_Time.length > 0 || max_Time.length > 0;
 
         const errorConditions =
             [
                 {
-                    isMet: both_Dates_Entered && min_Date > max_Date,
+                    isMet: isBothDates && min_Date > max_Date,
                     errorMessage: "The 'Minimum Date' field can't be a date after the 'Maximum Date' field"
                 },
                 {
-                    isMet: both_Times_Entered && min_Time > max_Time,
+                    isMet: isBothTimes && min_Time > max_Time,
                     errorMessage: "The 'Minimum Time' can't be a time after the 'Maximum Time' field"
                 },
                 {
-                    isMet: single_Time_Entered,
+                    isMet: isSingleTime,
                     errorMessage: "Both the 'Minimum Time' and 'Maximum Time' fields are required"
                 }
             ];
@@ -753,13 +753,13 @@ function initMap() {
         );
 
         // Before filtering the markers, determine if the filter criteria includes location
-        const location_filtering = filter_marker.getVisible() && search_area.getVisible();
+        const isLocationFiltering = filter_marker.getVisible() && search_area.getVisible();
 
         let filter_center;
         let search_radius;
 
         // If so, determine the center point and search radius
-        if (location_filtering) {
+        if (isLocationFiltering) {
             // LatLng object of marker added to smaller map (center of search area)
             filter_center = new google.maps.LatLng(filter_marker.getPosition().lat(), filter_marker.getPosition().lng());
             search_radius = document.getElementById("Filter_Location").value;
@@ -768,26 +768,26 @@ function initMap() {
         // Filter the markers which need to be hidden
         const Filtered_MarkerArray = MarkerArray.filter(marker => {
             // The properties which are less computationally expensive to filter by should come first
-            if (min_Date_Entered) {
+            if (isMinDate) {
                 if (new Date(marker.crimeDate) < min_Date) {
                     return true;
                 }
             }
 
-            if (max_Date_Entered) {
+            if (isMaxDate) {
                 if (new Date(marker.crimeDate) > max_Date) {
                     return true;
                 }
             }
 
-            if (both_Times_Entered) {
+            if (isBothTimes) {
                 if (marker.crimeTime < min_Time || marker.crimeTime > max_Time) {
                     return true;
                 }
             }
 
-            if (!AllCrimes) {
-                if (!AllSubCrimes) { // One specific crime
+            if (!isAllCrimes) {
+                if (!isAllSubCrimes) { // One specific crime
                     if (marker.crimeType != Sub_Crime_Type) {
                         return true;
                     }
@@ -804,7 +804,7 @@ function initMap() {
                 }
             }
 
-            if (location_filtering) { // Filter criteria included location
+            if (isLocationFiltering) { // Filter criteria included location
                 // Shortest distance between search area center and the current marker
                 const distanceInMetres = google.maps.geometry.spherical.computeDistanceBetween(filter_center, marker.getPosition());
                 const distanceInMiles = (distanceInMetres / 1609); // Convert to miles
@@ -1021,7 +1021,7 @@ function initMap() {
 
     // File input for uplaoding a file is changed
     document.getElementById('Import_Input').addEventListener("change", () => {
-        isFileSelected = false;
+        isFileSelected = false; // Set initially to false and flag to true when proven otherwise
         isCSV = false;
 
         const files = document.getElementById('Import_Input').files;
@@ -1029,14 +1029,14 @@ function initMap() {
 
         if (files.length >= 1) { // If input has a file selected
             isFileSelected = true;
-            const fileName = files[0].name;
+            const fileName = files[0].name; // Get the name of the first file (only)
             const ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
 
             // Check extension (in file name)
             if (ext == 'csv') {
                 isCSV = true;
             }
-            // A server side check confirms the mime type
+            // Note: A server side check will confirm the MIME type
 
             file_label.innerHTML = fileName; // Change label of input to filename
         }
@@ -1055,7 +1055,9 @@ function initMap() {
         document.querySelectorAll('#btn_import_confirm, #close_import')
             .forEach(el => el.setAttribute('disabled', true));
 
-        if (isFileSelected && isCSV) {
+        const isValidFile = (isFileSelected && isCSV);
+
+        if (isValidFile) {
             // Prepare file for POST request
             file = document.getElementById('Import_Input').files[0];
             formdata = new FormData();
