@@ -1,7 +1,9 @@
 <?php
 require 'dbConfig.php';
 
-// TODO Delete old previous records
+// Delete records that are older than 30 minutes
+$stmt = $db->prepare('DELETE FROM operation_jobs WHERE Start_Time < (NOW() - INTERVAL 30 MINUTE)');
+if (!$stmt->execute()) echo $stmt->error; 
 
 if (count($argv) != 2) {
     echo "Expected 2 paramters; filePath and Job ID";
