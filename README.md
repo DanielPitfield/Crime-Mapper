@@ -2,13 +2,14 @@
 ![Commit](https://img.shields.io/github/last-commit/DanielPitfield/Crime_Mapper)
 ![Issues](https://img.shields.io/github/issues-raw/DanielPitfield/Crime_Mapper)
 
-A web-based crime mapping, visualisation and analysis solution (**[Live Demo](http://ec2-35-178-182-176.eu-west-2.compute.amazonaws.com)**)
+A web-based crime mapping, visualisation and analysis solution.
 
 ![Home](documentation/images/Home.PNG)
 
 ## Table of Contents
-* [Programming Languages](#programming-languages)
-* [Frameworks / APIs](#frameworks--APIs)
+* [Technologies](#technologies)
+* [Frameworks](#frameworks)
+* [APIs](#apis)
 * [Usage / Instructions](#usage--instructions)
     * [Crime Icons](#crime-icons)
     * [Add Crime](#add-crime)
@@ -18,24 +19,24 @@ A web-based crime mapping, visualisation and analysis solution (**[Live Demo](ht
     * [Filter Crime](#filter-crime)
         * [Filter by ID](#filter-by-id)
         * [Delete Filtered Crime](#delete-filtered-crime)
-    * [Import Crime](#import_crime)
-    * [Analyse Crime](#analyse_crime)
+    * [Import Crime](#import-crime)
+    * [Analyse Crime](#analyse-crime)
         * [Cluster Icons](#cluster-icons)
-    * [Import Crime](#import_crime)
 * [Known Issues](#known-issues)
 	
-## Programming Languages
+## Technologies
 * HTML
 * CSS
 * JavaScript
 * PHP
-* SQL
-
-## Frameworks / APIs
-* Google Maps JavaScript API
 * MySQL
-* BootStrap (v4.4.1)
-* jQuery (v3.4.1)
+
+## Frameworks
+* BootStrap
+* jQuery
+
+## APIs
+* Google Maps JavaScript API
 
 ## Usage / Instructions
 ### Crime Icons
