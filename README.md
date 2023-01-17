@@ -1,5 +1,4 @@
 # Crime Mapper
-![Status](https://img.shields.io/website?down_color=red&down_message=offline&up_color=brightgreen&up_message=online&url=http%3A%2F%2Fec2-35-178-182-176.eu-west-2.compute.amazonaws.com)
 ![Commit](https://img.shields.io/github/last-commit/DanielPitfield/Crime_Mapper)
 ![Issues](https://img.shields.io/github/issues-raw/DanielPitfield/Crime_Mapper)
 
