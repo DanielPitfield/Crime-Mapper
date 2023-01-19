@@ -200,7 +200,9 @@ The three different cluster icons and the minimum number of crimes they represen
 
 Not yet implemented.
 
-## Known Issues 
+## Known Issues
+* Database configuration details tracked within version control
+* API calls (and therefore the API key) are client-side
 * IE11 is not supported
 * Not responsive for mobile devices
 * Larger resolutions (above 1920x1080) are untested
