@@ -196,13 +196,11 @@ The three different cluster icons and the minimum number of crimes they represen
 
 **3)** To turn off the clustering, click the 'Analyse Crime' button again (the button acts as a toggle).
 
-
 ### Predict Crime
 
-Crime prediciotn functionality is not yet implemented. This feature will be added soon.
-
+Not yet implemented.
 
 ## Known Issues 
 * IE11 is not supported
-* Not responsive for mobile devices (mobile version in development)
+* Not responsive for mobile devices
 * Larger resolutions (above 1920x1080) are untested
