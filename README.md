@@ -1,15 +1,17 @@
 # Crime Mapper
-![Commit](https://img.shields.io/github/last-commit/DanielPitfield/Crime_Mapper)
-![Issues](https://img.shields.io/github/issues-raw/DanielPitfield/Crime_Mapper)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript)
+![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery)
+![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
+![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white&color=black)
+![HTML](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-A web-based crime mapping, visualisation and analysis solution.
+A web-based crime mapping, visualisation and analysis solution using the Google Maps JavaScript API
 
 ![Home](documentation/images/Home.PNG)
 
 ## Table of Contents
-* [Technologies](#technologies)
-* [Frameworks](#frameworks)
-* [APIs](#apis)
 * [Usage / Instructions](#usage--instructions)
     * [Crime Icons](#crime-icons)
     * [Add Crime](#add-crime)
@@ -23,20 +25,6 @@ A web-based crime mapping, visualisation and analysis solution.
     * [Analyse Crime](#analyse-crime)
         * [Cluster Icons](#cluster-icons)
 * [Known Issues](#known-issues)
-	
-## Technologies
-* HTML
-* CSS
-* JavaScript
-* PHP
-* MySQL
-
-## Frameworks
-* BootStrap
-* jQuery
-
-## APIs
-* Google Maps JavaScript API
 
 ## Usage / Instructions
 ### Crime Icons
